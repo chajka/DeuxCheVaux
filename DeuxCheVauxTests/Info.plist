@@ -20,17 +20,12 @@
 	<string>1</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
-		<key>NSAllowsArbitraryLoads</key>
-		<false/>
 		<key>NSExceptionDomains</key>
 		<dict>
+			<key>NSExceptionAllowsInsecureHTTPLoads</key>
+			<true/>
 			<key>nicovideo.jp</key>
-			<dict>
-				<key>NSIncludesSubdomains</key>
-				<true/>
-				<key>NSExceptionAllowsInsecureHTTPLoads</key>
-				<true/>
-			</dict>
+			<string></string>
 		</dict>
 	</dict>
 </dict>

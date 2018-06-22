@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		C68BA41920DC445900684ADF /* DeuxCheVaux.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C68BA40F20DC445900684ADF /* DeuxCheVaux.framework */; };
 		C68BA41E20DC445900684ADF /* DeuxCheVauxTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C68BA41D20DC445900684ADF /* DeuxCheVauxTests.swift */; };
-		C68BA42020DC445900684ADF /* DeuxCheVaux.h in Headers */ = {isa = PBXBuildFile; fileRef = C68BA41220DC445900684ADF /* DeuxCheVaux.h */; settings = {ATTRIBUTES = (Public, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -24,7 +23,6 @@
 
 /* Begin PBXFileReference section */
 		C68BA40F20DC445900684ADF /* DeuxCheVaux.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = DeuxCheVaux.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		C68BA41220DC445900684ADF /* DeuxCheVaux.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DeuxCheVaux.h; sourceTree = "<group>"; };
 		C68BA41320DC445900684ADF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C68BA41820DC445900684ADF /* DeuxCheVauxTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DeuxCheVauxTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C68BA41D20DC445900684ADF /* DeuxCheVauxTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeuxCheVauxTests.swift; sourceTree = "<group>"; };
@@ -71,7 +69,6 @@
 		C68BA41120DC445900684ADF /* DeuxCheVaux */ = {
 			isa = PBXGroup;
 			children = (
-				C68BA41220DC445900684ADF /* DeuxCheVaux.h */,
 				C68BA41320DC445900684ADF /* Info.plist */,
 			);
 			path = DeuxCheVaux;
@@ -93,7 +90,6 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C68BA42020DC445900684ADF /* DeuxCheVaux.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
