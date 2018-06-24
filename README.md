@@ -6,5 +6,8 @@
 ## Member classes of this module
 [PlayerStatus][PlayerStatus.swift]
 Parse result xml of API getplayerstatus
+[PublishStatus][PublishStatus.swift]
+Parse result xml of API getpublishstatus
 
 [PlayerStatus.swift]: ./PlayerStatus.md
+[PublishStatus.swift]:./PublishStatus.md
