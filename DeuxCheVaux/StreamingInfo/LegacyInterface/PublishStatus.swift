@@ -10,6 +10,7 @@ import Cocoa
 
 private enum PublishStatusKey:String {
 	case token = "token"
+	case vote = "allow_vote"
 	
 	static func ~= (lhs:PublishStatusKey, rhs:String) -> Bool {
 		return lhs.rawValue == rhs ? true : false
@@ -21,6 +22,7 @@ let publishStatusFormat:String = "http://watch.live.nicovideo.jp/api/getpublishs
 class PublishStatus: NSObject ,XMLParserDelegate {
 	public var number:String!
 	public var token:String!
+	public var canVote:Bool!
 
 	private var userSession:Array<HTTPCookie> = Array()
 
@@ -60,6 +62,8 @@ class PublishStatus: NSObject ,XMLParserDelegate {
 			number = String(stringBuffer)
 		case .token:
 			token = String(stringBuffer)
+		case .vote:
+			canVote = stringBuffer == "1" ? true : false
 		default:
 			break
 		}

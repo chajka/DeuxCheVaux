@@ -34,6 +34,7 @@ class PublishStatusTest: XCTestCase {
 
 		XCTAssertEqual(publishStatus.number, liveNumber, "property number is wrong")
 		XCTAssertNil(publishStatus.token, "property token can not parsed")
+		XCTAssertFalse(publishStatus.canVote, "property canVote cannot parsed")
 	}
 
     func testPerformanceExample() {
