@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		C633F86220DFE35400C1B265 /* PublishStatusTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = C633F86120DFE35400C1B265 /* PublishStatusTest.swift */; };
+		C633F86620DFF59D00C1B265 /* OwnerAndVIPCommentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = C633F86520DFF59D00C1B265 /* OwnerAndVIPCommentHandler.swift */; };
+		C633F86720DFF59D00C1B265 /* OwnerAndVIPCommentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = C633F86520DFF59D00C1B265 /* OwnerAndVIPCommentHandler.swift */; };
 		C68BA41920DC445900684ADF /* DeuxCheVaux.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C68BA40F20DC445900684ADF /* DeuxCheVaux.framework */; };
 		C68BA41E20DC445900684ADF /* DeuxCheVauxTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C68BA41D20DC445900684ADF /* DeuxCheVauxTests.swift */; };
 		C68BA43020DEC84700684ADF /* PlayerStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = C68BA42F20DEC84700684ADF /* PlayerStatus.swift */; };
@@ -29,6 +31,7 @@
 
 /* Begin PBXFileReference section */
 		C633F86120DFE35400C1B265 /* PublishStatusTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PublishStatusTest.swift; sourceTree = "<group>"; };
+		C633F86520DFF59D00C1B265 /* OwnerAndVIPCommentHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OwnerAndVIPCommentHandler.swift; sourceTree = "<group>"; };
 		C68BA40F20DC445900684ADF /* DeuxCheVaux.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = DeuxCheVaux.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C68BA41320DC445900684ADF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C68BA41820DC445900684ADF /* DeuxCheVauxTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DeuxCheVauxTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -58,6 +61,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		C633F86420DFF4F300C1B265 /* WebAPI */ = {
+			isa = PBXGroup;
+			children = (
+				C633F86520DFF59D00C1B265 /* OwnerAndVIPCommentHandler.swift */,
+			);
+			path = WebAPI;
+			sourceTree = "<group>";
+		};
 		C68BA40520DC445900684ADF = {
 			isa = PBXGroup;
 			children = (
@@ -79,6 +90,7 @@
 		C68BA41120DC445900684ADF /* DeuxCheVaux */ = {
 			isa = PBXGroup;
 			children = (
+				C633F86420DFF4F300C1B265 /* WebAPI */,
 				C68BA42D20DEC7E700684ADF /* StreamingInfo */,
 				C68BA41320DC445900684ADF /* Info.plist */,
 			);
@@ -221,6 +233,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C633F86620DFF59D00C1B265 /* OwnerAndVIPCommentHandler.swift in Sources */,
 				C68BA43020DEC84700684ADF /* PlayerStatus.swift in Sources */,
 				C68BA43520DFD56900684ADF /* PublishStatus.swift in Sources */,
 			);
@@ -230,6 +243,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C633F86720DFF59D00C1B265 /* OwnerAndVIPCommentHandler.swift in Sources */,
 				C68BA43320DF64AE00684ADF /* PlayerStatusTest.swift in Sources */,
 				C68BA43620DFD56900684ADF /* PublishStatus.swift in Sources */,
 				C633F86220DFE35400C1B265 /* PublishStatusTest.swift in Sources */,
