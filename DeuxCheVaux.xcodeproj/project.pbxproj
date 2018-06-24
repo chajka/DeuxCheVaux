@@ -11,6 +11,7 @@
 		C68BA41E20DC445900684ADF /* DeuxCheVauxTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C68BA41D20DC445900684ADF /* DeuxCheVauxTests.swift */; };
 		C68BA43020DEC84700684ADF /* PlayerStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = C68BA42F20DEC84700684ADF /* PlayerStatus.swift */; };
 		C68BA43120DEC84700684ADF /* PlayerStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = C68BA42F20DEC84700684ADF /* PlayerStatus.swift */; };
+		C68BA43320DF64AE00684ADF /* PlayerStatusTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = C68BA43220DF64AE00684ADF /* PlayerStatusTest.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -30,6 +31,7 @@
 		C68BA41D20DC445900684ADF /* DeuxCheVauxTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeuxCheVauxTests.swift; sourceTree = "<group>"; };
 		C68BA41F20DC445900684ADF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C68BA42F20DEC84700684ADF /* PlayerStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerStatus.swift; sourceTree = "<group>"; };
+		C68BA43220DF64AE00684ADF /* PlayerStatusTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerStatusTest.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -83,6 +85,7 @@
 			children = (
 				C68BA41D20DC445900684ADF /* DeuxCheVauxTests.swift */,
 				C68BA41F20DC445900684ADF /* Info.plist */,
+				C68BA43220DF64AE00684ADF /* PlayerStatusTest.swift */,
 			);
 			path = DeuxCheVauxTests;
 			sourceTree = "<group>";
@@ -219,6 +222,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C68BA43320DF64AE00684ADF /* PlayerStatusTest.swift in Sources */,
 				C68BA43120DEC84700684ADF /* PlayerStatus.swift in Sources */,
 				C68BA41E20DC445900684ADF /* DeuxCheVauxTests.swift in Sources */,
 			);
