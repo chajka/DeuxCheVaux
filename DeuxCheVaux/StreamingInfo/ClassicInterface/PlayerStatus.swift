@@ -15,6 +15,7 @@ enum PlayerStatusKey:String {
 	case socialType = "provider_type"
 	case communityName = "default_community"
 	case ownerFlag = "is_owner"
+	case ownerIdentifier = "owner_id"
 
 	static func ~= (lhs:PlayerStatusKey, rhs:String) -> Bool {
 		return lhs.rawValue == rhs ? true : false
@@ -46,6 +47,7 @@ class PlayerStatus: NSObject , XMLParserDelegate {
 	public var socialType:SocialType!
 	public var community:String!
 	public var isOwner:Bool!
+	public var ownerIdentifier:String!
 
 	var userSession:Array<HTTPCookie>
 	var stringBuffer:String = String()
@@ -101,6 +103,8 @@ class PlayerStatus: NSObject , XMLParserDelegate {
 			community = String(stringBuffer)
 		case .ownerFlag:
 			isOwner = stringBuffer == "1" ? true : false
+		case .ownerIdentifier:
+			ownerIdentifier = String(stringBuffer)
 		default:
 			break
 		}// end switch case by element name
