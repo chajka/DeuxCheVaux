@@ -93,17 +93,17 @@
 		C68BA42D20DEC7E700684ADF /* StreamingInfo */ = {
 			isa = PBXGroup;
 			children = (
-				C68BA42E20DEC81400684ADF /* ClassicInterface */,
+				C68BA42E20DEC81400684ADF /* LegacyInterface */,
 			);
 			path = StreamingInfo;
 			sourceTree = "<group>";
 		};
-		C68BA42E20DEC81400684ADF /* ClassicInterface */ = {
+		C68BA42E20DEC81400684ADF /* LegacyInterface */ = {
 			isa = PBXGroup;
 			children = (
 				C68BA42F20DEC84700684ADF /* PlayerStatus.swift */,
 			);
-			path = ClassicInterface;
+			path = LegacyInterface;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
