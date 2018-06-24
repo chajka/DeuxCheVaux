@@ -18,6 +18,7 @@ enum PlayerStatusKey:String {
 	case ownerIdentifier = "owner_id"
 	case ownerName = "owner_name"
 	case baseTime = "base_time"
+	case listenerIdentifier = "user_id"
 
 	static func ~= (lhs:PlayerStatusKey, rhs:String) -> Bool {
 		return lhs.rawValue == rhs ? true : false
@@ -52,6 +53,8 @@ class PlayerStatus: NSObject , XMLParserDelegate {
 	public var ownerIdentifier:String!
 	public var ownerName:String!
 	public var baseTime:Date!
+
+	public var listenerIdentifier:String!
 
 	var userSession:Array<HTTPCookie>
 	var stringBuffer:String = String()
@@ -117,6 +120,8 @@ class PlayerStatus: NSObject , XMLParserDelegate {
 			if let unixTime:TimeInterval = baseTimeInterval {
 				baseTime = Date(timeIntervalSince1970: unixTime)
 			}
+		case .listenerIdentifier:
+			listenerIdentifier = String(stringBuffer)
 		default:
 			break
 		}// end switch case by element name

@@ -42,6 +42,9 @@ class PlayerStatusTest: XCTestCase {
 		XCTAssertNotNil(playerstatus.ownerIdentifier, "property owner identifier name is nil")
 		XCTAssertNotNil(playerstatus.ownerName, "property owner name is nil")
 		XCTAssertNotNil(playerstatus.baseTime, "property base time is nil")
+
+		XCTAssertNotNil(playerstatus.listenerIdentifier, "property listener identifier name is nil")
+
 	}
 	
 	func testPerformanceExample() {
