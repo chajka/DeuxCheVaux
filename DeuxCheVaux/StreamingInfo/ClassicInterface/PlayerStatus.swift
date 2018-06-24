@@ -82,7 +82,7 @@ enum PlayerStatusKey:String {
 
 let playerStatusFormat:String = "http://watch.live.nicovideo.jp/api/getplayerstatus?v="
 
-class PlayerStatus: NSObject , XMLParserDelegate {
+public class PlayerStatus: NSObject , XMLParserDelegate {
 	public var number:String!
 	public var title:String!
 	public var desc:String!
@@ -108,7 +108,7 @@ class PlayerStatus: NSObject , XMLParserDelegate {
 	var port:Int!
 	var thread:String!
 
-	init(program:String, cookies:Array<HTTPCookie>) {
+	public init(program:String, cookies:Array<HTTPCookie>) {
 		userSession = cookies
 		super.init()
 		getPlayerStatus(programNumber: program)
