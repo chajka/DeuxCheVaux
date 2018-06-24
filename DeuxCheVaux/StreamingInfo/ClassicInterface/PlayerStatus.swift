@@ -21,13 +21,14 @@ enum PlayerStatusKey:String {
 	case listenerIdentifier = "user_id"
 	case listenerName = "nickname"
 	case listenerIsPremium = "is_premium"
+	case listenerLanguage = "userLanguage"
 
 	static func ~= (lhs:PlayerStatusKey, rhs:String) -> Bool {
 		return lhs.rawValue == rhs ? true : false
 	}// end func ~=
 }// end enum PlayerStatusKey
 
-enum SocialType:String {
+public enum SocialType:String {
 	case community = "community"
 	case channel = "channel"
 	case official = "official"
@@ -40,6 +41,20 @@ enum SocialType:String {
 		return lhs.rawValue == rhs ? true : false
 	}// end func ==
 }// end enum SocialType
+
+public enum UserLanguage:String {
+	case ja = "ja-jp"
+	case zh = "zh-tw"
+	case en = "en-us"
+	
+	static func ~= (lhs:UserLanguage, rhs:String) -> Bool {
+		return lhs.rawValue == rhs ? true : false
+	}// end func ~=
+	
+	static func == (lhs:UserLanguage, rhs:String) -> Bool {
+		return lhs.rawValue == rhs ? true : false
+	}// end func ==
+}
 
 let playerStatusFormat:String = "http://watch.live.nicovideo.jp/api/getplayerstatus?v="
 
@@ -59,6 +74,7 @@ class PlayerStatus: NSObject , XMLParserDelegate {
 	public var listenerIdentifier:String!
 	public var listenerName:String!
 	public var listenerIsPremium:Bool!
+	public var listenerLanguage:UserLanguage!
 
 	var userSession:Array<HTTPCookie>
 	var stringBuffer:String = String()
@@ -109,7 +125,7 @@ class PlayerStatus: NSObject , XMLParserDelegate {
 				socialType = .official
 			default:
 				socialType = .community
-			}
+			}// end switch case by provider type
 		case .communityName:
 			community = String(stringBuffer)
 		case .ownerFlag:
@@ -123,13 +139,24 @@ class PlayerStatus: NSObject , XMLParserDelegate {
 			let baseTimeInterval = TimeInterval(baseTimeStr)
 			if let unixTime:TimeInterval = baseTimeInterval {
 				baseTime = Date(timeIntervalSince1970: unixTime)
-			}
+			}// end unix time string can convert unix time
 		case .listenerIdentifier:
 			listenerIdentifier = String(stringBuffer)
 		case .listenerName:
 			listenerName = String(stringBuffer)
 		case .listenerIsPremium:
 			listenerIsPremium = stringBuffer == "1" ? true : false
+		case .listenerLanguage:
+			switch stringBuffer {
+			case .ja:
+				listenerLanguage = .ja
+			case .zh:
+				listenerLanguage = .zh
+			case .en:
+				listenerLanguage = .en
+			default:
+				listenerLanguage = .ja
+			}// end switch case by user language
 		default:
 			break
 		}// end switch case by element name
