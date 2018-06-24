@@ -12,11 +12,28 @@ enum PlayerStatusKey:String {
 	case programNumber = "id"
 	case programTitle = "title"
 	case programDescription = "description"
+	case socialType = "provider_type"
+	case communityName = "default_community"
+	case ownerFlag = "is_owner"
 
 	static func ~= (lhs:PlayerStatusKey, rhs:String) -> Bool {
 		return lhs.rawValue == rhs ? true : false
 	}// end func ~=
 }// end enum PlayerStatusKey
+
+enum SocialType:String {
+	case community = "community"
+	case channel = "channel"
+	case official = "official"
+
+	static func ~= (lhs:SocialType, rhs:String) -> Bool {
+		return lhs.rawValue == rhs ? true : false
+	}// end func ~=
+
+	static func == (lhs:SocialType, rhs:String) -> Bool {
+		return lhs.rawValue == rhs ? true : false
+	}// end func ==
+}// end enum SocialType
 
 let playerStatusFormat:String = "http://watch.live.nicovideo.jp/api/getplayerstatus?v="
 
@@ -26,6 +43,9 @@ class PlayerStatus: NSObject , XMLParserDelegate {
 	public var number:String!
 	public var title:String!
 	public var desc:String!
+	public var socialType:SocialType!
+	public var community:String!
+	public var isOwner:Bool!
 
 	var userSession:Array<HTTPCookie>
 	var stringBuffer:String = String()
@@ -66,6 +86,21 @@ class PlayerStatus: NSObject , XMLParserDelegate {
 			title = String(stringBuffer)
 		case .programDescription:
 			desc = String(stringBuffer)
+		case .socialType:
+			switch stringBuffer {
+			case .community:
+				socialType = .community
+			case .channel:
+				socialType = .channel
+			case .official:
+				socialType = .official
+			default:
+				socialType = .community
+			}
+		case .communityName:
+			community = String(stringBuffer)
+		case .ownerFlag:
+			isOwner = stringBuffer == "1" ? true : false
 		default:
 			break
 		}// end switch case by element name
