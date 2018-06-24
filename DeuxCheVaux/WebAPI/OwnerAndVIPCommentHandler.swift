@@ -39,6 +39,19 @@ enum CommentKeys:String {
 	case link = "link"
 }// end enum CommentKeys
 
+enum VIPCommentColor:String {
+	case white = "white"
+	case red = "red"
+	case green = "green"
+	case blue = "bule"
+	case cyan = "cyan"
+	case yellow = "yellow"
+	case purple = "purple"
+	case pink = "pink"
+	case orange = "orange"
+	case niconicowhite = "niconicowhite"
+}// end enum VIPCommentColor
+
 extension CommentKeys:StringEnum { }
 
 class OwnerAndVIPCommentHandler: NSObject {
@@ -98,4 +111,20 @@ class OwnerAndVIPCommentHandler: NSObject {
 		task.resume()
 	}// end clearOwnerComment
 
+	func postVIPComment(comment:String, name:String, color:String) throws -> Void {
+		let vipCommentColor:VIPCommentColor? = VIPCommentColor(rawValue: color)
+		if (comment.isEmpty) || (name.isEmpty) || (vipCommentColor == nil) { return }
+		guard let url = URL(string: apiBaseString + vipComment) else { return }
+		var jsonDict:Dictionary<String, Any> = Dictionary()
+		jsonDict[CommentKeys.comment] = comment
+		jsonDict[CommentKeys.name] = name
+		jsonDict[CommentKeys.color] = color
+		
+		request.httpBody = try JSONSerialization.data(withJSONObject: jsonDict, options: [])
+		request.url = url
+		request.httpMethod = HTTPMethod.post.rawValue
+		request.setValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
+		let task:URLSessionDataTask = session.dataTask(with: request)
+		task.resume()
+	}
 }// end class OwnerAndVIPCommentHandler
