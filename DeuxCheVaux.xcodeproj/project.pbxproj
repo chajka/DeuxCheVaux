@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		C68BA41920DC445900684ADF /* DeuxCheVaux.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C68BA40F20DC445900684ADF /* DeuxCheVaux.framework */; };
 		C68BA41E20DC445900684ADF /* DeuxCheVauxTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C68BA41D20DC445900684ADF /* DeuxCheVauxTests.swift */; };
+		C68BA43020DEC84700684ADF /* PlayerStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = C68BA42F20DEC84700684ADF /* PlayerStatus.swift */; };
+		C68BA43120DEC84700684ADF /* PlayerStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = C68BA42F20DEC84700684ADF /* PlayerStatus.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -27,6 +29,7 @@
 		C68BA41820DC445900684ADF /* DeuxCheVauxTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DeuxCheVauxTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C68BA41D20DC445900684ADF /* DeuxCheVauxTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeuxCheVauxTests.swift; sourceTree = "<group>"; };
 		C68BA41F20DC445900684ADF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		C68BA42F20DEC84700684ADF /* PlayerStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerStatus.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -69,6 +72,7 @@
 		C68BA41120DC445900684ADF /* DeuxCheVaux */ = {
 			isa = PBXGroup;
 			children = (
+				C68BA42D20DEC7E700684ADF /* StreamingInfo */,
 				C68BA41320DC445900684ADF /* Info.plist */,
 			);
 			path = DeuxCheVaux;
@@ -81,6 +85,22 @@
 				C68BA41F20DC445900684ADF /* Info.plist */,
 			);
 			path = DeuxCheVauxTests;
+			sourceTree = "<group>";
+		};
+		C68BA42D20DEC7E700684ADF /* StreamingInfo */ = {
+			isa = PBXGroup;
+			children = (
+				C68BA42E20DEC81400684ADF /* ClassicInterface */,
+			);
+			path = StreamingInfo;
+			sourceTree = "<group>";
+		};
+		C68BA42E20DEC81400684ADF /* ClassicInterface */ = {
+			isa = PBXGroup;
+			children = (
+				C68BA42F20DEC84700684ADF /* PlayerStatus.swift */,
+			);
+			path = ClassicInterface;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -144,6 +164,7 @@
 				TargetAttributes = {
 					C68BA40E20DC445900684ADF = {
 						CreatedOnToolsVersion = 9.4.1;
+						LastSwiftMigration = 0940;
 					};
 					C68BA41720DC445900684ADF = {
 						CreatedOnToolsVersion = 9.4.1;
@@ -190,6 +211,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C68BA43020DEC84700684ADF /* PlayerStatus.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -197,6 +219,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C68BA43120DEC84700684ADF /* PlayerStatus.swift in Sources */,
 				C68BA41E20DC445900684ADF /* DeuxCheVauxTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -334,6 +357,7 @@
 		C68BA42420DC445900684ADF /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -354,6 +378,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = tv.from.chajka.DeuxCheVaux;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 4.0;
 			};
 			name = Debug;
@@ -361,6 +386,7 @@
 		C68BA42520DC445900684ADF /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -388,6 +414,7 @@
 		C68BA42720DC445900684ADF /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = G9SC48NK42;
@@ -406,6 +433,7 @@
 		C68BA42820DC445900684ADF /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = G9SC48NK42;
