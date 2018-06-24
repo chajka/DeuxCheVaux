@@ -10,7 +10,7 @@ import XCTest
 
 class PlayerStatusTest: XCTestCase {
 	private let user_session_value:String = "user_session_6347612_a0c800610aa6bbe0f20ad9edb3ab94d3b8b0b369f96eb0fcfcf70f1ed69e097a"
-	private let liveNumber:String = "lv314021092"
+	private let liveNumber:String = "lv314025961"
 	
 	private var cookie:HTTPCookie!
 	
@@ -39,6 +39,8 @@ class PlayerStatusTest: XCTestCase {
 		XCTAssertNotNil(playerstatus.community, "property socialType is nil")
 		XCTAssertFalse(playerstatus.isOwner, "property isOwner is true")
 		XCTAssertNotNil(playerstatus.ownerIdentifier, "property isOwner is true")
+		XCTAssertNotNil(playerstatus.ownerIdentifier, "property owner identifier name is nil")
+		XCTAssertNotNil(playerstatus.ownerName, "property owner name is nil")
 	}
 	
 	func testPerformanceExample() {
