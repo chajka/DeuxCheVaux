@@ -36,6 +36,7 @@ class PublishStatusTest: XCTestCase {
 		XCTAssertNotNil(publishStatus.token, "property token can not parsed")
 		XCTAssertFalse(publishStatus.canVote, "property canVote cannot parsed")
 		XCTAssertNotNil(publishStatus.rtmpURL, "property rtmp url can not parsed")
+		XCTAssertNotNil(publishStatus.streamKey, "property stream key can not parsed")
 	}
 
     func testPerformanceExample() {

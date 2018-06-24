@@ -12,6 +12,7 @@ private enum PublishStatusKey:String {
 	case token = "token"
 	case vote = "allow_vote"
 	case rtmpurl = "url"
+	case stream = "stream"
 	
 	static func ~= (lhs:PublishStatusKey, rhs:String) -> Bool {
 		return lhs.rawValue == rhs ? true : false
@@ -25,6 +26,7 @@ class PublishStatus: NSObject ,XMLParserDelegate {
 	public var token:String!
 	public var canVote:Bool!
 	public var rtmpURL:String!
+	public var streamKey:String!
 
 	private var userSession:Array<HTTPCookie> = Array()
 
@@ -68,6 +70,8 @@ class PublishStatus: NSObject ,XMLParserDelegate {
 			canVote = stringBuffer == "1" ? true : false
 		case .rtmpurl:
 			rtmpURL = String(stringBuffer)
+		case .stream:
+			streamKey = String(stringBuffer)
 		default:
 			break
 		}
