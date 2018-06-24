@@ -34,6 +34,7 @@ class PlayerStatusTest: XCTestCase {
 		XCTAssertNotNil(playerstatus, "player status is nil")
 		XCTAssertNotNil(playerstatus.number, "property programNumber is nil")
 		XCTAssertNotNil(playerstatus.title, "property title is nil")
+		XCTAssertNotNil(playerstatus.desc, "property desc is nil")
 	}
 	
 	func testPerformanceExample() {

@@ -11,6 +11,7 @@ import Cocoa
 enum PlayerStatusKey:String {
 	case programNumber = "id"
 	case programTitle = "title"
+	case programDescription = "description"
 
 	static func ~= (lhs:PlayerStatusKey, rhs:String) -> Bool {
 		return lhs.rawValue == rhs ? true : false
@@ -24,6 +25,7 @@ private let VIPPassString:String = "\0xe3\0x83\0x90\0xe3\0x83\0x83\0xe3\0x82\0xa
 class PlayerStatus: NSObject , XMLParserDelegate {
 	public var number:String!
 	public var title:String!
+	public var desc:String!
 
 	var userSession:Array<HTTPCookie>
 	var stringBuffer:String = String()
@@ -62,6 +64,8 @@ class PlayerStatus: NSObject , XMLParserDelegate {
 			number = String(stringBuffer)
 		case .programTitle:
 			title = String(stringBuffer)
+		case .programDescription:
+			desc = String(stringBuffer)
 		default:
 			break
 		}// end switch case by element name
