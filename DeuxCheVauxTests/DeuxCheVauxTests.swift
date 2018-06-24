@@ -9,6 +9,8 @@
 import XCTest
 @testable import DeuxCheVaux
 
+let liveNumber:String = "lv314035986"
+
 class DeuxCheVauxTests: XCTestCase {
 
 	override func setUp() {
