@@ -11,6 +11,8 @@
 		C633F86620DFF59D00C1B265 /* OwnerAndVIPCommentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = C633F86520DFF59D00C1B265 /* OwnerAndVIPCommentHandler.swift */; };
 		C633F86720DFF59D00C1B265 /* OwnerAndVIPCommentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = C633F86520DFF59D00C1B265 /* OwnerAndVIPCommentHandler.swift */; };
 		C633F86920DFF64A00C1B265 /* Dictionary+StringEnum.swift in Sources */ = {isa = PBXBuildFile; fileRef = C633F86820DFF64A00C1B265 /* Dictionary+StringEnum.swift */; };
+		C633F86D20DFFA1800C1B265 /* OwnerAndVIPCommentHandlerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = C633F86C20DFFA1800C1B265 /* OwnerAndVIPCommentHandlerTest.swift */; };
+		C633F86E20DFFB6300C1B265 /* Dictionary+StringEnum.swift in Sources */ = {isa = PBXBuildFile; fileRef = C633F86820DFF64A00C1B265 /* Dictionary+StringEnum.swift */; };
 		C68BA41920DC445900684ADF /* DeuxCheVaux.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C68BA40F20DC445900684ADF /* DeuxCheVaux.framework */; };
 		C68BA41E20DC445900684ADF /* DeuxCheVauxTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C68BA41D20DC445900684ADF /* DeuxCheVauxTests.swift */; };
 		C68BA43020DEC84700684ADF /* PlayerStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = C68BA42F20DEC84700684ADF /* PlayerStatus.swift */; };
@@ -34,6 +36,7 @@
 		C633F86120DFE35400C1B265 /* PublishStatusTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PublishStatusTest.swift; sourceTree = "<group>"; };
 		C633F86520DFF59D00C1B265 /* OwnerAndVIPCommentHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OwnerAndVIPCommentHandler.swift; sourceTree = "<group>"; };
 		C633F86820DFF64A00C1B265 /* Dictionary+StringEnum.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Dictionary+StringEnum.swift"; sourceTree = "<group>"; };
+		C633F86C20DFFA1800C1B265 /* OwnerAndVIPCommentHandlerTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OwnerAndVIPCommentHandlerTest.swift; sourceTree = "<group>"; };
 		C68BA40F20DC445900684ADF /* DeuxCheVaux.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = DeuxCheVaux.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C68BA41320DC445900684ADF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C68BA41820DC445900684ADF /* DeuxCheVauxTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DeuxCheVauxTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -106,6 +109,7 @@
 				C68BA41D20DC445900684ADF /* DeuxCheVauxTests.swift */,
 				C68BA43220DF64AE00684ADF /* PlayerStatusTest.swift */,
 				C633F86120DFE35400C1B265 /* PublishStatusTest.swift */,
+				C633F86C20DFFA1800C1B265 /* OwnerAndVIPCommentHandlerTest.swift */,
 				C68BA41F20DC445900684ADF /* Info.plist */,
 			);
 			path = DeuxCheVauxTests;
@@ -247,8 +251,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C633F86D20DFFA1800C1B265 /* OwnerAndVIPCommentHandlerTest.swift in Sources */,
 				C633F86720DFF59D00C1B265 /* OwnerAndVIPCommentHandler.swift in Sources */,
 				C68BA43320DF64AE00684ADF /* PlayerStatusTest.swift in Sources */,
+				C633F86E20DFFB6300C1B265 /* Dictionary+StringEnum.swift in Sources */,
 				C68BA43620DFD56900684ADF /* PublishStatus.swift in Sources */,
 				C633F86220DFE35400C1B265 /* PublishStatusTest.swift in Sources */,
 				C68BA43120DEC84700684ADF /* PlayerStatus.swift in Sources */,
