@@ -22,7 +22,7 @@ enum PlayerStatusKey:String {
 	case listenerName = "nickname"
 	case listenerIsPremium = "is_premium"
 	case listenerLanguage = "userLanguage"
-	case listenerIsVIP = "room_seetno"
+	case listenerIsVIP = "is_vip"
 
 	static func ~= (lhs:PlayerStatusKey, rhs:String) -> Bool {
 		return lhs.rawValue == rhs ? true : false
@@ -58,8 +58,6 @@ public enum UserLanguage:String {
 }
 
 let playerStatusFormat:String = "http://watch.live.nicovideo.jp/api/getplayerstatus?v="
-
-private let VIPPassString:String = "\0xe3\0x83\0x90\0xe3\0x83\0x83\0xe3\0x82\0xaf\0xe3\0x82\0xb9\0xe3\0x83\0x86\0xe3\0x83\0xbc\0xe3\0x82\0xb8\0xe3\0x83\0x91\0xe3\0x82\0xb9"
 
 class PlayerStatus: NSObject , XMLParserDelegate {
 	public var number:String!
@@ -160,7 +158,7 @@ class PlayerStatus: NSObject , XMLParserDelegate {
 				listenerLanguage = .ja
 			}// end switch case by user language
 		case .listenerIsVIP:
-			listenerIsVIP = stringBuffer == VIPPassString ? true : false
+			listenerIsVIP = stringBuffer == "1" ? true : false
 		default:
 			break
 		}// end switch case by element name
