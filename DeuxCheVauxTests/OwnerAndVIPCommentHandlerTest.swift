@@ -33,6 +33,8 @@ class OwnerAndVIPCommentHandlerTest: XCTestCase {
 			try operatorCommentor.ownerComment(comment: "test comment", name: "Чайка", color: "green", isPerm: false)
 			Thread.sleep(forTimeInterval: 10)
 			try operatorCommentor.ownerComment(comment: "/perm test comment", color: "red", isPerm: false)
+			Thread.sleep(forTimeInterval: 20)
+			operatorCommentor.clearOwnerComment()
 		} catch {
 			XCTAssertTrue(false, "JSON serialization throw error")
 		}

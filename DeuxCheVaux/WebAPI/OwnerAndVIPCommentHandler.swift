@@ -63,6 +63,11 @@ class OwnerAndVIPCommentHandler: NSObject {
 	func ownerComment(comment:String, name:String = "", color:String = "", isPerm:Bool = false) throws -> Void {
 		var permanent:Bool = isPerm
 		var commentToPost = String(comment)
+		if (comment.starts(with: clear)) {
+			clearOwnerComment()
+			return
+		}// end if comment is clear command
+
 		guard let url = URL(string: apiBaseString + operatorComment) else { return }
 		if (comment.starts(with: perm)) {
 			permanent = true
@@ -82,4 +87,15 @@ class OwnerAndVIPCommentHandler: NSObject {
 		let task:URLSessionDataTask = session.dataTask(with: request)
 		task.resume()
 	}// end func owner comment
+
+	func clearOwnerComment() -> Void {
+		guard let url = URL(string: apiBaseString + operatorComment) else { return }
+		request.url = url
+		request.httpMethod = HTTPMethod.delete.rawValue
+		request.setValue(nil, forHTTPHeaderField: ContentTypeKey)
+		request.httpBody = nil
+		let task:URLSessionDataTask = session.dataTask(with: request)
+		task.resume()
+	}// end clearOwnerComment
+
 }// end class OwnerAndVIPCommentHandler
