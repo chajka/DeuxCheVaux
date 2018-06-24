@@ -11,6 +11,7 @@ import Cocoa
 private enum PublishStatusKey:String {
 	case token = "token"
 	case vote = "allow_vote"
+	case rtmpurl = "url"
 	
 	static func ~= (lhs:PublishStatusKey, rhs:String) -> Bool {
 		return lhs.rawValue == rhs ? true : false
@@ -23,6 +24,7 @@ class PublishStatus: NSObject ,XMLParserDelegate {
 	public var number:String!
 	public var token:String!
 	public var canVote:Bool!
+	public var rtmpURL:String!
 
 	private var userSession:Array<HTTPCookie> = Array()
 
@@ -35,8 +37,8 @@ class PublishStatus: NSObject ,XMLParserDelegate {
 	}// end init
 
 	func getPublishStatus(programNumber:String) -> Void {
-		let publishStatusFormat:String = playerStatusFormat + programNumber
-		if let publishStatusURL:URL = URL(string: publishStatusFormat) {
+		let publishStatusURLString:String = publishStatusFormat + programNumber
+		if let publishStatusURL:URL = URL(string: publishStatusURLString) {
 			let session:URLSession = URLSession(configuration: URLSessionConfiguration.default)
 			var request = URLRequest(url: publishStatusURL)
 			var parser:XMLParser?
@@ -64,6 +66,8 @@ class PublishStatus: NSObject ,XMLParserDelegate {
 			token = String(stringBuffer)
 		case .vote:
 			canVote = stringBuffer == "1" ? true : false
+		case .rtmpurl:
+			rtmpURL = String(stringBuffer)
 		default:
 			break
 		}
