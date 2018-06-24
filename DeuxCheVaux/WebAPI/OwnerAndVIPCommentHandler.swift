@@ -73,7 +73,7 @@ class OwnerAndVIPCommentHandler: NSObject {
 		}// end if have cookies
 	}// end init
 
-	func ownerComment(comment:String, name:String = "", color:String = "", isPerm:Bool = false) throws -> Void {
+	func postOwnerComment(comment:String, name:String = "", color:String = "", isPerm:Bool = false) throws -> Void {
 		var permanent:Bool = isPerm
 		var commentToPost = String(comment)
 		if (comment.starts(with: clear)) {

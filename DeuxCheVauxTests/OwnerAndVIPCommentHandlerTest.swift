@@ -30,9 +30,9 @@ class OwnerAndVIPCommentHandlerTest: XCTestCase {
 	func test02_ownerComment() {
 		let operatorCommentor:OwnerAndVIPCommentHandler = OwnerAndVIPCommentHandler(program:liveNumber, cookies:[cookie])
 		do {
-			try operatorCommentor.ownerComment(comment: "test comment", name: "Чайка", color: "green", isPerm: false)
+			try operatorCommentor.postOwnerComment(comment: "test comment", name: "Чайка", color: "green", isPerm: false)
 			Thread.sleep(forTimeInterval: 10)
-			try operatorCommentor.ownerComment(comment: "/perm test comment", color: "red", isPerm: false)
+			try operatorCommentor.postOwnerComment(comment: "/perm test comment", color: "red", isPerm: false)
 			Thread.sleep(forTimeInterval: 20)
 			operatorCommentor.clearOwnerComment()
 			try operatorCommentor.postVIPComment(comment: "BSP Comment test", name: "Чайка", color: "cyan")
