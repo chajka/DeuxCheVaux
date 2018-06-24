@@ -8,14 +8,22 @@
 
 import Cocoa
 
+enum PlayerStatusKey:String {
+	case programNumber = "id"
+
+	static func ~= (lhs:PlayerStatusKey, rhs:String) -> Bool {
+		return lhs.rawValue == rhs ? true : false
+	}// end func ~=
+}// end enum PlayerStatusKey
+
 let playerStatusFormat:String = "http://watch.live.nicovideo.jp/api/getplayerstatus?v="
 
 private let VIPPassString:String = "\0xe3\0x83\0x90\0xe3\0x83\0x83\0xe3\0x82\0xaf\0xe3\0x82\0xb9\0xe3\0x83\0x86\0xe3\0x83\0xbc\0xe3\0x82\0xb8\0xe3\0x83\0x91\0xe3\0x82\0xb9"
 
 class PlayerStatus: NSObject , XMLParserDelegate {
-	var programNumber:String
-	var userSession:Array<HTTPCookie>
+	public var programNumber:String
 
+	var userSession:Array<HTTPCookie>
 	var stringBuffer:String = String()
 
 	init(program:String, cookies:Array<HTTPCookie>) {
@@ -45,6 +53,8 @@ class PlayerStatus: NSObject , XMLParserDelegate {
 
 	public func parser(_ parser: XMLParser, didEndElement elementName: String, namespaceURI: String?, qualifiedName qName: String?) {
 		switch elementName {
+		case .programNumber:
+			programNumber = String(stringBuffer)
 		default:
 			break
 		}// end switch case by element name
