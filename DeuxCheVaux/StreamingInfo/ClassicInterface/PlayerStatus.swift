@@ -10,6 +10,7 @@ import Cocoa
 
 enum PlayerStatusKey:String {
 	case programNumber = "id"
+	case programTitle = "title"
 
 	static func ~= (lhs:PlayerStatusKey, rhs:String) -> Bool {
 		return lhs.rawValue == rhs ? true : false
@@ -21,18 +22,19 @@ let playerStatusFormat:String = "http://watch.live.nicovideo.jp/api/getplayersta
 private let VIPPassString:String = "\0xe3\0x83\0x90\0xe3\0x83\0x83\0xe3\0x82\0xaf\0xe3\0x82\0xb9\0xe3\0x83\0x86\0xe3\0x83\0xbc\0xe3\0x82\0xb8\0xe3\0x83\0x91\0xe3\0x82\0xb9"
 
 class PlayerStatus: NSObject , XMLParserDelegate {
-	public var programNumber:String
+	public var number:String!
+	public var title:String!
 
 	var userSession:Array<HTTPCookie>
 	var stringBuffer:String = String()
 
 	init(program:String, cookies:Array<HTTPCookie>) {
-		programNumber = program
 		userSession = cookies
 		super.init()
+		getPlayerStatus(programNumber: program)
 	}// end init
 
-	func getPlayerStatus() -> Void {
+	func getPlayerStatus(programNumber:String) -> Void {
 		let playerStatusURLString:String = playerStatusFormat + programNumber
 		if let playerStatusURL:URL = URL(string: playerStatusURLString) {
 			let session:URLSession = URLSession(configuration: URLSessionConfiguration.default)
@@ -47,14 +49,19 @@ class PlayerStatus: NSObject , XMLParserDelegate {
 			}// end closure
 			task.resume()
 			while !recievieDone { Thread.sleep(forTimeInterval: 0.1) }
-			parser?.parse()
+			if let playerStatusParser:XMLParser = parser {
+				playerStatusParser.delegate = self
+				playerStatusParser.parse()
+			}
 		}// end if url is not empty
 	}// end function getPlayerStatus
 
 	public func parser(_ parser: XMLParser, didEndElement elementName: String, namespaceURI: String?, qualifiedName qName: String?) {
 		switch elementName {
 		case .programNumber:
-			programNumber = String(stringBuffer)
+			number = String(stringBuffer)
+		case .programTitle:
+			title = String(stringBuffer)
 		default:
 			break
 		}// end switch case by element name

@@ -32,7 +32,8 @@ class PlayerStatusTest: XCTestCase {
 	func test02_properties() {
 		let playerstatus:PlayerStatus = PlayerStatus(program: liveNumber, cookies: [cookie])
 		XCTAssertNotNil(playerstatus, "player status is nil")
-		XCTAssertNotNil(playerstatus.programNumber, "property programNumber is nil")
+		XCTAssertNotNil(playerstatus.number, "property programNumber is nil")
+		XCTAssertNotNil(playerstatus.title, "property title is nil")
 	}
 	
 	func testPerformanceExample() {

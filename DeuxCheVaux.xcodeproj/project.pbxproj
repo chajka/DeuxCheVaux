@@ -84,8 +84,8 @@
 			isa = PBXGroup;
 			children = (
 				C68BA41D20DC445900684ADF /* DeuxCheVauxTests.swift */,
-				C68BA41F20DC445900684ADF /* Info.plist */,
 				C68BA43220DF64AE00684ADF /* PlayerStatusTest.swift */,
+				C68BA41F20DC445900684ADF /* Info.plist */,
 			);
 			path = DeuxCheVauxTests;
 			sourceTree = "<group>";
