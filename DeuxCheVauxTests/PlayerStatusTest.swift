@@ -39,11 +39,12 @@ class PlayerStatusTest: XCTestCase {
 		XCTAssertNotNil(playerstatus.community, "property socialType is nil")
 		XCTAssertFalse(playerstatus.isOwner, "property isOwner is true")
 		XCTAssertNotNil(playerstatus.ownerIdentifier, "property isOwner is true")
-		XCTAssertNotNil(playerstatus.ownerIdentifier, "property owner identifier name is nil")
+		XCTAssertNotNil(playerstatus.ownerIdentifier, "property owner identifier is nil")
 		XCTAssertNotNil(playerstatus.ownerName, "property owner name is nil")
 		XCTAssertNotNil(playerstatus.baseTime, "property base time is nil")
 
-		XCTAssertNotNil(playerstatus.listenerIdentifier, "property listener identifier name is nil")
+		XCTAssertNotNil(playerstatus.listenerIdentifier, "property listener identifier is nil")
+		XCTAssertNotNil(playerstatus.listenerName, "property listener name is nil")
 
 	}
 	
