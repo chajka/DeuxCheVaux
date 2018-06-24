@@ -47,6 +47,7 @@ class PlayerStatusTest: XCTestCase {
 		XCTAssertNotNil(playerstatus.listenerName, "property listener name is nil")
 		XCTAssertTrue(playerstatus.listenerIsPremium, "property listenerIsPremium is false")
 		XCTAssertEqual(playerstatus.listenerLanguage, .en, "property listener language is not english")
+		XCTAssertFalse(playerstatus.listenerIsVIP, "property listener is VIP is not true")
 	}
 	
 	func testPerformanceExample() {
