@@ -9,5 +9,5 @@ Parse result xml of API getplayerstatus
 [PublishStatus][PublishStatus.swift]
 Parse result xml of API getpublishstatus
 
-[PlayerStatus.swift]: ./PlayerStatus.md
+[PlayerStatus.swift]: ./PlayerStatus.md  
 [PublishStatus.swift]:./PublishStatus.md
