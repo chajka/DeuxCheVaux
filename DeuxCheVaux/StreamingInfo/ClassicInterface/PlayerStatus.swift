@@ -20,6 +20,7 @@ enum PlayerStatusKey:String {
 	case baseTime = "base_time"
 	case listenerIdentifier = "user_id"
 	case listenerName = "nickname"
+	case listenerIsPremium = "is_premium"
 
 	static func ~= (lhs:PlayerStatusKey, rhs:String) -> Bool {
 		return lhs.rawValue == rhs ? true : false
@@ -57,6 +58,7 @@ class PlayerStatus: NSObject , XMLParserDelegate {
 
 	public var listenerIdentifier:String!
 	public var listenerName:String!
+	public var listenerIsPremium:Bool!
 
 	var userSession:Array<HTTPCookie>
 	var stringBuffer:String = String()
@@ -126,6 +128,8 @@ class PlayerStatus: NSObject , XMLParserDelegate {
 			listenerIdentifier = String(stringBuffer)
 		case .listenerName:
 			listenerName = String(stringBuffer)
+		case .listenerIsPremium:
+			listenerIsPremium = stringBuffer == "1" ? true : false
 		default:
 			break
 		}// end switch case by element name
