@@ -8,26 +8,24 @@
 
 import Cocoa
 
-enum PlayerStatusKey:String {
-	case programNumber = "id"
-	case programTitle = "title"
-	case programDescription = "description"
-	case socialType = "provider_type"
-	case communityName = "default_community"
-	case ownerFlag = "is_owner"
-	case ownerIdentifier = "owner_id"
-	case ownerName = "owner_name"
-	case baseTime = "base_time"
-	case listenerIdentifier = "user_id"
-	case listenerName = "nickname"
-	case listenerIsPremium = "is_premium"
-	case listenerLanguage = "userLanguage"
-	case listenerIsVIP = "is_vip"
+public struct XMLSocket {
+	var address:String
+	var port:Int
 
-	static func ~= (lhs:PlayerStatusKey, rhs:String) -> Bool {
-		return lhs.rawValue == rhs ? true : false
-	}// end func ~=
-}// end enum PlayerStatusKey
+	static func == (lhs:XMLSocket, rhs:XMLSocket) -> Bool {
+		return (lhs.address == rhs.address) && (lhs.port == rhs.port)
+	}// end func ==
+}// end struct XMLSocket
+
+public struct MessageServer {
+	var XMLSocet:XMLSocket
+	var WebSocket:URL?
+	var thread:String
+
+	static func == (lhs:MessageServer, rhs:MessageServer) -> Bool {
+		return (lhs.XMLSocet == rhs.XMLSocet) && (lhs.WebSocket == rhs.WebSocket) && (lhs.thread == rhs.thread)
+	}// end func ==
+}// end struct MessageServer
 
 public enum SocialType:String {
 	case community = "community"
@@ -55,7 +53,32 @@ public enum UserLanguage:String {
 	static func == (lhs:UserLanguage, rhs:String) -> Bool {
 		return lhs.rawValue == rhs ? true : false
 	}// end func ==
-}
+}// end public enum UserLanguage
+
+enum PlayerStatusKey:String {
+	case programNumber = "id"
+	case programTitle = "title"
+	case programDescription = "description"
+	case socialType = "provider_type"
+	case communityName = "default_community"
+	case ownerFlag = "is_owner"
+	case ownerIdentifier = "owner_id"
+	case ownerName = "owner_name"
+	case baseTime = "base_time"
+	case listenerIdentifier = "user_id"
+	case listenerName = "nickname"
+	case listenerIsPremium = "is_premium"
+	case listenerLanguage = "userLanguage"
+	case listenerIsVIP = "is_vip"
+	case msAddress = "addr"
+	case msPort = "port"
+	case msThread = "thread"
+	case messageServerList = "ms_list"
+	
+	static func ~= (lhs:PlayerStatusKey, rhs:String) -> Bool {
+		return lhs.rawValue == rhs ? true : false
+	}// end func ~=
+}// end enum PlayerStatusKey
 
 let playerStatusFormat:String = "http://watch.live.nicovideo.jp/api/getplayerstatus?v="
 
@@ -76,8 +99,14 @@ class PlayerStatus: NSObject , XMLParserDelegate {
 	public var listenerLanguage:UserLanguage!
 	public var listenerIsVIP:Bool!
 
+	public var messageServers:Array<MessageServer> = Array()
+
 	var userSession:Array<HTTPCookie>
 	var stringBuffer:String = String()
+
+	var server:String!
+	var port:Int!
+	var thread:String!
 
 	init(program:String, cookies:Array<HTTPCookie>) {
 		userSession = cookies
@@ -159,6 +188,19 @@ class PlayerStatus: NSObject , XMLParserDelegate {
 			}// end switch case by user language
 		case .listenerIsVIP:
 			listenerIsVIP = stringBuffer == "1" ? true : false
+		case .msAddress:
+			server = String(stringBuffer)
+		case .msPort:
+			if let portNumber:Int = Int(stringBuffer) {
+				port = portNumber
+			}
+		case .msThread:
+			thread = String(stringBuffer)
+			let xmlserver:XMLSocket = XMLSocket(address: server, port: port)
+			let ms:MessageServer = MessageServer(XMLSocet: xmlserver, WebSocket: nil, thread: thread)
+			messageServers.append(ms)
+		case .messageServerList:
+			messageServers.removeFirst()
 		default:
 			break
 		}// end switch case by element name

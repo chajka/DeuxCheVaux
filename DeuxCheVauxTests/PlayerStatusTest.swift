@@ -48,6 +48,7 @@ class PlayerStatusTest: XCTestCase {
 		XCTAssertTrue(playerstatus.listenerIsPremium, "property listenerIsPremium is false")
 		XCTAssertEqual(playerstatus.listenerLanguage, .en, "property listener language is not english")
 		XCTAssertFalse(playerstatus.listenerIsVIP, "property listener is VIP is not true")
+		XCTAssertGreaterThan(playerstatus.messageServers.count, 0, "property message servers is empty")
 	}
 	
 	func testPerformanceExample() {
