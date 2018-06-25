@@ -8,38 +8,7 @@
 
 import Cocoa
 
-private let apiBase:String = "http://live2.nicovideo.jp/watch/"
-
-private let operatorComment:String = "/operator_comment"
-private let programExtension:String = "/extension"
-private let vipComment:String = "/bsp_comment"
-private let statistics:String = "/statistics"
-private let contents:String = "/contents"
-private let mixing:String = "/mixing"
-
-private let perm:String = "/perm "
-private let clear:String = "/cls"
-
-private let ContentTypeKey:String = "Content-type"
-private let ContentTypeJSON:String = "application/json"
-
-
-enum HTTPMethod:String {
-	case get = "GET"
-	case post = "POST"
-	case put = "PUT"
-	case delete = "DELETE"
-}// end enum httpMehod
-
-enum CommentKeys:String {
-	case comment = "text"
-	case name = "userName"
-	case color = "color"
-	case perm = "isPermanent"
-	case link = "link"
-}// end enum CommentKeys
-
-enum VIPCommentColor:String {
+public enum VIPCommentColor:String {
 	case white = "white"
 	case red = "red"
 	case green = "green"
@@ -52,6 +21,55 @@ enum VIPCommentColor:String {
 	case niconicowhite = "niconicowhite"
 }// end enum VIPCommentColor
 
+public enum CommentPostError:Error {
+	case EmptyComment
+	case NameUndefined
+	case InvalidColor(String)
+}// end public enum CommentPostError
+
+private let apiBase:String = "http://live2.nicovideo.jp/watch/"
+
+private let StartStopStream:String = "/segment"
+private let operatorComment:String = "/operator_comment"
+private let programExtension:String = "/extension"
+private let vipComment:String = "/bsp_comment"
+private let statistics:String = "/statistics"
+private let contents:String = "/contents"
+private let mixing:String = "/mixing"
+
+private let perm:String = "/perm "
+private let clear:String = "/clear"
+
+private let ContentTypeKey:String = "Content-type"
+private let ContentTypeJSON:String = "application/json"
+
+enum HTTPMethod:String {
+	case get = "GET"
+	case post = "POST"
+	case put = "PUT"
+	case delete = "DELETE"
+}// end enum httpMehod
+
+enum StreamControl {
+	enum Key:String {
+		case state = "state"
+	}// end enum Key
+	enum Value:String {
+		case start = "on_air"
+		case end = "end"
+	}// end enum value
+}// end enum StreamControl
+
+enum CommentKeys:String {
+	case comment = "text"
+	case name = "userName"
+	case color = "color"
+	case perm = "isPermanent"
+	case link = "link"
+}// end enum CommentKeys
+
+extension StreamControl.Key:StringEnum { }
+extension StreamControl.Value:StringEnum { }
 extension CommentKeys:StringEnum { }
 
 class OwnerAndVIPCommentHandler: NSObject {
@@ -73,7 +91,40 @@ class OwnerAndVIPCommentHandler: NSObject {
 		}// end if have cookies
 	}// end init
 
+	func startStreaming() -> Void {
+		guard let url = URL(string: apiBaseString + StartStopStream) else { return }
+		var jsonDict:Dictionary<String, Any> = Dictionary()
+		jsonDict[StreamControl.Key.state] = StreamControl.Value.start.rawValue
+		do {
+			request.httpBody = try JSONSerialization.data(withJSONObject: jsonDict, options: [])
+			request.setValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
+			request.httpMethod = HTTPMethod.put.rawValue
+			request.url = url
+			let task = session.dataTask(with: request)
+			task.resume()
+		} catch {
+			print("Program \(program) can not serialize")
+		}
+	}// end func startStreaming
+	
+	func stopStreaming() -> Void {
+		guard let url = URL(string: apiBaseString + StartStopStream) else { return }
+		var jsonDict:Dictionary<String, Any> = Dictionary()
+		jsonDict[StreamControl.Key.state] = StreamControl.Value.end.rawValue
+		do {
+			request.httpBody = try JSONSerialization.data(withJSONObject: jsonDict, options: [])
+			request.setValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
+			request.httpMethod = HTTPMethod.put.rawValue
+			request.url = url
+			let task = session.dataTask(with: request)
+			task.resume()
+		} catch {
+			print("Program \(program) can not serialize")
+		}
+	}// end func startStreaming
+
 	func postOwnerComment(comment:String, name:String = "", color:String = "", isPerm:Bool = false) throws -> Void {
+		if comment.isEmpty { throw CommentPostError.EmptyComment }
 		var permanent:Bool = isPerm
 		var commentToPost = String(comment)
 		if (comment.starts(with: clear)) {
@@ -113,7 +164,10 @@ class OwnerAndVIPCommentHandler: NSObject {
 
 	func postVIPComment(comment:String, name:String, color:String) throws -> Void {
 		let vipCommentColor:VIPCommentColor? = VIPCommentColor(rawValue: color)
-		if (comment.isEmpty) || (name.isEmpty) || (vipCommentColor == nil) { return }
+		if vipCommentColor == nil { throw CommentPostError.InvalidColor(color)}
+		if name.isEmpty { throw CommentPostError.NameUndefined }
+		if comment.isEmpty { throw CommentPostError.EmptyComment }
+
 		guard let url = URL(string: apiBaseString + vipComment) else { return }
 		var jsonDict:Dictionary<String, Any> = Dictionary()
 		jsonDict[CommentKeys.comment] = comment
@@ -126,5 +180,5 @@ class OwnerAndVIPCommentHandler: NSObject {
 		request.setValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
 		let task:URLSessionDataTask = session.dataTask(with: request)
 		task.resume()
-	}
+	}// end func postVIPComment
 }// end class OwnerAndVIPCommentHandler
