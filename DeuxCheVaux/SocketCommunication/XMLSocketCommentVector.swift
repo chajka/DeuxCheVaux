@@ -77,9 +77,9 @@ extension POSTKey.Locale: StringEnum { }
 extension POSTKey.Lang: StringEnum { }
 extension POSTKey.Seat: StringEnum { }
 
-public class XMLSocketCommentVector: NSObject {
+public class XMLSocketCommentVector: NSObject ,StreamDelegate {
 	private let queue:DispatchQueue = DispatchQueue.global(qos: .default)
-	private let sem:DispatchSemaphore = DispatchSemaphore(value: 0)
+	private let sem:DispatchSemaphore
 	
 	private var writeable:Bool {
 		willSet (value) {
@@ -90,12 +90,8 @@ public class XMLSocketCommentVector: NSObject {
 		}// end computed property set
 	}// end property writeable
 	
-	private var playerStatus:PlayerStatus!
-	
-	private var serverName:String
-	private var roomOffset:Int
-	private var portNumber:Int
-	private var thread:String
+	private var server:String
+	private var port:Int
 	private var threadData:Data
 	private var program:String
 	private var baseTiem:Date
@@ -110,16 +106,70 @@ public class XMLSocketCommentVector: NSObject {
 	
 	public var delegate:CommentSocketDelegate!
 
-	public override init() {
-		serverName = ""
-		roomOffset = 0
-		portNumber = 0
-		thread = ""
-		threadData = Data()
-		program = ""
-		cookies = []
-		baseTiem = Date()
+	public init(playerStatus:PlayerStatus, serverOffset:Int, history:Int = defaultHistroryCount, cookies:Array<HTTPCookie>) {
+		let messageServer = playerStatus.messageServers[serverOffset]
+		server = messageServer.XMLSocet.address
+		port = messageServer.XMLSocet.port
+		threadData = String(format: threadFormat, messageServer.thread, history).data(using: .utf8)!
+		baseTiem = playerStatus.baseTime
+		program = playerStatus.number
+		self.cookies = cookies
 		writeable = false
-	}// end overrride init
+
+		sem = DispatchSemaphore(value: serverOffset)
+	}// end init
 	
-}
+	deinit {
+		if finishRunLoop != true { _ = close() }
+	}// end deinit
+
+	public func open() -> Bool {
+		Stream.getStreamsToHost(withName: server, port: port, inputStream: &inputStream, outputStream: &outputStream)
+		guard let readStream = inputStream, let writeStream = outputStream else { return false }
+		queue.async {
+			self.runLoop = RunLoop.current
+			self.sem.signal()
+			self.finishRunLoop = false
+			
+			while(!self.finishRunLoop) {
+				RunLoop.current.run(mode: RunLoopMode.defaultRunLoopMode, before: Date.distantFuture)
+			}// end keep runloop
+		}// end block async
+		
+		sem.wait()
+		guard let runLoop = runLoop else { return false }
+		for stream in [readStream, writeStream] {
+			stream.delegate = self
+			stream.open()
+			stream.schedule(in: runLoop, forMode: .defaultRunLoopMode)
+		}// end foreach streams
+		
+		return true
+	}// end func open
+	
+	public func close() -> Bool {
+		if finishRunLoop == true { return false }
+		
+		guard let readStream = inputStream, let writeStream = outputStream else { return false }
+		guard let runLoop = runLoop else { return false }
+		for stream in [readStream, writeStream] {
+			stream.remove(from: runLoop, forMode: .defaultRunLoopMode)
+			stream.close()
+		}// end foreach streams
+		
+		inputStream = nil
+		outputStream = nil
+		stopRunLoop()
+		
+		return true
+	}// end function close
+	
+	private func stopRunLoop() -> Void {
+		finishRunLoop = true
+		let _:Timer = Timer(timeInterval: 0, target: self, selector: #selector(noop(timer:)), userInfo: nil, repeats: false)
+	}// end function stopRunLoop
+	
+	@objc private func noop(timer:Timer) -> Void {
+		// dummy noop function for terminate private run loop
+	}// end function noop
+}// end class XMLSocketCommentVector
