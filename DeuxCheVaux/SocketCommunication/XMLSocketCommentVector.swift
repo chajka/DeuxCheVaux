@@ -170,6 +170,52 @@ public class XMLSocketCommentVector: NSObject ,StreamDelegate {
 		return true
 	}// end function close
 	
+	public func heartbeat(_ callback:@escaping heartbeatCallback) -> Void {
+		guard let heartbeatURL = URL(string: (heartbeatFormat + program)) else { return }
+		let config = URLSessionConfiguration.default
+		let session = URLSession(configuration: config)
+		var req = URLRequest(url: heartbeatURL)
+		if cookies.count > 0 {
+			let cookiesForHeader = HTTPCookie.requestHeaderFields(with: cookies)
+			req.allHTTPHeaderFields = cookiesForHeader
+		}// end if have cookies
+		
+		let task:URLSessionDataTask = session.dataTask(with: req) { (dat, res, err) in
+			guard let data = dat else { return }
+			do {
+				let heartbeat = try XMLDocument(data: data, options: XMLNode.Options.documentTidyXML)
+				let heartbeatStatus = heartbeat.rootElement()?.attribute(forName: "status")
+				if heartbeatStatus?.stringValue == "ok" {
+					guard let children = heartbeat.children?.last?.children else { return }
+					var watch:Int = 0
+					var comment:Int = 0
+					var ticket:String = ""
+					for child:XMLNode in children {
+						switch child.name {
+						case "watchCount":
+							guard let watchCount = child.stringValue else { break }
+							watch = Int(watchCount)!
+						case "commentCount":
+							guard let commentCount = child.stringValue else { break }
+							comment = Int(commentCount)!
+						case "ticket":
+							guard let ticketString = child.stringValue else { break }
+							ticket = ticketString
+						default:
+							break
+						}// end switch child
+					}// end foreach children
+					callback(watch, comment, ticket)
+				}// end if hertbeat status is OK
+			} catch {
+				callback(-1, -1, "")
+			}// end try - catch
+		}// end completion handler
+		task.resume()
+		
+		return
+	}// end function heartbeat
+	
 	public func stream(_ aStream: Stream, handle eventCode: Stream.Event) {
 		switch aStream {
 		case outputStream!:
