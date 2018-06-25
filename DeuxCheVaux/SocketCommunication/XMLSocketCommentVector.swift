@@ -8,8 +8,8 @@
 
 import Cocoa
 
-public protocol CommentSocketDelegate {
-	func commentSocket(commentVector vector:XMLSocketCommentVector, didRecieveComment comment:XMLElement) -> Void
+public protocol XMLSocketCommentVectorDelegate {
+	func commentVector(commentVector vector:XMLSocketCommentVector, didRecieveComment comment:XMLElement) -> Void
 }// end protocol CommentSocketDelegate
 
 public typealias heartbeatCallback = (_ commentCount:Int, _ watcherCount:Int, _ ticket:String) -> Void
@@ -107,7 +107,7 @@ public class XMLSocketCommentVector: NSObject ,StreamDelegate {
 	private var outputStream:OutputStream?
 	private var inputRemnant:Data = Data()
 	
-	public var delegate:CommentSocketDelegate!
+	public var delegate:XMLSocketCommentVectorDelegate!
 
 	public init(playerStatus:PlayerStatus, serverOffset:Int, history:Int = defaultHistroryCount, cookies:Array<HTTPCookie>) {
 		let messageServer = playerStatus.messageServers[serverOffset]
@@ -170,6 +170,76 @@ public class XMLSocketCommentVector: NSObject ,StreamDelegate {
 		return true
 	}// end function close
 	
+	public func stream(_ aStream: Stream, handle eventCode: Stream.Event) {
+		switch aStream {
+		case outputStream!:
+			handleWriteStreamEvent(eventCode: eventCode)
+		case inputStream!:
+			handleReadStreamEvent(eventCode: eventCode)
+		default:
+			break
+		}// end switch
+	}// end function stream:handleEventCode
+	
+	private func handleWriteStreamEvent(eventCode: Stream.Event) -> Void {
+		guard let _ = outputStream else { return }
+		switch eventCode {
+		case .hasSpaceAvailable:
+			if (!writeable) { self.writeable = true }
+			print("write streame has byte available")
+		case .endEncountered:
+			print("Write Stream End Encounted")
+		case .errorOccurred:
+			print("Write Stream Error Occurred")
+		default:
+			break
+		}// end switch
+	}// end function handleWriteSreamEvent
+	
+	private func handleReadStreamEvent(eventCode: Stream.Event) -> Void {
+		var buffer = [UInt8](repeating: 0, count: BufferSize)
+		guard let readStream = inputStream else { return }
+		switch eventCode {
+		case .hasBytesAvailable:
+			let result:Int = readStream.read(&buffer, maxLength: buffer.count)
+			switch result {
+			case -1:
+				print("Can not read")
+			case 0:
+				print("No data")
+			default:
+				let dataBuffer:Data = Data(buffer)
+				var strings:Array<Data> = dataBuffer.split(separator: 0)
+				if (inputRemnant.count > 0) {
+					strings[0] = inputRemnant + strings[0]
+					inputRemnant = Data()
+				}// end if have input remnant
+				if (buffer[result - 1] != 0) {
+					inputRemnant = strings.last!
+					strings.removeLast()
+				}// end if have remnant
+				var comments:Array<String> = Array()
+				for stringData:Data in strings {
+					if let comment = String(data: stringData, encoding: String.Encoding.utf8) {
+						comments.append(comment)
+					}// end if
+				}// end foreach comment strings
+				
+				guard let commentSocketDelegate = delegate else { return }
+				for comment in comments {
+					do {
+						let element:XMLElement = try XMLElement(xmlString: comment)
+						commentSocketDelegate.commentVector(commentVector: self, didRecieveComment: element)
+					} catch {
+						print("comment socket send not xml string or broken string")
+					}// end try - catch parse xml element
+				}// end foreach
+		}// end switch result of read stream
+		default:
+			print("event is not has bytes available \(eventCode)")
+		}// end switch by event code
+	}// end function handleReadStreamEvent
+	
 	private func postkey(commentCount:Int, ticket:String, callback:@escaping PostKeyCallBack) -> Void {
 		let result =  makePostKeyURL(commentCount:commentCount, ticket:ticket)
 		let postkeyURL:URL = result.0
@@ -179,7 +249,8 @@ public class XMLSocketCommentVector: NSObject ,StreamDelegate {
 		var req = URLRequest(url: postkeyURL)
 		req.httpMethod = "POST"
 		req.httpBody = params.data(using: .utf8)
-		if (cookies.count > 0) {
+		if (cookies.count > 0)
+		{
 			let cookiesForHeader = HTTPCookie.requestHeaderFields(with: cookies)
 			req.allHTTPHeaderFields = cookiesForHeader
 		}// end if have cookie(s)
