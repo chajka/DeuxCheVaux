@@ -94,6 +94,7 @@ public class XMLSocketCommentVector: NSObject ,StreamDelegate {
 	private let port:Int
 	private let thread:String
 	private let threadData:Data
+	private let userIdentifier:String
 	private let userLanguage:UserLanguage
 	private let program:String
 	private let baseTiem:Date
@@ -115,6 +116,7 @@ public class XMLSocketCommentVector: NSObject ,StreamDelegate {
 		port = messageServer.XMLSocet.port
 		thread = messageServer.thread
 		threadData = String(format: threadFormat, messageServer.thread, history).data(using: .utf8)!
+		userIdentifier = playerStatus.listenerIdentifier
 		baseTiem = playerStatus.baseTime
 		isPremium = playerStatus.listenerIsPremium
 		program = playerStatus.number
@@ -170,6 +172,34 @@ public class XMLSocketCommentVector: NSObject ,StreamDelegate {
 		return true
 	}// end function close
 	
+	public func comment(comment:String, command:Array<String>) -> Void {
+		let chatXMLElement:XMLElement = XMLElement(name: XML.Name.Chat.rawValue, stringValue: comment)
+		var attributes:Dictionary<String, String> = Dictionary()
+		attributes[XML.Attr.Thread] = thread
+		attributes[XML.Attr.UserID] = userIdentifier
+		attributes[XML.Attr.Premium] = isPremium ? "1" : "0"
+		attributes[XML.Attr.Locale] = userLanguage.rawValue
+		
+		if (command.count > 0) {
+			attributes[XML.Attr.Command] = command.joined(separator:" ")
+		}// end if have command
+		
+		heartbeat { (watchCount, commentCount, ticket) in
+			if (ticket.count > 0) {
+				self.postkey(commentCount: commentCount, ticket: ticket, callback: { (postkey) in
+					attributes[XML.Attr.Ticket] = ticket
+					attributes[XML.Attr.Postkey] = postkey
+					attributes[XML.Attr.Vops] = String(Int((-self.baseTiem.timeIntervalSinceNow) * 100))
+					chatXMLElement.setAttributesAs(attributes)
+					
+					let chatElement:String = chatXMLElement.xmlString + "\0"
+					self.write(chatElement)
+					Swift.print(chatElement)
+				})// end closure for postkey
+			}// end if
+		}// end closure for heartbeat
+	}// end function comment
+	
 	public func heartbeat(_ callback:@escaping heartbeatCallback) -> Void {
 		guard let heartbeatURL = URL(string: (heartbeatFormat + program)) else { return }
 		let config = URLSessionConfiguration.default
@@ -215,6 +245,14 @@ public class XMLSocketCommentVector: NSObject ,StreamDelegate {
 		
 		return
 	}// end function heartbeat
+	
+	private func write(_ message:String) -> Void {
+		if (finishRunLoop) { return }
+		guard let writeStream = outputStream, let stringDataToWrite = message.data(using: String.Encoding.utf8) else { return }
+		stringDataToWrite.withUnsafeBytes( {(dat:UnsafePointer<UInt8>) -> Void in
+			writeStream.write(dat, maxLength: stringDataToWrite.count)})
+		Thread.sleep(forTimeInterval: 3)
+	}// end function write
 	
 	public func stream(_ aStream: Stream, handle eventCode: Stream.Event) {
 		switch aStream {
