@@ -90,12 +90,15 @@ public class XMLSocketCommentVector: NSObject ,StreamDelegate {
 		}// end computed property set
 	}// end property writeable
 	
-	private var server:String
-	private var port:Int
-	private var threadData:Data
-	private var program:String
-	private var baseTiem:Date
-	private var cookies:Array<HTTPCookie>
+	private let server:String
+	private let port:Int
+	private let thread:String
+	private let threadData:Data
+	private let userLanguage:UserLanguage
+	private let program:String
+	private let baseTiem:Date
+	private let isPremium:Bool
+	private let cookies:Array<HTTPCookie>
 	
 	private var runLoop:RunLoop!
 	private var finishRunLoop:Bool = true
@@ -110,9 +113,12 @@ public class XMLSocketCommentVector: NSObject ,StreamDelegate {
 		let messageServer = playerStatus.messageServers[serverOffset]
 		server = messageServer.XMLSocet.address
 		port = messageServer.XMLSocet.port
+		thread = messageServer.thread
 		threadData = String(format: threadFormat, messageServer.thread, history).data(using: .utf8)!
 		baseTiem = playerStatus.baseTime
+		isPremium = playerStatus.listenerIsPremium
 		program = playerStatus.number
+		userLanguage = playerStatus.listenerLanguage
 		self.cookies = cookies
 		writeable = false
 
@@ -131,7 +137,7 @@ public class XMLSocketCommentVector: NSObject ,StreamDelegate {
 			self.sem.signal()
 			self.finishRunLoop = false
 			
-			while(!self.finishRunLoop) {
+			while (!self.finishRunLoop) {
 				RunLoop.current.run(mode: RunLoopMode.defaultRunLoopMode, before: Date.distantFuture)
 			}// end keep runloop
 		}// end block async
@@ -163,6 +169,32 @@ public class XMLSocketCommentVector: NSObject ,StreamDelegate {
 		
 		return true
 	}// end function close
+	
+	private func makePostKeyURL(commentCount:Int, ticket:String) -> (URL, String) {
+		let therad:String = [POSTKey.Key.Thread.rawValue, thread].joined(separator: "=")
+		let block:String = [POSTKey.Key.Block.rawValue, String(Int((commentCount + 1) / 100))].joined(separator: "=")
+		let useLocale:String = [POSTKey.Key.UseLocale.rawValue, POSTKey.UseLocale.UseLocale.rawValue].joined(separator: "=")
+		let locale:String = [POSTKey.Key.Locale.rawValue, POSTKey.Locale.Null.rawValue].joined(separator: "=")
+		var lang:String
+		var seat:String
+		switch userLanguage {
+		case UserLanguage.ja:
+			lang = [POSTKey.Key.Lang.rawValue, POSTKey.Lang.ja.rawValue].joined(separator: "=")
+			seat = [POSTKey.Key.Seat.rawValue, POSTKey.Seat.ja.rawValue].joined(separator: "=")
+		case UserLanguage.zh:
+			lang = [POSTKey.Key.Lang.rawValue, POSTKey.Lang.zh.rawValue].joined(separator: "=")
+			seat = [POSTKey.Key.Seat.rawValue, POSTKey.Seat.zh.rawValue].joined(separator: "=")
+		case UserLanguage.en:
+			lang = [POSTKey.Key.Lang.rawValue, POSTKey.Lang.en.rawValue].joined(separator: "=")
+			seat = [POSTKey.Key.Seat.rawValue, POSTKey.Seat.en.rawValue].joined(separator: "=")
+		}// end switch
+		
+		let params:String = [therad, block, useLocale, lang, locale, seat].joined(separator: "&")
+		let postkeyURLandParamStr:String = postkeyFormat + program
+		let postkeysURL:URL = URL(string: postkeyURLandParamStr)!
+		
+		return (postkeysURL, params)
+	}// end function makePostKeyURL
 	
 	private func stopRunLoop() -> Void {
 		finishRunLoop = true
