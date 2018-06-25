@@ -78,5 +78,48 @@ extension POSTKey.Lang: StringEnum { }
 extension POSTKey.Seat: StringEnum { }
 
 public class XMLSocketCommentVector: NSObject {
+	private let queue:DispatchQueue = DispatchQueue.global(qos: .default)
+	private let sem:DispatchSemaphore = DispatchSemaphore(value: 0)
+	
+	private var writeable:Bool {
+		willSet (value) {
+			if value == true {
+				guard let writeStream = outputStream else { return }
+				_ = threadData.withUnsafeBytes( {(data:UnsafePointer<UInt8>) -> Void in writeStream.write(data, maxLength: threadData.count)})
+			}// end didSet
+		}// end computed property set
+	}// end property writeable
+	
+	private var playerStatus:PlayerStatus!
+	
+	private var serverName:String
+	private var roomOffset:Int
+	private var portNumber:Int
+	private var thread:String
+	private var threadData:Data
+	private var program:String
+	private var baseTiem:Date
+	private var cookies:Array<HTTPCookie>
+	
+	private var runLoop:RunLoop!
+	private var finishRunLoop:Bool = true
+	
+	private var inputStream:InputStream?
+	private var outputStream:OutputStream?
+	private var inputRemnant:Data = Data()
+	
+	public var delegate:CommentSocketDelegate!
 
+	public override init() {
+		serverName = ""
+		roomOffset = 0
+		portNumber = 0
+		thread = ""
+		threadData = Data()
+		program = ""
+		cookies = []
+		baseTiem = Date()
+		writeable = false
+	}// end overrride init
+	
 }
