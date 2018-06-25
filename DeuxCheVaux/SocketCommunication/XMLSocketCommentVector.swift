@@ -170,6 +170,35 @@ public class XMLSocketCommentVector: NSObject ,StreamDelegate {
 		return true
 	}// end function close
 	
+	private func postkey(commentCount:Int, ticket:String, callback:@escaping PostKeyCallBack) -> Void {
+		let result =  makePostKeyURL(commentCount:commentCount, ticket:ticket)
+		let postkeyURL:URL = result.0
+		let params:String = result.1
+		let config = URLSessionConfiguration.default
+		let session = URLSession(configuration: config)
+		var req = URLRequest(url: postkeyURL)
+		req.httpMethod = "POST"
+		req.httpBody = params.data(using: .utf8)
+		if (cookies.count > 0) {
+			let cookiesForHeader = HTTPCookie.requestHeaderFields(with: cookies)
+			req.allHTTPHeaderFields = cookiesForHeader
+		}// end if have cookie(s)
+		
+		let task:URLSessionDataTask = session.dataTask(with: req) { (dat, resp, err) in
+			guard let data:Data = dat else { return }
+			let postkeyResult = String(data: data, encoding: String.Encoding.utf8)!
+			let postkeys:Array<Substring> = postkeyResult.split(separator: "=", maxSplits: 2, omittingEmptySubsequences: true)
+			if (postkeys.count == 2) {
+				let postkey:String = String(postkeys.last!)
+				callback(postkey)
+			} else  {
+				Swift.print(postkeyURL)
+				return
+			}// end if
+		}// end process recieved data
+		task.resume()
+	}// end func postkey
+	
 	private func makePostKeyURL(commentCount:Int, ticket:String) -> (URL, String) {
 		let therad:String = [POSTKey.Key.Thread.rawValue, thread].joined(separator: "=")
 		let block:String = [POSTKey.Key.Block.rawValue, String(Int((commentCount + 1) / 100))].joined(separator: "=")
