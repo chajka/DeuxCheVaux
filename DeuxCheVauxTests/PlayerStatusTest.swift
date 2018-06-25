@@ -9,7 +9,6 @@
 import XCTest
 
 class PlayerStatusTest: XCTestCase {
-	private let user_session_value:String = "user_session_6347612_a0c800610aa6bbe0f20ad9edb3ab94d3b8b0b369f96eb0fcfcf70f1ed69e097a"
 	
 	private var cookie:HTTPCookie!
 	
