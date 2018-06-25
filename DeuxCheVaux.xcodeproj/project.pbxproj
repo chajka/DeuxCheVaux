@@ -74,6 +74,13 @@
 			path = WebAPI;
 			sourceTree = "<group>";
 		};
+		C687B8EB20E17E22006784B1 /* SocketCommunication */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = SocketCommunication;
+			sourceTree = "<group>";
+		};
 		C68BA40520DC445900684ADF = {
 			isa = PBXGroup;
 			children = (
@@ -96,6 +103,7 @@
 			isa = PBXGroup;
 			children = (
 				C633F86820DFF64A00C1B265 /* Dictionary+StringEnum.swift */,
+				C687B8EB20E17E22006784B1 /* SocketCommunication */,
 				C633F86420DFF4F300C1B265 /* WebAPI */,
 				C68BA42D20DEC7E700684ADF /* StreamingInfo */,
 				C68BA41320DC445900684ADF /* Info.plist */,
