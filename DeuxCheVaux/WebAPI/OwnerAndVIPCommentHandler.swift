@@ -8,18 +8,54 @@
 
 import Cocoa
 
-public enum VIPCommentColor:String {
-	case white = "white"
-	case red = "red"
-	case green = "green"
-	case blue = "bule"
-	case cyan = "cyan"
-	case yellow = "yellow"
-	case purple = "purple"
-	case pink = "pink"
-	case orange = "orange"
-	case niconicowhite = "niconicowhite"
-}// end enum VIPCommentColor
+public enum Color {
+	enum normal:String {
+		case white = "white"
+		case red = "red"
+		case pink = "pink"
+		case orange = "orange"
+		case yellow = "yellow"
+		case green = "green"
+		case cyan = "cyan"
+		case blue = "bule"
+		case purple = "purple"
+		case black = "black"
+	}// end enum normal member usable comment color
+	enum vip:String {
+		case white = "white"
+		case red = "red"
+		case green = "green"
+		case blue = "bule"
+		case cyan = "cyan"
+		case yellow = "yellow"
+		case purple = "purple"
+		case pink = "pink"
+		case orange = "orange"
+		case niconicowhite = "niconicowhite"
+	}// end enum
+	enum premium:String {
+		case white = "white"
+		case red = "red"
+		case pink = "pink"
+		case orange = "orange"
+		case yellow = "yellow"
+		case green = "green"
+		case cyan = "cyan"
+		case blue = "bule"
+		case purple = "purple"
+		case black = "black"
+		case white2 = "white2"
+		case red2 = "red2"
+		case pink2 = "pink2"
+		case orange2 = "orange2"
+		case yellow2 = "yellow2"
+		case green2 = "green2"
+		case cyan2 = "cyan2"
+		case blue2 = "bule2"
+		case purple2 = "purple2"
+		case black2 = "black2"
+	}// end enum premium member usable comment color
+}// end usable color for comment
 
 public enum CommentPostError:Error {
 	case EmptyComment
@@ -104,7 +140,7 @@ public class OwnerAndVIPCommentHandler: NSObject {
 			task.resume()
 		} catch {
 			print("Program \(program) can not serialize")
-		}
+		}// end try - catch JSONSerialization
 	}// end func startStreaming
 	
 	public func stopStreaming() -> Void {
@@ -120,17 +156,19 @@ public class OwnerAndVIPCommentHandler: NSObject {
 			task.resume()
 		} catch {
 			print("Program \(program) can not serialize")
-		}
+		}// end try - catch JSONSerialization
 	}// end func startStreaming
 
-	public func postOwnerComment(comment:String, name:String = "", color:String = "", isPerm:Bool = false) throws -> Void {
+	public func postOwnerComment(comment:String, name:String = "", color:String = "white", isPerm:Bool = false) throws -> Void {
 		if comment.isEmpty { throw CommentPostError.EmptyComment }
-		var permanent:Bool = isPerm
 		var commentToPost = String(comment)
 		if (comment.starts(with: clear)) {
 			clearOwnerComment()
 			return
 		}// end if comment is clear command
+		let commentColor = Color.premium(rawValue: color)
+		if commentColor == nil { throw CommentPostError.InvalidColor(color)}
+		var permanent:Bool = isPerm
 
 		guard let url = URL(string: apiBaseString + operatorComment) else { return }
 		if (comment.starts(with: perm)) {
@@ -152,8 +190,8 @@ public class OwnerAndVIPCommentHandler: NSObject {
 			let task:URLSessionDataTask = session.dataTask(with: request)
 			task.resume()
 		} catch {
-			print("Program \(program) can not serialize")
-		}
+			print("Comment \(jsonDict) can not serialize")
+		}// end try - catch JSONSerialization
 	}// end func owner comment
 
 	public func clearOwnerComment() -> Void {
@@ -167,7 +205,7 @@ public class OwnerAndVIPCommentHandler: NSObject {
 	}// end clearOwnerComment
 
 	public func postVIPComment(comment:String, name:String, color:String) throws -> Void {
-		let vipCommentColor:VIPCommentColor? = VIPCommentColor(rawValue: color)
+		let vipCommentColor:Color.vip? = Color.vip(rawValue: color)
 		if vipCommentColor == nil { throw CommentPostError.InvalidColor(color)}
 		if name.isEmpty { throw CommentPostError.NameUndefined }
 		if comment.isEmpty { throw CommentPostError.EmptyComment }
@@ -185,7 +223,7 @@ public class OwnerAndVIPCommentHandler: NSObject {
 			let task:URLSessionDataTask = session.dataTask(with: request)
 			task.resume()
 		} catch {
-			print("Program \(program) can not serialize")
-		}
+			print("Comment \(jsonDict) can not serialize")
+		}// end try - catch JSONSerialization
 	}// end func postVIPComment
 }// end class OwnerAndVIPCommentHandler
