@@ -69,6 +69,19 @@ private enum POSTKey {
 	}// end enum
 }// end enum POSTKey
 
+private enum HeartbeatElement:String {
+	case watch = "watchCount"
+	case comment = "commentCount"
+	case ticket = "ticket"
+
+	static func ~= (lhs:HeartbeatElement, rhs:String) -> Bool {
+		return lhs.rawValue == rhs ? true : false
+	}// end func ~=
+	static func == (lhs:HeartbeatElement, rhs:String) -> Bool {
+		return lhs.rawValue == rhs ? true : false
+	}// end func ==
+}// end enum HeartbeatElement
+
 extension XML.Name: StringEnum { }
 extension XML.Attr: StringEnum { }
 extension POSTKey.Key: StringEnum { }
@@ -136,9 +149,9 @@ public class XMLSocketCommentVector: NSObject ,StreamDelegate {
 		guard let readStream = inputStream, let writeStream = outputStream else { return false }
 		queue.async {
 			self.runLoop = RunLoop.current
-			self.sem.signal()
 			self.finishRunLoop = false
-			
+			self.sem.signal()
+
 			while (!self.finishRunLoop) {
 				RunLoop.current.run(mode: RunLoopMode.defaultRunLoopMode, before: Date.distantFuture)
 			}// end keep runloop
@@ -180,12 +193,12 @@ public class XMLSocketCommentVector: NSObject ,StreamDelegate {
 		attributes[XML.Attr.Premium] = isPremium ? "1" : "0"
 		attributes[XML.Attr.Locale] = userLanguage.rawValue
 		
-		if (command.count > 0) {
+		if !command.isEmpty {
 			attributes[XML.Attr.Command] = command.joined(separator:" ")
 		}// end if have command
 		
 		heartbeat { (watchCount, commentCount, ticket) in
-			if (ticket.count > 0) {
+			if !ticket.isEmpty {
 				self.postkey(commentCount: commentCount, ticket: ticket, callback: { (postkey) in
 					attributes[XML.Attr.Ticket] = ticket
 					attributes[XML.Attr.Postkey] = postkey
@@ -205,7 +218,7 @@ public class XMLSocketCommentVector: NSObject ,StreamDelegate {
 		let config = URLSessionConfiguration.default
 		let session = URLSession(configuration: config)
 		var req = URLRequest(url: heartbeatURL)
-		if cookies.count > 0 {
+		if !cookies.isEmpty {
 			let cookiesForHeader = HTTPCookie.requestHeaderFields(with: cookies)
 			req.allHTTPHeaderFields = cookiesForHeader
 		}// end if have cookies
@@ -221,14 +234,15 @@ public class XMLSocketCommentVector: NSObject ,StreamDelegate {
 					var comment:Int = 0
 					var ticket:String = ""
 					for child:XMLNode in children {
-						switch child.name {
-						case "watchCount":
+						guard let name = child.name else { break }
+						switch name {
+						case .watch:
 							guard let watchCount = child.stringValue else { break }
 							watch = Int(watchCount)!
-						case "commentCount":
+						case .comment:
 							guard let commentCount = child.stringValue else { break }
 							comment = Int(commentCount)!
-						case "ticket":
+						case .ticket:
 							guard let ticketString = child.stringValue else { break }
 							ticket = ticketString
 						default:
@@ -248,7 +262,7 @@ public class XMLSocketCommentVector: NSObject ,StreamDelegate {
 	
 	private func write(_ message:String) -> Void {
 		if (finishRunLoop) { return }
-		guard let writeStream = outputStream, let stringDataToWrite = message.data(using: String.Encoding.utf8) else { return }
+		guard let writeStream:OutputStream = outputStream, let stringDataToWrite:Data = message.data(using: String.Encoding.utf8) else { return }
 		stringDataToWrite.withUnsafeBytes( {(dat:UnsafePointer<UInt8>) -> Void in
 			writeStream.write(dat, maxLength: stringDataToWrite.count)})
 		Thread.sleep(forTimeInterval: 3)
@@ -276,7 +290,7 @@ public class XMLSocketCommentVector: NSObject ,StreamDelegate {
 		case .errorOccurred:
 			print("Write Stream Error Occurred")
 		default:
-			break
+			print ("Write stream unknown Event Ocurred : \(eventCode)")
 		}// end switch
 	}// end function handleWriteSreamEvent
 	
@@ -293,17 +307,17 @@ public class XMLSocketCommentVector: NSObject ,StreamDelegate {
 				print("No data")
 			default:
 				let dataBuffer:Data = Data(buffer)
-				var strings:Array<Data> = dataBuffer.split(separator: 0)
+				var dataForSstrings:Array<Data> = dataBuffer.split(separator: 0)
 				if (inputRemnant.count > 0) {
-					strings[0] = inputRemnant + strings[0]
+					dataForSstrings[0] = inputRemnant + dataForSstrings[0]
 					inputRemnant = Data()
 				}// end if have input remnant
 				if (buffer[result - 1] != 0) {
-					inputRemnant = strings.last!
-					strings.removeLast()
+					inputRemnant = dataForSstrings.last!
+					dataForSstrings.removeLast()
 				}// end if have remnant
 				var comments:Array<String> = Array()
-				for stringData:Data in strings {
+				for stringData:Data in dataForSstrings {
 					if let comment = String(data: stringData, encoding: String.Encoding.utf8) {
 						comments.append(comment)
 					}// end if
@@ -315,7 +329,7 @@ public class XMLSocketCommentVector: NSObject ,StreamDelegate {
 						let element:XMLElement = try XMLElement(xmlString: comment)
 						commentSocketDelegate.commentVector(commentVector: self, didRecieveComment: element)
 					} catch {
-						print("comment socket send not xml string or broken string")
+						print("comment socket recieve not a xml format string or broken string \(comment)")
 					}// end try - catch parse xml element
 				}// end foreach
 		}// end switch result of read stream
@@ -325,16 +339,13 @@ public class XMLSocketCommentVector: NSObject ,StreamDelegate {
 	}// end function handleReadStreamEvent
 	
 	private func postkey(commentCount:Int, ticket:String, callback:@escaping PostKeyCallBack) -> Void {
-		let result =  makePostKeyURL(commentCount:commentCount, ticket:ticket)
-		let postkeyURL:URL = result.0
-		let params:String = result.1
+		let (postkeyURL, params) =  makePostKeyURL(commentCount:commentCount, ticket:ticket)
 		let config = URLSessionConfiguration.default
 		let session = URLSession(configuration: config)
 		var req = URLRequest(url: postkeyURL)
-		req.httpMethod = "POST"
+		req.httpMethod = HTTPMethod.post.rawValue
 		req.httpBody = params.data(using: .utf8)
-		if (cookies.count > 0)
-		{
+		if !cookies.isEmpty {
 			let cookiesForHeader = HTTPCookie.requestHeaderFields(with: cookies)
 			req.allHTTPHeaderFields = cookiesForHeader
 		}// end if have cookie(s)
