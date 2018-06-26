@@ -42,7 +42,6 @@
 		C633F86C20DFFA1800C1B265 /* OwnerAndVIPCommentHandlerTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OwnerAndVIPCommentHandlerTest.swift; sourceTree = "<group>"; };
 		C687B8EC20E17ECD006784B1 /* XMLSocketCommentVector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XMLSocketCommentVector.swift; sourceTree = "<group>"; };
 		C687B8EF20E17EEC006784B1 /* XMLSocketCommentVectorTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XMLSocketCommentVectorTest.swift; sourceTree = "<group>"; };
-		C687B8F120E19E1B006784B1 /* XMLSocketCommentVector.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = XMLSocketCommentVector.md; sourceTree = SOURCE_ROOT; };
 		C68BA40F20DC445900684ADF /* DeuxCheVaux.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = DeuxCheVaux.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C68BA41320DC445900684ADF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C68BA41820DC445900684ADF /* DeuxCheVauxTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DeuxCheVauxTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -84,7 +83,6 @@
 			isa = PBXGroup;
 			children = (
 				C687B8EC20E17ECD006784B1 /* XMLSocketCommentVector.swift */,
-				C687B8F120E19E1B006784B1 /* XMLSocketCommentVector.md */,
 			);
 			path = SocketCommunication;
 			sourceTree = "<group>";

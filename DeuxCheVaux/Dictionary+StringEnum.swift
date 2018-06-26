@@ -8,11 +8,11 @@
 
 import Foundation
 
-protocol StringEnum {
+public protocol StringEnum {
 	var rawValue:String { get }
 }
 
-extension Dictionary {
+public extension Dictionary {
 	subscript(enumKey: StringEnum) -> Value? {
 		get {
 			if let key = enumKey.rawValue as? Key {
