@@ -179,7 +179,7 @@ public class PlayerStatus: NSObject , XMLParserDelegate {
 			if let unixTime: TimeInterval = startTimeInterval {
 				startTime = Date(timeIntervalSince1970: unixTime)
 			}// end unix time string can convert unix time
-		case .startTime:
+		case .endTime:
 			let endTimeStr = stringBuffer
 			let endTimeInterval = TimeInterval(endTimeStr)
 			if let unixTime: TimeInterval = endTimeInterval {
