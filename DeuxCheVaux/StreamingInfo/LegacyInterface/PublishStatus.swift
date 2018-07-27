@@ -19,7 +19,7 @@ private enum PublishStatusKey: String {
 	}// end func ~=
 }// end enum PlayerStatusKey
 
-private let publishStatusFormat: String = "http: //watch.live.nicovideo.jp/api/getpublishstatus?v="
+private let publishStatusFormat: String = "http://watch.live.nicovideo.jp/api/getpublishstatus?v="
 
 public class PublishStatus: NSObject ,XMLParserDelegate {
 	public var number: String!

@@ -82,7 +82,7 @@ enum PlayerStatusKey: String {
 	}// end func ~=
 }// end enum PlayerStatusKey
 
-let playerStatusFormat: String = "http: //watch.live.nicovideo.jp/api/getplayerstatus?v="
+let playerStatusFormat: String = "http://watch.live.nicovideo.jp/api/getplayerstatus?v="
 
 public class PlayerStatus: NSObject , XMLParserDelegate {
 	public var number: String!
