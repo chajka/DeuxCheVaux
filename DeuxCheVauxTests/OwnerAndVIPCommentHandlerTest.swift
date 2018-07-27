@@ -10,7 +10,7 @@ import XCTest
 
 class OwnerAndVIPCommentHandlerTest: XCTestCase {
 
-	private var cookie:HTTPCookie!
+	private var cookie: HTTPCookie!
 
     override func setUp() {
         super.setUp()
@@ -23,12 +23,12 @@ class OwnerAndVIPCommentHandlerTest: XCTestCase {
     }
 
     func test01_allocation() {
-		let operatorCommentor:OwnerAndVIPCommentHandler = OwnerAndVIPCommentHandler(program:liveNumber, cookies:[cookie])
+		let operatorCommentor: OwnerAndVIPCommentHandler = OwnerAndVIPCommentHandler(program: liveNumber, cookies: [cookie])
 		XCTAssertNotNil(operatorCommentor, "operatorCommentor can not initialized")
     }
 
 	func test02_ownerComment() {
-		let operatorCommentor:OwnerAndVIPCommentHandler = OwnerAndVIPCommentHandler(program:liveNumber, cookies:[cookie])
+		let operatorCommentor: OwnerAndVIPCommentHandler = OwnerAndVIPCommentHandler(program: liveNumber, cookies: [cookie])
 		do {
 			try operatorCommentor.postOwnerComment(comment: "test comment", name: "Чайка", color: "green", isPerm: false)
 			Thread.sleep(forTimeInterval: 10)
