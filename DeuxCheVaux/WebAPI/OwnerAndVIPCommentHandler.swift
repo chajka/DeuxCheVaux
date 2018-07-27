@@ -9,7 +9,7 @@
 import Cocoa
 
 public enum Color {
-	enum normal:String {
+	enum normal: String {
 		case white = "white"
 		case red = "red"
 		case pink = "pink"
@@ -21,7 +21,7 @@ public enum Color {
 		case purple = "purple"
 		case black = "black"
 	}// end enum normal member usable comment color
-	enum vip:String {
+	enum vip: String {
 		case white = "white"
 		case red = "red"
 		case green = "green"
@@ -33,7 +33,7 @@ public enum Color {
 		case orange = "orange"
 		case niconicowhite = "niconicowhite"
 	}// end enum
-	enum premium:String {
+	enum premium: String {
 		case white = "white"
 		case red = "red"
 		case pink = "pink"
@@ -57,29 +57,29 @@ public enum Color {
 	}// end enum premium member usable comment color
 }// end usable color for comment
 
-public enum CommentPostError:Error {
+public enum CommentPostError: Error {
 	case EmptyComment
 	case NameUndefined
 	case InvalidColor(String)
 }// end public enum CommentPostError
 
-private let apiBase:String = "http://live2.nicovideo.jp/watch/"
+private let apiBase: String = "http: //live2.nicovideo.jp/watch/"
 
-private let StartStopStream:String = "/segment"
-private let operatorComment:String = "/operator_comment"
-private let programExtension:String = "/extension"
-private let vipComment:String = "/bsp_comment"
-private let statistics:String = "/statistics"
-private let contents:String = "/contents"
-private let mixing:String = "/mixing"
+private let StartStopStream: String = "/segment"
+private let operatorComment: String = "/operator_comment"
+private let programExtension: String = "/extension"
+private let vipComment: String = "/bsp_comment"
+private let statistics: String = "/statistics"
+private let contents: String = "/contents"
+private let mixing: String = "/mixing"
 
-private let perm:String = "/perm "
-private let clear:String = "/clear"
+private let perm: String = "/perm "
+private let clear: String = "/clear"
 
-private let ContentTypeKey:String = "Content-type"
-private let ContentTypeJSON:String = "application/json"
+private let ContentTypeKey: String = "Content-type"
+private let ContentTypeJSON: String = "application/json"
 
-enum HTTPMethod:String {
+enum HTTPMethod: String {
 	case get = "GET"
 	case post = "POST"
 	case put = "PUT"
@@ -87,16 +87,16 @@ enum HTTPMethod:String {
 }// end enum httpMehod
 
 enum StreamControl {
-	enum Key:String {
+	enum Key: String {
 		case state = "state"
 	}// end enum Key
-	enum Value:String {
+	enum Value: String {
 		case start = "on_air"
 		case end = "end"
 	}// end enum value
 }// end enum StreamControl
 
-enum CommentKeys:String {
+enum CommentKeys: String {
 	case comment = "text"
 	case name = "userName"
 	case color = "color"
@@ -104,23 +104,23 @@ enum CommentKeys:String {
 	case link = "link"
 }// end enum CommentKeys
 
-extension StreamControl.Key:StringEnum { }
-extension StreamControl.Value:StringEnum { }
-extension CommentKeys:StringEnum { }
+extension StreamControl.Key: StringEnum { }
+extension StreamControl.Value: StringEnum { }
+extension CommentKeys: StringEnum { }
 
 public class OwnerAndVIPCommentHandler: NSObject {
-	private let program:String
-	private let apiBaseString:String
-	private let cookies:Array<HTTPCookie>
-	private var request:URLRequest
-	private let session:URLSession
+	private let program: String
+	private let apiBaseString: String
+	private let cookies: Array<HTTPCookie>
+	private var request: URLRequest
+	private let session: URLSession
 
-	public init(program:String, cookies:Array<HTTPCookie>) {
+	public init(program: String, cookies: Array<HTTPCookie>) {
 		self.program = program
 		self.cookies = cookies
 		apiBaseString = apiBase + self.program
 		session = URLSession(configuration: URLSessionConfiguration.default)
-		let url:URL = URL(string: apiBaseString)!
+		let url: URL = URL(string: apiBaseString)!
 		request = URLRequest(url: url)
 		if (cookies.count > 0) {
 			request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
@@ -129,7 +129,7 @@ public class OwnerAndVIPCommentHandler: NSObject {
 
 	public func startStreaming() -> Void {
 		guard let url = URL(string: apiBaseString + StartStopStream) else { return }
-		var jsonDict:Dictionary<String, Any> = Dictionary()
+		var jsonDict: Dictionary<String, Any> = Dictionary()
 		jsonDict[StreamControl.Key.state] = StreamControl.Value.start.rawValue
 		do {
 			request.httpBody = try JSONSerialization.data(withJSONObject: jsonDict, options: [])
@@ -145,7 +145,7 @@ public class OwnerAndVIPCommentHandler: NSObject {
 	
 	public func stopStreaming() -> Void {
 		guard let url = URL(string: apiBaseString + StartStopStream) else { return }
-		var jsonDict:Dictionary<String, Any> = Dictionary()
+		var jsonDict: Dictionary<String, Any> = Dictionary()
 		jsonDict[StreamControl.Key.state] = StreamControl.Value.end.rawValue
 		do {
 			request.httpBody = try JSONSerialization.data(withJSONObject: jsonDict, options: [])
@@ -159,7 +159,7 @@ public class OwnerAndVIPCommentHandler: NSObject {
 		}// end try - catch JSONSerialization
 	}// end func startStreaming
 
-	public func postOwnerComment(comment:String, name:String = "", color:String = "white", isPerm:Bool = false) throws -> Void {
+	public func postOwnerComment(comment: String, name: String = "", color: String = "white", isPerm: Bool = false) throws -> Void {
 		if comment.isEmpty { throw CommentPostError.EmptyComment }
 		var commentToPost = String(comment)
 		if (comment.starts(with: clear)) {
@@ -168,7 +168,7 @@ public class OwnerAndVIPCommentHandler: NSObject {
 		}// end if comment is clear command
 		let commentColor = Color.premium(rawValue: color)
 		if commentColor == nil { throw CommentPostError.InvalidColor(color)}
-		var permanent:Bool = isPerm
+		var permanent: Bool = isPerm
 
 		guard let url = URL(string: apiBaseString + operatorComment) else { return }
 		if (comment.starts(with: perm)) {
@@ -176,7 +176,7 @@ public class OwnerAndVIPCommentHandler: NSObject {
 			commentToPost = String(comment.suffix(comment.count - perm.count))
 		}// end if comment include permanent command
 		
-		var jsonDict:Dictionary<String, Any> = Dictionary()
+		var jsonDict: Dictionary<String, Any> = Dictionary()
 		jsonDict[CommentKeys.comment] = commentToPost
 		if permanent { jsonDict[CommentKeys.perm] = true }
 		if !name.isEmpty { jsonDict[CommentKeys.name] = name }
@@ -187,7 +187,7 @@ public class OwnerAndVIPCommentHandler: NSObject {
 			request.url = url
 			request.httpMethod = HTTPMethod.put.rawValue
 			request.addValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
-			let task:URLSessionDataTask = session.dataTask(with: request)
+			let task: URLSessionDataTask = session.dataTask(with: request)
 			task.resume()
 		} catch {
 			print("Comment \(jsonDict) can not serialize")
@@ -200,18 +200,18 @@ public class OwnerAndVIPCommentHandler: NSObject {
 		request.httpMethod = HTTPMethod.delete.rawValue
 		request.setValue(nil, forHTTPHeaderField: ContentTypeKey)
 		request.httpBody = nil
-		let task:URLSessionDataTask = session.dataTask(with: request)
+		let task: URLSessionDataTask = session.dataTask(with: request)
 		task.resume()
 	}// end clearOwnerComment
 
-	public func postVIPComment(comment:String, name:String, color:String) throws -> Void {
-		let vipCommentColor:Color.vip? = Color.vip(rawValue: color)
+	public func postVIPComment(comment: String, name: String, color: String) throws -> Void {
+		let vipCommentColor: Color.vip? = Color.vip(rawValue: color)
 		if vipCommentColor == nil { throw CommentPostError.InvalidColor(color)}
 		if name.isEmpty { throw CommentPostError.NameUndefined }
 		if comment.isEmpty { throw CommentPostError.EmptyComment }
 
 		guard let url = URL(string: apiBaseString + vipComment) else { return }
-		var jsonDict:Dictionary<String, Any> = Dictionary()
+		var jsonDict: Dictionary<String, Any> = Dictionary()
 		jsonDict[CommentKeys.comment] = comment
 		jsonDict[CommentKeys.name] = name
 		jsonDict[CommentKeys.color] = color
@@ -220,7 +220,7 @@ public class OwnerAndVIPCommentHandler: NSObject {
 			request.url = url
 			request.httpMethod = HTTPMethod.post.rawValue
 			request.setValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
-			let task:URLSessionDataTask = session.dataTask(with: request)
+			let task: URLSessionDataTask = session.dataTask(with: request)
 			task.resume()
 		} catch {
 			print("Comment \(jsonDict) can not serialize")

@@ -9,7 +9,7 @@
 import XCTest
 
 class PublishStatusTest: XCTestCase {
-	private var cookie:HTTPCookie!
+	private var cookie: HTTPCookie!
 
     override func setUp() {
         super.setUp()
@@ -22,12 +22,12 @@ class PublishStatusTest: XCTestCase {
     }
 
     func test01_allocation() {
-		let publishStatus:PublishStatus = PublishStatus(program: liveNumber, cookies: [cookie])
+		let publishStatus: PublishStatus = PublishStatus(program: liveNumber, cookies: [cookie])
 		XCTAssertNotNil(publishStatus, "class PublishStatus initialize failed")
     }
 
 	func test01_properties() {
-		let publishStatus:PublishStatus = PublishStatus(program: liveNumber, cookies: [cookie])
+		let publishStatus: PublishStatus = PublishStatus(program: liveNumber, cookies: [cookie])
 		XCTAssertNotNil(publishStatus, "class PublishStatus initialize failed")
 
 		XCTAssertEqual(publishStatus.number, liveNumber, "property number is wrong")

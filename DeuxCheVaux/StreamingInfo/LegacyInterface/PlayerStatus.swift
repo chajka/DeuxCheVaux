@@ -9,53 +9,53 @@
 import Cocoa
 
 public struct XMLSocket {
-	var address:String
-	var port:Int
+	var address: String
+	var port: Int
 
-	static func == (lhs:XMLSocket, rhs:XMLSocket) -> Bool {
+	static func == (lhs: XMLSocket, rhs: XMLSocket) -> Bool {
 		return (lhs.address == rhs.address) && (lhs.port == rhs.port)
 	}// end func ==
 }// end struct XMLSocket
 
 public struct MessageServer {
-	var XMLSocet:XMLSocket
-	var WebSocket:URL?
-	var thread:String
+	var XMLSocet: XMLSocket
+	var WebSocket: URL?
+	var thread: String
 
-	static func == (lhs:MessageServer, rhs:MessageServer) -> Bool {
+	static func == (lhs: MessageServer, rhs: MessageServer) -> Bool {
 		return (lhs.XMLSocet == rhs.XMLSocet) && (lhs.WebSocket == rhs.WebSocket) && (lhs.thread == rhs.thread)
 	}// end func ==
 }// end struct MessageServer
 
-public enum SocialType:String {
+public enum SocialType: String {
 	case community = "community"
 	case channel = "channel"
 	case official = "official"
 
-	static func ~= (lhs:SocialType, rhs:String) -> Bool {
+	static func ~= (lhs: SocialType, rhs: String) -> Bool {
 		return lhs.rawValue == rhs ? true : false
 	}// end func ~=
 
-	static func == (lhs:SocialType, rhs:String) -> Bool {
+	static func == (lhs: SocialType, rhs: String) -> Bool {
 		return lhs.rawValue == rhs ? true : false
 	}// end func ==
 }// end enum SocialType
 
-public enum UserLanguage:String {
+public enum UserLanguage: String {
 	case ja = "ja-jp"
 	case zh = "zh-tw"
 	case en = "en-us"
 	
-	static func ~= (lhs:UserLanguage, rhs:String) -> Bool {
+	static func ~= (lhs: UserLanguage, rhs: String) -> Bool {
 		return lhs.rawValue == rhs ? true : false
 	}// end func ~=
 	
-	static func == (lhs:UserLanguage, rhs:String) -> Bool {
+	static func == (lhs: UserLanguage, rhs: String) -> Bool {
 		return lhs.rawValue == rhs ? true : false
 	}// end func ==
 }// end public enum UserLanguage
 
-enum PlayerStatusKey:String {
+enum PlayerStatusKey: String {
 	case programNumber = "id"
 	case programTitle = "title"
 	case programDescription = "description"
@@ -66,6 +66,7 @@ enum PlayerStatusKey:String {
 	case ownerName = "owner_name"
 	case baseTime = "base_time"
 	case startTime = "start_time"
+	case endTime = "end_time"
 	case listenerIdentifier = "user_id"
 	case listenerName = "nickname"
 	case listenerIsPremium = "is_premium"
@@ -76,62 +77,63 @@ enum PlayerStatusKey:String {
 	case msThread = "thread"
 	case messageServerList = "ms_list"
 	
-	static func ~= (lhs:PlayerStatusKey, rhs:String) -> Bool {
+	static func ~= (lhs: PlayerStatusKey, rhs: String) -> Bool {
 		return lhs.rawValue == rhs ? true : false
 	}// end func ~=
 }// end enum PlayerStatusKey
 
-let playerStatusFormat:String = "http://watch.live.nicovideo.jp/api/getplayerstatus?v="
+let playerStatusFormat: String = "http: //watch.live.nicovideo.jp/api/getplayerstatus?v="
 
 public class PlayerStatus: NSObject , XMLParserDelegate {
-	public var number:String!
-	public var title:String!
-	public var desc:String!
-	public var socialType:SocialType!
-	public var community:String!
-	public var isOwner:Bool!
-	public var ownerIdentifier:String!
-	public var ownerName:String!
-	public var baseTime:Date!
+	public var number: String!
+	public var title: String!
+	public var desc: String!
+	public var socialType: SocialType!
+	public var community: String!
+	public var isOwner: Bool!
+	public var ownerIdentifier: String!
+	public var ownerName: String!
+	public var baseTime: Date!
 	public var startTime: Date!
+	public var endTime: Date!
 
-	public var listenerIdentifier:String!
-	public var listenerName:String!
-	public var listenerIsPremium:Bool!
-	public var listenerLanguage:UserLanguage!
-	public var listenerIsVIP:Bool!
+	public var listenerIdentifier: String!
+	public var listenerName: String!
+	public var listenerIsPremium: Bool!
+	public var listenerLanguage: UserLanguage!
+	public var listenerIsVIP: Bool!
 
-	public var messageServers:Array<MessageServer> = Array()
+	public var messageServers: Array<MessageServer> = Array()
 
-	var userSession:Array<HTTPCookie>
-	var stringBuffer:String = String()
+	var userSession: Array<HTTPCookie>
+	var stringBuffer: String = String()
 
-	var server:String!
-	var port:Int!
-	var thread:String!
+	var server: String!
+	var port: Int!
+	var thread: String!
 
-	public init(program:String, cookies:Array<HTTPCookie>) {
+	public init(program: String, cookies: Array<HTTPCookie>) {
 		userSession = cookies
 		super.init()
 		getPlayerStatus(programNumber: program)
 	}// end init
 
-	func getPlayerStatus(programNumber:String) -> Void {
-		let playerStatusURLString:String = playerStatusFormat + programNumber
-		if let playerStatusURL:URL = URL(string: playerStatusURLString) {
-			let session:URLSession = URLSession(configuration: URLSessionConfiguration.default)
+	func getPlayerStatus(programNumber: String) -> Void {
+		let playerStatusURLString: String = playerStatusFormat + programNumber
+		if let playerStatusURL: URL = URL(string: playerStatusURLString) {
+			let session: URLSession = URLSession(configuration: URLSessionConfiguration.default)
 			var request = URLRequest(url: playerStatusURL)
-			var parser:XMLParser?
-			var recievieDone:Bool = false
+			var parser: XMLParser?
+			var recievieDone: Bool = false
 			request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: userSession)
-			let task:URLSessionDataTask = session.dataTask(with: request) { (dat, req, err) in
+			let task: URLSessionDataTask = session.dataTask(with: request) { (dat, req, err) in
 				guard let data = dat else { return }
 				parser = XMLParser(data: data)
 				recievieDone = true
 			}// end closure
 			task.resume()
 			while !recievieDone { Thread.sleep(forTimeInterval: 0.1) }
-			if let playerStatusParser:XMLParser = parser {
+			if let playerStatusParser: XMLParser = parser {
 				playerStatusParser.delegate = self
 				playerStatusParser.parse()
 			}
@@ -168,15 +170,21 @@ public class PlayerStatus: NSObject , XMLParserDelegate {
 		case .baseTime:
 			let baseTimeStr = stringBuffer
 			let baseTimeInterval = TimeInterval(baseTimeStr)
-			if let unixTime:TimeInterval = baseTimeInterval {
+			if let unixTime: TimeInterval = baseTimeInterval {
 				baseTime = Date(timeIntervalSince1970: unixTime)
 			}// end unix time string can convert unix time
 		case .startTime:
 			let startTimeStr = stringBuffer
 			let startTimeInterval = TimeInterval(startTimeStr)
-			if let unixTime:TimeInterval = startTimeInterval {
+			if let unixTime: TimeInterval = startTimeInterval {
 				startTime = Date(timeIntervalSince1970: unixTime)
-		}// end unix time string can convert unix time
+			}// end unix time string can convert unix time
+		case .startTime:
+			let endTimeStr = stringBuffer
+			let endTimeInterval = TimeInterval(endTimeStr)
+			if let unixTime: TimeInterval = endTimeInterval {
+				endTime = Date(timeIntervalSince1970: unixTime)
+			}// end unix time string can convert unix time
 		case .listenerIdentifier:
 			listenerIdentifier = String(stringBuffer)
 		case .listenerName:
@@ -199,13 +207,13 @@ public class PlayerStatus: NSObject , XMLParserDelegate {
 		case .msAddress:
 			server = String(stringBuffer)
 		case .msPort:
-			if let portNumber:Int = Int(stringBuffer) {
+			if let portNumber: Int = Int(stringBuffer) {
 				port = portNumber
 			}
 		case .msThread:
 			thread = String(stringBuffer)
-			let xmlserver:XMLSocket = XMLSocket(address: server, port: port)
-			let ms:MessageServer = MessageServer(XMLSocet: xmlserver, WebSocket: nil, thread: thread)
+			let xmlserver: XMLSocket = XMLSocket(address: server, port: port)
+			let ms: MessageServer = MessageServer(XMLSocet: xmlserver, WebSocket: nil, thread: thread)
 			messageServers.append(ms)
 		case .messageServerList:
 			messageServers.removeFirst()
@@ -214,7 +222,7 @@ public class PlayerStatus: NSObject , XMLParserDelegate {
 		}// end switch case by element name
 	}// end func parser didEndElement
 
-	public func parser(_ parser: XMLParser, didStartElement elementName: String, namespaceURI: String?, qualifiedName qName: String?, attributes attributeDict: [String : String] = [:]) {
+	public func parser(_ parser: XMLParser, didStartElement elementName: String, namespaceURI: String?, qualifiedName qName: String?, attributes attributeDict: [String : String] = [: ]) {
 		stringBuffer = String()
 	}// end function parser didStartElement
 

@@ -9,7 +9,7 @@
 import Foundation
 
 public protocol StringEnum {
-	var rawValue:String { get }
+	var rawValue: String { get }
 }
 
 public extension Dictionary {

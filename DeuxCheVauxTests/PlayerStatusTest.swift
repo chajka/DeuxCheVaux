@@ -10,7 +10,7 @@ import XCTest
 
 class PlayerStatusTest: XCTestCase {
 	
-	private var cookie:HTTPCookie!
+	private var cookie: HTTPCookie!
 	
 	override func setUp() {
 		super.setUp()
@@ -23,12 +23,12 @@ class PlayerStatusTest: XCTestCase {
 	}
 	
 	func test01_allocation() {
-		let playerstatus:PlayerStatus = PlayerStatus(program: liveNumber, cookies: [cookie])
+		let playerstatus: PlayerStatus = PlayerStatus(program: liveNumber, cookies: [cookie])
 		XCTAssertNotNil(playerstatus, "player status is nil")
 	}
 	
 	func test02_properties() {
-		let playerstatus:PlayerStatus = PlayerStatus(program: liveNumber, cookies: [cookie])
+		let playerstatus: PlayerStatus = PlayerStatus(program: liveNumber, cookies: [cookie])
 		XCTAssertNotNil(playerstatus, "player status is nil")
 		XCTAssertNotNil(playerstatus.number, "property programNumber is nil")
 		XCTAssertNotNil(playerstatus.title, "property title is nil")
