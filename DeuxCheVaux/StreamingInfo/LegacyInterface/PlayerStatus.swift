@@ -65,6 +65,7 @@ enum PlayerStatusKey:String {
 	case ownerIdentifier = "owner_id"
 	case ownerName = "owner_name"
 	case baseTime = "base_time"
+	case startTime = "start_time"
 	case listenerIdentifier = "user_id"
 	case listenerName = "nickname"
 	case listenerIsPremium = "is_premium"
@@ -92,6 +93,7 @@ public class PlayerStatus: NSObject , XMLParserDelegate {
 	public var ownerIdentifier:String!
 	public var ownerName:String!
 	public var baseTime:Date!
+	public var startTime: Date!
 
 	public var listenerIdentifier:String!
 	public var listenerName:String!
@@ -169,6 +171,12 @@ public class PlayerStatus: NSObject , XMLParserDelegate {
 			if let unixTime:TimeInterval = baseTimeInterval {
 				baseTime = Date(timeIntervalSince1970: unixTime)
 			}// end unix time string can convert unix time
+		case .startTime:
+			let startTimeStr = stringBuffer
+			let startTimeInterval = TimeInterval(startTimeStr)
+			if let unixTime:TimeInterval = startTimeInterval {
+				startTime = Date(timeIntervalSince1970: unixTime)
+		}// end unix time string can convert unix time
 		case .listenerIdentifier:
 			listenerIdentifier = String(stringBuffer)
 		case .listenerName:
