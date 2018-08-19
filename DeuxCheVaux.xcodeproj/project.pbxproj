@@ -71,6 +71,13 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		C6129FC021294D0400B727F8 /* NewInterface */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = NewInterface;
+			sourceTree = "<group>";
+		};
 		C633F86420DFF4F300C1B265 /* WebAPI */ = {
 			isa = PBXGroup;
 			children = (
@@ -133,6 +140,7 @@
 		C68BA42D20DEC7E700684ADF /* StreamingInfo */ = {
 			isa = PBXGroup;
 			children = (
+				C6129FC021294D0400B727F8 /* NewInterface */,
 				C68BA42E20DEC81400684ADF /* LegacyInterface */,
 			);
 			path = StreamingInfo;
