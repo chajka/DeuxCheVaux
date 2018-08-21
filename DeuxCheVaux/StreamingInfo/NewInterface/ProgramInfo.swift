@@ -25,15 +25,15 @@ public enum ProgramStatus: String {
 }// end enum ProgramStatus
 
 public struct Social {
-	let name: String
-	let identifier: String
-	let level: Int
-	let type: SocialType
+	public let name: String
+	public let identifier: String
+	public let level: Int
+	public let type: SocialType
 }// end struct Social
 
 public struct Broadcaster {
-	let name: String
-	let identifier: String
+	public let name: String
+	public let identifier: String
 }// end Struct Broadcaster
 
 private enum RoomKeys: String {
@@ -95,15 +95,15 @@ extension JSONKey.room: StringEnum { }
 public class ProgramInfo: NSObject {
 		// MARK:   Outlets
 		// MARK: - Properties
-	private(set) var social: Social!
-	private(set) var status: ProgramStatus!
-	private(set) var isMemberOnly: Bool!
-	private(set) var categories: Array<String>!
-	private(set) var startTime: Date!
-	private(set) var programDesctiption: NSAttributedString!
-	private(set) var broadcaster: Broadcaster!
-	private(set) var canNicoAd: Bool!
-	private(set) var servers: Array<MessageServer> = Array()
+	public private(set) var social: Social!
+	public private(set) var status: ProgramStatus!
+	public private(set) var isMemberOnly: Bool!
+	public private(set) var categories: Array<String>!
+	public private(set) var startTime: Date!
+	public private(set) var programDesctiption: NSAttributedString!
+	public private(set) var broadcaster: Broadcaster!
+	public private(set) var canNicoAd: Bool!
+	public private(set) var servers: Array<MessageServer> = Array()
 
 		// MARK: - Member variables
 	let userSession: Array<HTTPCookie>
@@ -160,7 +160,8 @@ public class ProgramInfo: NSObject {
 		self.startTime = Date(timeIntervalSince1970: infomation[JSONKey.data.beginAt] as? TimeInterval ?? Date().timeIntervalSince1970)
 		if let descriptionString = (infomation[JSONKey.data.description] as? String)?.data(using: .utf8) {
 			do {
-				programDesctiption = try NSAttributedString(data: descriptionString, options: [NSAttributedString.DocumentReadingOptionKey.documentType : NSAttributedString.DocumentType.html], documentAttributes: nil)
+				let readingOptions: Dictionary<NSAttributedString.DocumentReadingOptionKey, Any> = [.documentType: NSAttributedString.DocumentType.html, .textEncodingName: "UTF-8"]
+				programDesctiption = try NSAttributedString(data: descriptionString, options: readingOptions, documentAttributes: nil)
 			} catch {
 				programDesctiption = NSAttributedString(string: (infomation[JSONKey.data.description] as? String ?? ""))
 			}
@@ -203,7 +204,7 @@ public class ProgramInfo: NSObject {
 			parseServers(information: data)
  		}// end if URL can allocated
 
-		return ProgramInfoError.NoProgramError
+		return ProgramInfoError.NoError
 	}// end getProgramInfomation
 
 		// MARK: - Delegates
