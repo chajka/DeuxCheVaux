@@ -32,8 +32,8 @@ public struct Social {
 }// end struct Social
 
 public struct Broadcaster {
-	let name: String
-	let identifier: String
+	public let name: String
+	public let identifier: String
 }// end Struct Broadcaster
 
 private enum RoomKeys: String {
