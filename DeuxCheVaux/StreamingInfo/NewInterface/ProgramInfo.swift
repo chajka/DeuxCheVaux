@@ -25,10 +25,10 @@ public enum ProgramStatus: String {
 }// end enum ProgramStatus
 
 public struct Social {
-	let name: String
-	let identifier: String
-	let level: Int
-	let type: SocialType
+	public let name: String
+	public let identifier: String
+	public let level: Int
+	public let type: SocialType
 }// end struct Social
 
 public struct Broadcaster {
