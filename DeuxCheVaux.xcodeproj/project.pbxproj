@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C6129FC221294E3500B727F8 /* ProgramInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6129FC121294E3500B727F8 /* ProgramInfo.swift */; };
+		C6129FC321294E3500B727F8 /* ProgramInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6129FC121294E3500B727F8 /* ProgramInfo.swift */; };
+		C6129FC521294E5F00B727F8 /* ProgramInfoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6129FC421294E5F00B727F8 /* ProgramInfoTests.swift */; };
 		C633F86220DFE35400C1B265 /* PublishStatusTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = C633F86120DFE35400C1B265 /* PublishStatusTest.swift */; };
 		C633F86620DFF59D00C1B265 /* OwnerAndVIPCommentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = C633F86520DFF59D00C1B265 /* OwnerAndVIPCommentHandler.swift */; };
 		C633F86720DFF59D00C1B265 /* OwnerAndVIPCommentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = C633F86520DFF59D00C1B265 /* OwnerAndVIPCommentHandler.swift */; };
@@ -36,6 +39,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		C6129FC121294E3500B727F8 /* ProgramInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgramInfo.swift; sourceTree = "<group>"; };
+		C6129FC421294E5F00B727F8 /* ProgramInfoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgramInfoTests.swift; sourceTree = "<group>"; };
 		C633F86120DFE35400C1B265 /* PublishStatusTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PublishStatusTest.swift; sourceTree = "<group>"; };
 		C633F86520DFF59D00C1B265 /* OwnerAndVIPCommentHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OwnerAndVIPCommentHandler.swift; sourceTree = "<group>"; };
 		C633F86820DFF64A00C1B265 /* Dictionary+StringEnum.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Dictionary+StringEnum.swift"; sourceTree = "<group>"; };
@@ -71,6 +76,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		C6129FC021294D0400B727F8 /* NewInterface */ = {
+			isa = PBXGroup;
+			children = (
+				C6129FC121294E3500B727F8 /* ProgramInfo.swift */,
+			);
+			path = NewInterface;
+			sourceTree = "<group>";
+		};
 		C633F86420DFF4F300C1B265 /* WebAPI */ = {
 			isa = PBXGroup;
 			children = (
@@ -125,6 +138,7 @@
 				C633F86120DFE35400C1B265 /* PublishStatusTest.swift */,
 				C633F86C20DFFA1800C1B265 /* OwnerAndVIPCommentHandlerTest.swift */,
 				C687B8EF20E17EEC006784B1 /* XMLSocketCommentVectorTest.swift */,
+				C6129FC421294E5F00B727F8 /* ProgramInfoTests.swift */,
 				C68BA41F20DC445900684ADF /* Info.plist */,
 			);
 			path = DeuxCheVauxTests;
@@ -133,6 +147,7 @@
 		C68BA42D20DEC7E700684ADF /* StreamingInfo */ = {
 			isa = PBXGroup;
 			children = (
+				C6129FC021294D0400B727F8 /* NewInterface */,
 				C68BA42E20DEC81400684ADF /* LegacyInterface */,
 			);
 			path = StreamingInfo;
@@ -259,6 +274,7 @@
 				C687B8ED20E17ECD006784B1 /* XMLSocketCommentVector.swift in Sources */,
 				C68BA43020DEC84700684ADF /* PlayerStatus.swift in Sources */,
 				C68BA43520DFD56900684ADF /* PublishStatus.swift in Sources */,
+				C6129FC221294E3500B727F8 /* ProgramInfo.swift in Sources */,
 				C633F86920DFF64A00C1B265 /* Dictionary+StringEnum.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -267,12 +283,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C6129FC521294E5F00B727F8 /* ProgramInfoTests.swift in Sources */,
 				C633F86D20DFFA1800C1B265 /* OwnerAndVIPCommentHandlerTest.swift in Sources */,
 				C633F86720DFF59D00C1B265 /* OwnerAndVIPCommentHandler.swift in Sources */,
 				C68BA43320DF64AE00684ADF /* PlayerStatusTest.swift in Sources */,
 				C687B8EE20E17ECD006784B1 /* XMLSocketCommentVector.swift in Sources */,
 				C633F86E20DFFB6300C1B265 /* Dictionary+StringEnum.swift in Sources */,
 				C68BA43620DFD56900684ADF /* PublishStatus.swift in Sources */,
+				C6129FC321294E3500B727F8 /* ProgramInfo.swift in Sources */,
 				C687B8F020E17EEC006784B1 /* XMLSocketCommentVectorTest.swift in Sources */,
 				C633F86220DFE35400C1B265 /* PublishStatusTest.swift in Sources */,
 				C68BA43120DEC84700684ADF /* PlayerStatus.swift in Sources */,
