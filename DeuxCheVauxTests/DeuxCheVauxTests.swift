@@ -9,8 +9,8 @@
 import XCTest
 @testable import DeuxCheVaux
 
-let liveNumber: String = "lv314035986"
-let user_session_value: String = "user_session_6347612_a0c800610aa6bbe0f20ad9edb3ab94d3b8b0b369f96eb0fcfcf70f1ed69e097a"
+let liveNumber: String = "lv315190664"
+let user_session_value: String = "user_session_6347612_56a3532d995eafb79a795f7ad41dd7c6df0994e3012e96be5371de547fd0a8b1"
 
 class DeuxCheVauxTests: XCTestCase {
 
