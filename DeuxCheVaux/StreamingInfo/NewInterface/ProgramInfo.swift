@@ -11,7 +11,44 @@ import Cocoa
 let ProgramInfoFormat: String = "http://live2.nicovideo.jp/watch/"
 let ProgramInfoSuffix: String = "/programinfo"
 
-public enum JSONKey {
+public enum ProgramInfoError: Error {
+	case NoError
+	case NoProgramError
+	case URLResponseError
+	case JSONParseError
+}// end enum ProgramInfoError
+
+public enum ProgramStatus: String {
+	case test = "test"
+	case onAir = "onAir"
+	case ended = "ended"
+}// end enum ProgramStatus
+
+public struct Social {
+	let name: String
+	let identifier: String
+	let level: Int
+	let type: SocialType
+}// end struct Social
+
+public struct Broadcaster {
+	let name: String
+	let identifier: String
+}// end Struct Broadcaster
+
+private enum RoomKeys: String {
+	case name = "name"
+	case webSocket = "webSocketUri"
+	case xmlSocket = "xmlSocketUri"
+	case thread = "threadId"
+	case id = "id"
+
+	static func ~= (lhs: RoomKeys, rhs: String) -> Bool {
+		return lhs.rawValue ~= rhs ? true : false
+	}// end func ~=
+}// end enum RoomKey
+
+private enum JSONKey {
 	enum toplevel: String {
 		case meta = "meta"
 		case data = "data"
@@ -55,44 +92,7 @@ extension JSONKey.social: StringEnum { }
 extension JSONKey.broadcaster: StringEnum { }
 extension JSONKey.room: StringEnum { }
 
-public enum ProgramInfoError: Error {
-	case NoError
-	case NoProgramError
-	case URLResponseError
-	case JSONParseError
-}// end enum ProgramInfoError
-
-public enum ProgramStatus: String {
-	case test = "test"
-	case onAir = "onAir"
-	case ended = "ended"
-}// end enum ProgramStatus
-
-public struct Social {
-	let name: String
-	let identifier: String
-	let level: Int
-	let type: SocialType
-}// end struct Social
-
-public struct Broadcaster {
-	let name: String
-	let identifier: String
-}// end Struct Broadcaster
-
-private enum RoomKeys: String {
-	case name = "name"
-	case webSocket = "webSocketUri"
-	case xmlSocket = "xmlSocketUri"
-	case thread = "threadId"
-	case id = "id"
-
-	static func ~= (lhs: RoomKeys, rhs: String) -> Bool {
-		return lhs.rawValue ~= rhs ? true : false
-	}// end func ~=
-}// end enum RoomKey
-
-class ProgramInfo: NSObject {
+public class ProgramInfo: NSObject {
 		// MARK:   Outlets
 		// MARK: - Properties
 	private(set) var social: Social!
@@ -109,7 +109,7 @@ class ProgramInfo: NSObject {
 	let userSession: Array<HTTPCookie>
 
 		// MARK: - Constructor/Destructor
-	init (programNumber: String, cookies: [HTTPCookie]) throws {
+	public init (programNumber: String, cookies: [HTTPCookie]) throws {
 		userSession = cookies
 		super.init()
 		let result: ProgramInfoError = getProgramInfomation(programNumber: programNumber)
