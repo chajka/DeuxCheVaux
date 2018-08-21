@@ -160,7 +160,8 @@ public class ProgramInfo: NSObject {
 		self.startTime = Date(timeIntervalSince1970: infomation[JSONKey.data.beginAt] as? TimeInterval ?? Date().timeIntervalSince1970)
 		if let descriptionString = (infomation[JSONKey.data.description] as? String)?.data(using: .utf8) {
 			do {
-				programDesctiption = try NSAttributedString(data: descriptionString, options: [NSAttributedString.DocumentReadingOptionKey.documentType : NSAttributedString.DocumentType.html], documentAttributes: nil)
+				let readingOptions: Dictionary<NSAttributedString.DocumentReadingOptionKey, Any> = [.documentType: NSAttributedString.DocumentType.html, .textEncodingName: "UTF-8"]
+				programDesctiption = try NSAttributedString(data: descriptionString, options: readingOptions, documentAttributes: nil)
 			} catch {
 				programDesctiption = NSAttributedString(string: (infomation[JSONKey.data.description] as? String ?? ""))
 			}
