@@ -95,15 +95,15 @@ extension JSONKey.room: StringEnum { }
 public class ProgramInfo: NSObject {
 		// MARK:   Outlets
 		// MARK: - Properties
-	private(set) var social: Social!
-	private(set) var status: ProgramStatus!
-	private(set) var isMemberOnly: Bool!
-	private(set) var categories: Array<String>!
-	private(set) var startTime: Date!
-	private(set) var programDesctiption: NSAttributedString!
-	private(set) var broadcaster: Broadcaster!
-	private(set) var canNicoAd: Bool!
-	private(set) var servers: Array<MessageServer> = Array()
+	public private(set) var social: Social!
+	public private(set) var status: ProgramStatus!
+	public private(set) var isMemberOnly: Bool!
+	public private(set) var categories: Array<String>!
+	public private(set) var startTime: Date!
+	public private(set) var programDesctiption: NSAttributedString!
+	public private(set) var broadcaster: Broadcaster!
+	public private(set) var canNicoAd: Bool!
+	public private(set) var servers: Array<MessageServer> = Array()
 
 		// MARK: - Member variables
 	let userSession: Array<HTTPCookie>
@@ -203,7 +203,7 @@ public class ProgramInfo: NSObject {
 			parseServers(information: data)
  		}// end if URL can allocated
 
-		return ProgramInfoError.NoProgramError
+		return ProgramInfoError.NoError
 	}// end getProgramInfomation
 
 		// MARK: - Delegates
