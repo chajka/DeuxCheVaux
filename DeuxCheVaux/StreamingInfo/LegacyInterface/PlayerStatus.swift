@@ -87,26 +87,26 @@ enum PlayerStatusKey: String {
 let playerStatusFormat: String = "http://watch.live.nicovideo.jp/api/getplayerstatus?v="
 
 public class PlayerStatus: NSObject , XMLParserDelegate {
-	public var number: String!
-	public var title: String!
-	public var desc: String!
-	public var socialType: SocialType!
-	public var community: String!
-	public var isOwner: Bool!
-	public var ownerIdentifier: String!
-	public var ownerName: String!
-	public var baseTime: Date!
-	public var startTime: Date!
-	public var endTime: Date!
-	public var communityThumbnaiURL: URL!
+	public private(set) var number: String!
+	public private(set) var title: String!
+	public private(set) var desc: String!
+	public private(set) var socialType: SocialType!
+	public private(set) var community: String!
+	public private(set) var isOwner: Bool!
+	public private(set) var ownerIdentifier: String!
+	public private(set) var ownerName: String!
+	public private(set) var baseTime: Date!
+	public private(set) var startTime: Date!
+	public private(set) var endTime: Date!
+	public private(set) var communityThumbnaiURL: URL!
 
-	public var listenerIdentifier: String!
-	public var listenerName: String!
-	public var listenerIsPremium: Bool!
-	public var listenerLanguage: UserLanguage!
-	public var listenerIsVIP: Bool!
+	public private(set) var listenerIdentifier: String!
+	public private(set) var listenerName: String!
+	public private(set) var listenerIsPremium: Bool!
+	public private(set) var listenerLanguage: UserLanguage!
+	public private(set) var listenerIsVIP: Bool!
 
-	public var messageServers: Array<MessageServer> = Array()
+	public private(set) var messageServers: Array<MessageServer> = Array()
 
 	var userSession: Array<HTTPCookie>
 	var stringBuffer: String = String()
