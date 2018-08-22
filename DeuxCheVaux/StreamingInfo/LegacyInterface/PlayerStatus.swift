@@ -9,8 +9,8 @@
 import Cocoa
 
 public struct XMLSocket {
-	var address: String
-	var port: Int
+	public var address: String
+	public var port: Int
 
 	static func == (lhs: XMLSocket, rhs: XMLSocket) -> Bool {
 		return (lhs.address == rhs.address) && (lhs.port == rhs.port)
