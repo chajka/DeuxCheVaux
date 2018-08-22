@@ -87,41 +87,49 @@ enum PlayerStatusKey: String {
 let playerStatusFormat: String = "http://watch.live.nicovideo.jp/api/getplayerstatus?v="
 
 public class PlayerStatus: NSObject , XMLParserDelegate {
-	public var number: String!
-	public var title: String!
-	public var desc: String!
-	public var socialType: SocialType!
-	public var community: String!
-	public var isOwner: Bool!
-	public var ownerIdentifier: String!
-	public var ownerName: String!
-	public var baseTime: Date!
-	public var startTime: Date!
-	public var endTime: Date!
-	public var communityThumbnaiURL: URL!
-
-	public var listenerIdentifier: String!
-	public var listenerName: String!
-	public var listenerIsPremium: Bool!
-	public var listenerLanguage: UserLanguage!
-	public var listenerIsVIP: Bool!
-
-	public var messageServers: Array<MessageServer> = Array()
-
-	var userSession: Array<HTTPCookie>
-	var stringBuffer: String = String()
-
-	var server: String!
-	var port: Int!
-	var thread: String!
-
+		// MARK:   Outlets
+		// MARK: - Properties
+	public private(set) var number: String!
+	public private(set) var title: String!
+	public private(set) var desc: String!
+	public private(set) var socialType: SocialType!
+	public private(set) var community: String!
+	public private(set) var isOwner: Bool!
+	public private(set) var ownerIdentifier: String!
+	public private(set) var ownerName: String!
+	public private(set) var baseTime: Date!
+	public private(set) var startTime: Date!
+	public private(set) var endTime: Date!
+	public private(set) var communityThumbnaiURL: URL!
+	
+	public private(set) var listenerIdentifier: String!
+	public private(set) var listenerName: String!
+	public private(set) var listenerIsPremium: Bool!
+	public private(set) var listenerLanguage: UserLanguage!
+	public private(set) var listenerIsVIP: Bool!
+	
+	public private(set) var messageServers: Array<MessageServer> = Array()
+	
+		// MARK: - Member variables
+	private var userSession: Array<HTTPCookie>
+	private var stringBuffer: String = String()
+	
+	private var server: String!
+	private var port: Int!
+	private var thread: String!
+	
+		// MARK: - Constructor/Destructor
 	public init(program: String, cookies: Array<HTTPCookie>) {
 		userSession = cookies
 		super.init()
 		getPlayerStatus(programNumber: program)
 	}// end init
 
-	func getPlayerStatus(programNumber: String) -> Void {
+		// MARK: - Override
+		// MARK: - Actions
+		// MARK: - Public methods
+		// MARK: - Private methods
+	private func getPlayerStatus(programNumber: String) -> Void {
 		let playerStatusURLString: String = playerStatusFormat + programNumber
 		if let playerStatusURL: URL = URL(string: playerStatusURLString) {
 			let session: URLSession = URLSession(configuration: URLSessionConfiguration.default)
@@ -143,6 +151,8 @@ public class PlayerStatus: NSObject , XMLParserDelegate {
 		}// end if url is not empty
 	}// end function getPlayerStatus
 
+		// MARK: - Delegates
+			// MARK: NSXMLParserDelegate
 	public func parser(_ parser: XMLParser, didEndElement elementName: String, namespaceURI: String?, qualifiedName qName: String?) {
 		switch elementName {
 		case .programNumber:
