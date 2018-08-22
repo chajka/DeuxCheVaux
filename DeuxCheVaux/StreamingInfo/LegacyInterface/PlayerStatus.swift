@@ -18,10 +18,10 @@ public struct XMLSocket {
 }// end struct XMLSocket
 
 public struct MessageServer {
-	var XMLSocet: XMLSocket
-	var WebSocket: URL?
-	var thread: String
-	var name: String?
+	public var XMLSocet: XMLSocket
+	public var WebSocket: URL?
+	public var thread: String
+	public var name: String?
 
 	static func == (lhs: MessageServer, rhs: MessageServer) -> Bool {
 		return (lhs.XMLSocet == rhs.XMLSocet) && (lhs.WebSocket == rhs.WebSocket) && (lhs.thread == rhs.thread)
