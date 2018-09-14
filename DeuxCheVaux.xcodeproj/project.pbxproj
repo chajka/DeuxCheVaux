@@ -10,6 +10,8 @@
 		C6129FC221294E3500B727F8 /* ProgramInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6129FC121294E3500B727F8 /* ProgramInfo.swift */; };
 		C6129FC321294E3500B727F8 /* ProgramInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6129FC121294E3500B727F8 /* ProgramInfo.swift */; };
 		C6129FC521294E5F00B727F8 /* ProgramInfoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6129FC421294E5F00B727F8 /* ProgramInfoTests.swift */; };
+		C61E8F91214BC7390078550C /* VideoInformation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C61E8F90214BC7390078550C /* VideoInformation.swift */; };
+		C61E8F92214BC7390078550C /* VideoInformation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C61E8F90214BC7390078550C /* VideoInformation.swift */; };
 		C633F86220DFE35400C1B265 /* PublishStatusTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = C633F86120DFE35400C1B265 /* PublishStatusTest.swift */; };
 		C633F86620DFF59D00C1B265 /* OwnerAndVIPCommentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = C633F86520DFF59D00C1B265 /* OwnerAndVIPCommentHandler.swift */; };
 		C633F86720DFF59D00C1B265 /* OwnerAndVIPCommentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = C633F86520DFF59D00C1B265 /* OwnerAndVIPCommentHandler.swift */; };
@@ -41,6 +43,7 @@
 /* Begin PBXFileReference section */
 		C6129FC121294E3500B727F8 /* ProgramInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgramInfo.swift; sourceTree = "<group>"; };
 		C6129FC421294E5F00B727F8 /* ProgramInfoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgramInfoTests.swift; sourceTree = "<group>"; };
+		C61E8F90214BC7390078550C /* VideoInformation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoInformation.swift; sourceTree = "<group>"; };
 		C633F86120DFE35400C1B265 /* PublishStatusTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PublishStatusTest.swift; sourceTree = "<group>"; };
 		C633F86520DFF59D00C1B265 /* OwnerAndVIPCommentHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OwnerAndVIPCommentHandler.swift; sourceTree = "<group>"; };
 		C633F86820DFF64A00C1B265 /* Dictionary+StringEnum.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Dictionary+StringEnum.swift"; sourceTree = "<group>"; };
@@ -84,6 +87,22 @@
 			path = NewInterface;
 			sourceTree = "<group>";
 		};
+		C61E8F88214BC6B00078550C /* VideoInformation */ = {
+			isa = PBXGroup;
+			children = (
+				C61E8F89214BC6D40078550C /* LegacyInterface */,
+			);
+			path = VideoInformation;
+			sourceTree = "<group>";
+		};
+		C61E8F89214BC6D40078550C /* LegacyInterface */ = {
+			isa = PBXGroup;
+			children = (
+				C61E8F90214BC7390078550C /* VideoInformation.swift */,
+			);
+			path = LegacyInterface;
+			sourceTree = "<group>";
+		};
 		C633F86420DFF4F300C1B265 /* WebAPI */ = {
 			isa = PBXGroup;
 			children = (
@@ -125,6 +144,7 @@
 				C687B8EB20E17E22006784B1 /* SocketCommunication */,
 				C633F86420DFF4F300C1B265 /* WebAPI */,
 				C68BA42D20DEC7E700684ADF /* StreamingInfo */,
+				C61E8F88214BC6B00078550C /* VideoInformation */,
 				C68BA41320DC445900684ADF /* Info.plist */,
 			);
 			path = DeuxCheVaux;
@@ -227,6 +247,7 @@
 					};
 					C68BA41720DC445900684ADF = {
 						CreatedOnToolsVersion = 9.4.1;
+						LastSwiftMigration = 0940;
 					};
 				};
 			};
@@ -272,6 +293,7 @@
 			files = (
 				C633F86620DFF59D00C1B265 /* OwnerAndVIPCommentHandler.swift in Sources */,
 				C687B8ED20E17ECD006784B1 /* XMLSocketCommentVector.swift in Sources */,
+				C61E8F91214BC7390078550C /* VideoInformation.swift in Sources */,
 				C68BA43020DEC84700684ADF /* PlayerStatus.swift in Sources */,
 				C68BA43520DFD56900684ADF /* PublishStatus.swift in Sources */,
 				C6129FC221294E3500B727F8 /* ProgramInfo.swift in Sources */,
@@ -291,6 +313,7 @@
 				C633F86E20DFFB6300C1B265 /* Dictionary+StringEnum.swift in Sources */,
 				C68BA43620DFD56900684ADF /* PublishStatus.swift in Sources */,
 				C6129FC321294E3500B727F8 /* ProgramInfo.swift in Sources */,
+				C61E8F92214BC7390078550C /* VideoInformation.swift in Sources */,
 				C687B8F020E17EEC006784B1 /* XMLSocketCommentVectorTest.swift in Sources */,
 				C633F86220DFE35400C1B265 /* PublishStatusTest.swift in Sources */,
 				C68BA43120DEC84700684ADF /* PlayerStatus.swift in Sources */,
@@ -489,6 +512,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = G9SC48NK42;
@@ -500,6 +524,8 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = tv.from.chajka.DeuxCheVauxTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "DeuxCheVaux/VideoInformation/LegacyInterface/DeuxCheVauxTests-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 4.0;
 			};
 			name = Debug;
@@ -508,6 +534,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = G9SC48NK42;
@@ -519,6 +546,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = tv.from.chajka.DeuxCheVauxTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "DeuxCheVaux/VideoInformation/LegacyInterface/DeuxCheVauxTests-Bridging-Header.h";
 				SWIFT_VERSION = 4.0;
 			};
 			name = Release;
