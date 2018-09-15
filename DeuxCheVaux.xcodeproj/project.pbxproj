@@ -528,7 +528,6 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = tv.from.chajka.DeuxCheVauxTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_OBJC_BRIDGING_HEADER = "DeuxCheVaux/VideoInformation/LegacyInterface/DeuxCheVauxTests-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 4.0;
 			};
@@ -550,7 +549,6 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = tv.from.chajka.DeuxCheVauxTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_OBJC_BRIDGING_HEADER = "DeuxCheVaux/VideoInformation/LegacyInterface/DeuxCheVauxTests-Bridging-Header.h";
 				SWIFT_VERSION = 4.0;
 			};
 			name = Release;

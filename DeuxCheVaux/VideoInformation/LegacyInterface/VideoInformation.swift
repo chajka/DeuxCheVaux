@@ -54,6 +54,7 @@ public class VideoInformation: NSObject, XMLParserDelegate {
 		// MARK: - Public methods\
 	public func parse () throws -> Bool {
 		loadData()
+		parser.delegate = self
 		let result: Bool = parser.parse()
 
 		return result

@@ -20,9 +20,23 @@ class VideoInformationTests: XCTestCase {
         super.tearDown()
     }
 
-    func testExample() {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
+    func test01_allocation() {
+		let sm9: VideoInformation = VideoInformation(videoNumber: "sm9")
+		XCTAssertNotNil(sm9, "video sm9’s allocation failed")
+		XCTAssertNoThrow(try sm9.parse(), "video information for sm9 throw assert")
+		do {
+			let success: Bool = try sm9.parse()
+
+			XCTAssertNotNil(sm9.time, "video title fetch failed")
+			XCTAssertNotNil(sm9.videoDescription, "video description fetch failed")
+			XCTAssertNotNil(sm9.time, "video play time fetch failed")
+			XCTAssertGreaterThan(sm9.commentCount, 0, "comment count fetch failed")
+			XCTAssertGreaterThan(sm9.myListCount, 0, "my list count fetch failed")
+			XCTAssertGreaterThan(sm9.viewCount, 0, "view count fetch failed")
+			XCTAssertGreaterThan(sm9.tags.count, 0, "tags fetch failed")
+		} catch {
+			XCTAssert(false, "throw is happend")
+		}
     }
 
     func testPerformanceExample() {
