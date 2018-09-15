@@ -27,6 +27,7 @@ class VideoInformationTests: XCTestCase {
 		do {
 			let success: Bool = try sm9.parse()
 
+			XCTAssertTrue(success, "parse failed")
 			XCTAssertNotNil(sm9.time, "video title fetch failed")
 			XCTAssertNotNil(sm9.videoDescription, "video description fetch failed")
 			XCTAssertNotNil(sm9.time, "video play time fetch failed")
