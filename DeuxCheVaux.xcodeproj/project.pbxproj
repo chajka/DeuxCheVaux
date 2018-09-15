@@ -12,6 +12,7 @@
 		C6129FC521294E5F00B727F8 /* ProgramInfoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6129FC421294E5F00B727F8 /* ProgramInfoTests.swift */; };
 		C61E8F91214BC7390078550C /* VideoInformation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C61E8F90214BC7390078550C /* VideoInformation.swift */; };
 		C61E8F92214BC7390078550C /* VideoInformation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C61E8F90214BC7390078550C /* VideoInformation.swift */; };
+		C61E8F94214CB4580078550C /* VideoInformationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C61E8F93214CB4580078550C /* VideoInformationTests.swift */; };
 		C633F86220DFE35400C1B265 /* PublishStatusTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = C633F86120DFE35400C1B265 /* PublishStatusTest.swift */; };
 		C633F86620DFF59D00C1B265 /* OwnerAndVIPCommentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = C633F86520DFF59D00C1B265 /* OwnerAndVIPCommentHandler.swift */; };
 		C633F86720DFF59D00C1B265 /* OwnerAndVIPCommentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = C633F86520DFF59D00C1B265 /* OwnerAndVIPCommentHandler.swift */; };
@@ -44,6 +45,7 @@
 		C6129FC121294E3500B727F8 /* ProgramInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgramInfo.swift; sourceTree = "<group>"; };
 		C6129FC421294E5F00B727F8 /* ProgramInfoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgramInfoTests.swift; sourceTree = "<group>"; };
 		C61E8F90214BC7390078550C /* VideoInformation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoInformation.swift; sourceTree = "<group>"; };
+		C61E8F93214CB4580078550C /* VideoInformationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoInformationTests.swift; sourceTree = "<group>"; };
 		C633F86120DFE35400C1B265 /* PublishStatusTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PublishStatusTest.swift; sourceTree = "<group>"; };
 		C633F86520DFF59D00C1B265 /* OwnerAndVIPCommentHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OwnerAndVIPCommentHandler.swift; sourceTree = "<group>"; };
 		C633F86820DFF64A00C1B265 /* Dictionary+StringEnum.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Dictionary+StringEnum.swift"; sourceTree = "<group>"; };
@@ -159,6 +161,7 @@
 				C633F86C20DFFA1800C1B265 /* OwnerAndVIPCommentHandlerTest.swift */,
 				C687B8EF20E17EEC006784B1 /* XMLSocketCommentVectorTest.swift */,
 				C6129FC421294E5F00B727F8 /* ProgramInfoTests.swift */,
+				C61E8F93214CB4580078550C /* VideoInformationTests.swift */,
 				C68BA41F20DC445900684ADF /* Info.plist */,
 			);
 			path = DeuxCheVauxTests;
@@ -315,6 +318,7 @@
 				C6129FC321294E3500B727F8 /* ProgramInfo.swift in Sources */,
 				C61E8F92214BC7390078550C /* VideoInformation.swift in Sources */,
 				C687B8F020E17EEC006784B1 /* XMLSocketCommentVectorTest.swift in Sources */,
+				C61E8F94214CB4580078550C /* VideoInformationTests.swift in Sources */,
 				C633F86220DFE35400C1B265 /* PublishStatusTest.swift in Sources */,
 				C68BA43120DEC84700684ADF /* PlayerStatus.swift in Sources */,
 				C68BA41E20DC445900684ADF /* DeuxCheVauxTests.swift in Sources */,
