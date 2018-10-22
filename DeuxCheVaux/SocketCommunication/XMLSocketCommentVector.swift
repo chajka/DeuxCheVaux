@@ -153,7 +153,7 @@ public class XMLSocketCommentVector: NSObject ,StreamDelegate {
 			self.sem.signal()
 
 			while (!self.finishRunLoop) {
-				RunLoop.current.run(mode: RunLoopMode.defaultRunLoopMode, before: Date.distantFuture)
+				RunLoop.current.run(mode: RunLoop.Mode.default, before: Date.distantFuture)
 			}// end keep runloop
 		}// end block async
 		
@@ -162,7 +162,7 @@ public class XMLSocketCommentVector: NSObject ,StreamDelegate {
 		for stream in [readStream, writeStream] {
 			stream.delegate = self
 			stream.open()
-			stream.schedule(in: runLoop, forMode: .defaultRunLoopMode)
+			stream.schedule(in: runLoop, forMode: RunLoop.Mode.default)
 		}// end foreach streams
 		
 		return true
@@ -174,7 +174,7 @@ public class XMLSocketCommentVector: NSObject ,StreamDelegate {
 		guard let readStream = inputStream, let writeStream = outputStream else { return false }
 		guard let runLoop = runLoop else { return false }
 		for stream in [readStream, writeStream] {
-			stream.remove(from: runLoop, forMode: .defaultRunLoopMode)
+			stream.remove(from: runLoop, forMode: RunLoop.Mode.default)
 			stream.close()
 		}// end foreach streams
 		
