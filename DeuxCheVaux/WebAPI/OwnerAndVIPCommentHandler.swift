@@ -108,7 +108,7 @@ extension StreamControl.Key: StringEnum { }
 extension StreamControl.Value: StringEnum { }
 extension CommentKeys: StringEnum { }
 
-public class OwnerAndVIPCommentHandler: NSObject {
+public final class OwnerAndVIPCommentHandler: NSObject {
 	private let program: String
 	private let apiBaseString: String
 	private let cookies: Array<HTTPCookie>
