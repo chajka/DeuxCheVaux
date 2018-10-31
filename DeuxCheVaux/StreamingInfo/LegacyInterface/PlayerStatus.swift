@@ -86,7 +86,7 @@ enum PlayerStatusKey: String {
 
 let playerStatusFormat: String = "http://watch.live.nicovideo.jp/api/getplayerstatus?v="
 
-public class PlayerStatus: NSObject , XMLParserDelegate {
+public final class PlayerStatus: NSObject , XMLParserDelegate {
 		// MARK:   Outlets
 		// MARK: - Properties
 	public private(set) var number: String!

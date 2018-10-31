@@ -92,7 +92,7 @@ extension JSONKey.social: StringEnum { }
 extension JSONKey.broadcaster: StringEnum { }
 extension JSONKey.room: StringEnum { }
 
-public class ProgramInfo: NSObject {
+public final class ProgramInfo: NSObject {
 		// MARK:   Outlets
 		// MARK: - Properties
 	public private(set) var social: Social!
