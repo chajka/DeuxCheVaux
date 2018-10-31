@@ -90,7 +90,7 @@ extension POSTKey.Locale: StringEnum { }
 extension POSTKey.Lang: StringEnum { }
 extension POSTKey.Seat: StringEnum { }
 
-public class XMLSocketCommentVector: NSObject ,StreamDelegate {
+public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
 	private let queue: DispatchQueue = DispatchQueue.global(qos: .default)
 	private let sem: DispatchSemaphore
 	
