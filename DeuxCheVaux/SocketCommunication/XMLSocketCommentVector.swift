@@ -207,7 +207,6 @@ public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
 					
 					let chatElement: String = chatXMLElement.xmlString + "\0"
 					self.write(chatElement)
-					Swift.print(chatElement)
 				})// end closure for postkey
 			}// end if
 		}// end closure for heartbeat
