@@ -102,6 +102,7 @@ public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
 				threadData.copyBytes(to: data, count: threadData.count)
 				let dataPointer: UnsafePointer<UInt8> = UnsafePointer<UInt8>(data)
 				writeStream.write(dataPointer, maxLength: threadData.count)
+				data.deallocate()
 			}// end didSet
 		}// end computed property set
 	}// end property writeable
@@ -269,6 +270,7 @@ public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
 		stringDataToWrite.copyBytes(to: data, count: stringDataToWrite.count)
 		let dataPointer: UnsafePointer<UInt8> = UnsafePointer<UInt8>(data)
 		writeStream.write(dataPointer, maxLength: stringDataToWrite.count)
+		data.deallocate()
 		Thread.sleep(forTimeInterval: 3)
 	}// end function write
 	
