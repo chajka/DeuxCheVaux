@@ -98,7 +98,10 @@ public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
 		willSet (value) {
 			if value == true {
 				guard let writeStream = outputStream else { return }
-				_ = threadData.withUnsafeBytes( {(data: UnsafePointer<UInt8>) -> Void in writeStream.write(data, maxLength: threadData.count)})
+				let data: UnsafeMutablePointer<UInt8> = UnsafeMutablePointer<UInt8>.allocate(capacity: threadData.count)
+				threadData.copyBytes(to: data, count: threadData.count)
+				let dataPointer: UnsafePointer<UInt8> = UnsafePointer<UInt8>(data)
+				writeStream.write(dataPointer, maxLength: threadData.count)
 			}// end didSet
 		}// end computed property set
 	}// end property writeable
@@ -262,8 +265,10 @@ public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
 	private func write(_ message: String) -> Void {
 		if (finishRunLoop) { return }
 		guard let writeStream: OutputStream = outputStream, let stringDataToWrite: Data = message.data(using: String.Encoding.utf8) else { return }
-		stringDataToWrite.withUnsafeBytes( {(dat: UnsafePointer<UInt8>) -> Void in
-			writeStream.write(dat, maxLength: stringDataToWrite.count)})
+		let data: UnsafeMutablePointer<UInt8> = UnsafeMutablePointer<UInt8>.allocate(capacity: stringDataToWrite.count)
+		stringDataToWrite.copyBytes(to: data, count: stringDataToWrite.count)
+		let dataPointer: UnsafePointer<UInt8> = UnsafePointer<UInt8>(data)
+		writeStream.write(dataPointer, maxLength: stringDataToWrite.count)
 		Thread.sleep(forTimeInterval: 3)
 	}// end function write
 	
