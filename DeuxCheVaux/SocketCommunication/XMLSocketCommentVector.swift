@@ -91,6 +91,8 @@ extension POSTKey.Lang: StringEnum { }
 extension POSTKey.Seat: StringEnum { }
 
 public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
+	public private(set) var runLoop: RunLoop?
+
 	private let queue: DispatchQueue = DispatchQueue.global(qos: .default)
 	private let sem: DispatchSemaphore
 	
@@ -114,7 +116,6 @@ public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
 	private let isPremium: Bool
 	private let cookies: Array<HTTPCookie>
 	
-	private var runLoop: RunLoop!
 	private var finishRunLoop: Bool = true
 	
 	private var inputStream: InputStream?
@@ -123,7 +124,7 @@ public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
 	
 	public var delegate: XMLSocketCommentVectorDelegate!
 
-	public init(playerStatus: PlayerStatus, serverOffset: Int, history: Int = defaultHistroryCount, cookies: Array<HTTPCookie>) {
+	public init(playerStatus: PlayerStatus, serverOffset: Int, history: Int = defaultHistroryCount, cookies: Array<HTTPCookie>, inRunLoop runLoop: RunLoop? = nil) {
 		let messageServer = playerStatus.messageServers[serverOffset]
 		server = messageServer.XMLSocet.address
 		port = messageServer.XMLSocet.port
@@ -135,6 +136,7 @@ public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
 		program = playerStatus.number
 		userLanguage = playerStatus.listenerLanguage
 		self.cookies = cookies
+		self.runLoop = runLoop
 		writeable = false
 
 		sem = DispatchSemaphore(value: serverOffset)
