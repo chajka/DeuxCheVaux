@@ -149,17 +149,20 @@ public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
 	public func open() -> Bool {
 		Stream.getStreamsToHost(withName: server, port: port, inputStream: &inputStream, outputStream: &outputStream)
 		guard let readStream = inputStream, let writeStream = outputStream else { return false }
-		queue.async {
-			self.runLoop = RunLoop.current
-			self.finishRunLoop = false
-			self.sem.signal()
 
-			while (!self.finishRunLoop) {
-				RunLoop.current.run(mode: RunLoop.Mode.default, before: Date.distantFuture)
-			}// end keep runloop
-		}// end block async
-		
-		sem.wait()
+		if runLoop == nil {
+			queue.async {
+				self.runLoop = RunLoop.current
+				self.finishRunLoop = false
+				self.sem.signal()
+
+				while (!self.finishRunLoop) {
+					RunLoop.current.run(mode: RunLoop.Mode.default, before: Date.distantFuture)
+				}// end keep runloop
+			}// end block async
+			_ = sem.wait(timeout: DispatchTime.distantFuture)
+		}// end if did not pass run loop, make it
+
 		guard let runLoop = runLoop else { return false }
 		for stream in [readStream, writeStream] {
 			stream.delegate = self
