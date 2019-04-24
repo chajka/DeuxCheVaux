@@ -92,6 +92,7 @@ extension POSTKey.Seat: StringEnum { }
 
 public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
 	public private(set) var runLoop: RunLoop?
+	public private(set) var roomLabel: String? = nil
 
 	private let queue: DispatchQueue = DispatchQueue.global(qos: .default)
 	private let sem: DispatchSemaphore
@@ -139,11 +140,30 @@ public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
 		isPremium = playerStatus.listenerIsPremium
 		program = playerStatus.number
 		userLanguage = playerStatus.listenerLanguage
+		roomLabel = messageServer.name
 		self.cookies = cookies
 		self.runLoop = runLoop
 		writeable = false
 
 		sem = DispatchSemaphore(value: serverOffset)
+	}// end init
+
+	public init (_ messageServer: MessageServer, broadcastStatus playerStatus: PlayerStatus, history: Int = defaultHistroryCount, cookies: Array<HTTPCookie>, inRunLoop runLoop: RunLoop? = nil) {
+		server = messageServer.XMLSocet.address
+		port = messageServer.XMLSocet.port
+		thread = messageServer.thread
+		threadData = String(format: threadFormat, messageServer.thread, history).data(using: .utf8)!
+		userIdentifier = playerStatus.listenerIdentifier
+		baseTiem = playerStatus.baseTime
+		isPremium = playerStatus.listenerIsPremium
+		program = playerStatus.number
+		userLanguage = playerStatus.listenerLanguage
+		roomLabel = messageServer.name
+		self.cookies = cookies
+		self.runLoop = runLoop
+		writeable = false
+
+		sem = DispatchSemaphore(value: port)
 	}// end init
 	
 	deinit {
