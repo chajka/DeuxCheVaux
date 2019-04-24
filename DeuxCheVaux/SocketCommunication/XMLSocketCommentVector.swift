@@ -178,14 +178,12 @@ public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
 			queue.async {
 				self.runLoop = RunLoop.current
 				self.finishRunLoop = false
-				self.sem.signal()
-
 				while (!self.finishRunLoop) {
 					RunLoop.current.run(mode: RunLoop.Mode.default, before: Date.distantFuture)
 				}// end keep runloop
 			}// end block async
-			_ = sem.wait(timeout: DispatchTime.distantFuture)
 		}// end if did not pass run loop, make it
+		while (runLoop == nil) { Thread.sleep(forTimeInterval: 0.001) }
 
 		guard let runLoop = runLoop else { return false }
 		for stream in [readStream, writeStream] {
