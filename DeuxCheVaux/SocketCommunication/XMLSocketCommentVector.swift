@@ -92,10 +92,10 @@ extension POSTKey.Seat: StringEnum { }
 
 public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
 	public private(set) var runLoop: RunLoop?
+	public private(set) var roomLabel: String? = nil
 
 	private let queue: DispatchQueue = DispatchQueue.global(qos: .default)
-	private let sem: DispatchSemaphore
-	
+
 	private var writeable: Bool {
 		willSet (value) {
 			if value == true {
@@ -139,11 +139,26 @@ public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
 		isPremium = playerStatus.listenerIsPremium
 		program = playerStatus.number
 		userLanguage = playerStatus.listenerLanguage
+		roomLabel = messageServer.name
 		self.cookies = cookies
 		self.runLoop = runLoop
 		writeable = false
+	}// end init
 
-		sem = DispatchSemaphore(value: serverOffset)
+	public init (_ messageServer: MessageServer, broadcastStatus playerStatus: PlayerStatus, history: Int = defaultHistroryCount, cookies: Array<HTTPCookie>, inRunLoop runLoop: RunLoop? = nil) {
+		server = messageServer.XMLSocet.address
+		port = messageServer.XMLSocet.port
+		thread = messageServer.thread
+		threadData = String(format: threadFormat, messageServer.thread, history).data(using: .utf8)!
+		userIdentifier = playerStatus.listenerIdentifier
+		baseTiem = playerStatus.baseTime
+		isPremium = playerStatus.listenerIsPremium
+		program = playerStatus.number
+		userLanguage = playerStatus.listenerLanguage
+		roomLabel = messageServer.name
+		self.cookies = cookies
+		self.runLoop = runLoop
+		writeable = false
 	}// end init
 	
 	deinit {
@@ -158,14 +173,12 @@ public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
 			queue.async {
 				self.runLoop = RunLoop.current
 				self.finishRunLoop = false
-				self.sem.signal()
-
 				while (!self.finishRunLoop) {
 					RunLoop.current.run(mode: RunLoop.Mode.default, before: Date.distantFuture)
 				}// end keep runloop
 			}// end block async
-			_ = sem.wait(timeout: DispatchTime.distantFuture)
 		}// end if did not pass run loop, make it
+		while (runLoop == nil) { Thread.sleep(forTimeInterval: 0.001) }
 
 		guard let runLoop = runLoop else { return false }
 		for stream in [readStream, writeStream] {
