@@ -139,7 +139,12 @@ public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
 		isPremium = playerStatus.listenerIsPremium
 		program = playerStatus.number
 		userLanguage = playerStatus.listenerLanguage
-		roomLabel = messageServer.name
+		if let roomPrefix: Substring = messageServer.name?.prefix(1) {
+			let prefix = String(roomPrefix)
+			roomLabel = prefix == "c" ? "Arena" : "\u{7ACB} \(prefix):"
+		} else {
+			roomLabel = messageServer.name
+		}
 		self.cookies = cookies
 		self.runLoop = runLoop
 		writeable = false
@@ -155,7 +160,12 @@ public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
 		isPremium = playerStatus.listenerIsPremium
 		program = playerStatus.number
 		userLanguage = playerStatus.listenerLanguage
-		roomLabel = messageServer.name
+		if let roomPrefix: Substring = messageServer.name?.prefix(1) {
+			let prefix = String(roomPrefix)
+			roomLabel = prefix == "c" ? "Arena" : messageServer.name
+		} else {
+			roomLabel = messageServer.name
+		}
 		self.cookies = cookies
 		self.runLoop = runLoop
 		writeable = false
