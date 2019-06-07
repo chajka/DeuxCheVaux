@@ -16,10 +16,6 @@ private enum VideoInfoTag: String {
 	case commentCount = "comment_num"
 	case mylist = "mylist_counter"
 	case tag = "tag"
-
-	static func ~= (lhs: VideoInfoTag, rhs: String) -> Bool {
-		return lhs.rawValue ~= rhs ? true : false
-	}// end ~=
 }// end enum VideoInfoTag
 
 private let InfoQueryAPI: String = "http://ext.nicovideo.jp/api/getthumbinfo/"
