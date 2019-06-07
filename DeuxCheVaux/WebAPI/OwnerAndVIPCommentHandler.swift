@@ -173,7 +173,7 @@ public final class OwnerAndVIPCommentHandler: NSObject {
 	private var request: URLRequest
 	private let session: URLSession
 
-	public init(program: String, cookies: Array<HTTPCookie>) {
+	public init (program: String, cookies: Array<HTTPCookie>) {
 		self.program = program
 		self.cookies = cookies
 		apiBaseString = apiBase + self.program
@@ -185,7 +185,7 @@ public final class OwnerAndVIPCommentHandler: NSObject {
 		}// end if have cookies
 	}// end init
 
-	public func startStreaming() -> Void {
+	public func startStreaming () -> Void {
 		guard let url = URL(string: apiBaseString + StartStopStream) else { return }
 		var jsonDict: Dictionary<String, Any> = Dictionary()
 		jsonDict[StreamControl.Key.state] = StreamControl.Value.start.rawValue
@@ -201,7 +201,7 @@ public final class OwnerAndVIPCommentHandler: NSObject {
 		}// end try - catch JSONSerialization
 	}// end func startStreaming
 	
-	public func stopStreaming() -> Void {
+	public func stopStreaming () -> Void {
 		guard let url = URL(string: apiBaseString + StartStopStream) else { return }
 		var jsonDict: Dictionary<String, Any> = Dictionary()
 		jsonDict[StreamControl.Key.state] = StreamControl.Value.end.rawValue
@@ -217,7 +217,7 @@ public final class OwnerAndVIPCommentHandler: NSObject {
 		}// end try - catch JSONSerialization
 	}// end func startStreaming
 
-	public func postOwnerComment(comment: String, name: String = "", color: String = "white", isPerm: Bool = false) throws -> Void {
+	public func postOwnerComment (comment: String, name: String = "", color: String = "white", isPerm: Bool = false) throws -> Void {
 		if comment.isEmpty { throw CommentPostError.EmptyComment }
 		var commentToPost = String(comment)
 		if (comment.starts(with: clear)) {
@@ -252,7 +252,7 @@ public final class OwnerAndVIPCommentHandler: NSObject {
 		}// end try - catch JSONSerialization
 	}// end func owner comment
 
-	public func clearOwnerComment() -> Void {
+	public func clearOwnerComment () -> Void {
 		guard let url = URL(string: apiBaseString + operatorComment) else { return }
 		request.url = url
 		request.setValue(nil, forHTTPHeaderField: ContentTypeKey)
