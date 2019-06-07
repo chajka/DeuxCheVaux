@@ -91,7 +91,7 @@ public extension URLRequest {
 		get {
 			if let method: String = self.httpMethod {
 				return HTTPMethod(rawValue: method)
-			}
+			}// end get
 			return nil
 		}// end get
 		set {
@@ -152,7 +152,7 @@ public final class OwnerAndVIPCommentHandler: NSObject {
 		do {
 			request.httpBody = try JSONSerialization.data(withJSONObject: jsonDict, options: [])
 			request.setValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
-			request.httpMethod = HTTPMethod.put.rawValue
+			request.method = HTTPMethod.put
 			request.url = url
 			let task = session.dataTask(with: request)
 			task.resume()
@@ -168,7 +168,7 @@ public final class OwnerAndVIPCommentHandler: NSObject {
 		do {
 			request.httpBody = try JSONSerialization.data(withJSONObject: jsonDict, options: [])
 			request.setValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
-			request.httpMethod = HTTPMethod.put.rawValue
+			request.method = HTTPMethod.put
 			request.url = url
 			let task = session.dataTask(with: request)
 			task.resume()
@@ -203,7 +203,7 @@ public final class OwnerAndVIPCommentHandler: NSObject {
 		do {
 			request.httpBody = try JSONSerialization.data(withJSONObject: jsonDict, options: [])
 			request.url = url
-			request.httpMethod = HTTPMethod.put.rawValue
+			request.method = HTTPMethod.put
 			request.addValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
 			let task: URLSessionDataTask = session.dataTask(with: request)
 			task.resume()
@@ -215,8 +215,8 @@ public final class OwnerAndVIPCommentHandler: NSObject {
 	public func clearOwnerComment() -> Void {
 		guard let url = URL(string: apiBaseString + operatorComment) else { return }
 		request.url = url
-		request.httpMethod = HTTPMethod.delete.rawValue
 		request.setValue(nil, forHTTPHeaderField: ContentTypeKey)
+		request.method = HTTPMethod.delete
 		request.httpBody = nil
 		let task: URLSessionDataTask = session.dataTask(with: request)
 		task.resume()
@@ -236,7 +236,7 @@ public final class OwnerAndVIPCommentHandler: NSObject {
 		do {
 			request.httpBody = try JSONSerialization.data(withJSONObject: jsonDict, options: [])
 			request.url = url
-			request.httpMethod = HTTPMethod.post.rawValue
+			request.method = HTTPMethod.post
 			request.setValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
 			let task: URLSessionDataTask = session.dataTask(with: request)
 			task.resume()
