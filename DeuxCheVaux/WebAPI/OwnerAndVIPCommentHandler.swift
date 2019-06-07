@@ -63,7 +63,7 @@ public enum CommentPostError: Error {
 	case InvalidColor(String)
 }// end public enum CommentPostError
 
-private let apiBase: String = "http://live2.nicovideo.jp/watch/"
+private let apiBase: String = "https://live2.nicovideo.jp/watch/"
 
 private let StartStopStream: String = "/segment"
 private let operatorComment: String = "/operator_comment"
