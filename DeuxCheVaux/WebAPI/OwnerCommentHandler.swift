@@ -110,29 +110,29 @@ internal struct MetaInformation: Codable {
 	let errorMessage: String?
 }// end struct MetaInformation
 
-public enum DisplayType: String {
+public enum MixingState: String {
 	case main = "main"
 	case sub = "sub"
 	case soundonly = "none"
-}// end enum DisplayType
+}// end enum MixingState
 
 public struct Context: Codable {
 	let content: String
 	var audio: Float
 	var display: String
 
-	var displayType: DisplayType {
+	var displayType: MixingState {
 		get {
-			if let type: DisplayType = DisplayType(rawValue: display) {
+			if let type: MixingState = MixingState(rawValue: display) {
 				return type
 			} else {
-				return DisplayType.soundonly
+				return MixingState.soundonly
 			}// end if optional binding check for current display type
 		}// end get
 		set {
 			display = newValue.rawValue
 		}// end set
-	}// end computed property displayType
+	}// end computed property MixingState
 }// end struct Context
 
 public struct Mixing: Codable {
