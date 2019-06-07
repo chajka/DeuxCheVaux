@@ -110,6 +110,31 @@ internal struct MetaInformation: Codable {
 	let errorMessage: String?
 }// end struct MetaInformation
 
+public enum DisplayType: String {
+	case main = "main"
+	case sub = "sub"
+	case soundonly = "none"
+}// end enum DisplayType
+
+public struct Context: Codable {
+	let content: String
+	var audio: Float
+	var display: String
+
+	var displayType: DisplayType {
+		get {
+			if let type: DisplayType = DisplayType(rawValue: display) {
+				return type
+			} else {
+				return DisplayType.soundonly
+			}// end if optional binding check for current display type
+		}// end get
+		set {
+			display = newValue.rawValue
+		}// end set
+	}// end computed property displayType
+}// end struct Context
+
 enum StreamControl {
 	enum Key: String {
 		case state = "state"
