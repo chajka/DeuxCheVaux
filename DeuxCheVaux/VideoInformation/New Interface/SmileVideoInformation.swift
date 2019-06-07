@@ -29,11 +29,6 @@ internal struct MovieDescription: Codable {
 	let userId: String
 }// end struct MovieDescription
 
-internal struct MetaInformation: Codable {
-	let status: Int
-	let errorCode: String
-}// end struct MetaInformation
-
 private struct MovieInfo: Codable {
 	let meta: MetaInformation
 	let data: MovieDescription?

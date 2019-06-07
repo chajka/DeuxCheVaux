@@ -104,6 +104,12 @@ public extension URLRequest {
 	}// end property extension of URLRequest
 }// end of extension of URLRequest
 
+internal struct MetaInformation: Codable {
+	let status: Int
+	let errorCode: String
+	let errorMessage: String?
+}// end struct MetaInformation
+
 enum StreamControl {
 	enum Key: String {
 		case state = "state"
