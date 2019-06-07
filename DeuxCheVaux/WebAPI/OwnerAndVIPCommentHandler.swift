@@ -79,12 +79,30 @@ private let clear: String = "/clear"
 private let ContentTypeKey: String = "Content-type"
 private let ContentTypeJSON: String = "application/json"
 
-enum HTTPMethod: String {
+public enum HTTPMethod: String {
 	case get = "GET"
 	case post = "POST"
 	case put = "PUT"
 	case delete = "DELETE"
 }// end enum httpMehod
+
+public extension URLRequest {
+	var method: HTTPMethod? {
+		get {
+			if let method: String = self.httpMethod {
+				return HTTPMethod(rawValue: method)
+			}
+			return nil
+		}// end get
+		set {
+			if let httpMehtod: HTTPMethod = newValue {
+				self.httpMethod = httpMehtod.rawValue
+			} else {
+				self.httpMethod = ""
+			}// end if
+		}// end set
+	}// end property extension of URLRequest
+}// end of extension of URLRequest
 
 enum StreamControl {
 	enum Key: String {
