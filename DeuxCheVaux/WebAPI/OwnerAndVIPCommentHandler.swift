@@ -135,6 +135,15 @@ public struct Context: Codable {
 	}// end computed property displayType
 }// end struct Context
 
+public struct Mixing: Codable {
+	let mixing: Array<Context>
+}// end struct Mixing
+
+public struct MixInfo: Codable {
+	let data: Mixing?
+	let meta: MetaInformation
+}// end struct MixInfo
+
 enum StreamControl {
 	enum Key: String {
 		case state = "state"
