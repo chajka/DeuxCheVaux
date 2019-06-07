@@ -1,5 +1,5 @@
 //
-//  OwnerAndVIPCommentHandler.swift
+//  OwnerCommentHandler.swift
 //  DeuxCheVaux
 //
 //  Created by Чайка on 2018/06/25.
@@ -166,13 +166,16 @@ extension StreamControl.Key: StringEnum { }
 extension StreamControl.Value: StringEnum { }
 extension CommentKeys: StringEnum { }
 
-public final class OwnerAndVIPCommentHandler: NSObject {
+public final class OwnerCommentHandler: NSObject {
+		// MARK: - Properties
+		// MARK: - Member variables
 	private let program: String
 	private let apiBaseString: String
 	private let cookies: Array<HTTPCookie>
 	private var request: URLRequest
 	private let session: URLSession
-
+	
+		// MARK: - Constructor/Destructor
 	public init (program: String, cookies: Array<HTTPCookie>) {
 		self.program = program
 		self.cookies = cookies
@@ -184,7 +187,10 @@ public final class OwnerAndVIPCommentHandler: NSObject {
 			request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
 		}// end if have cookies
 	}// end init
-
+	
+		// MARK: - Override
+		// MARK: - Actions
+		// MARK: - Public methods
 	public func startStreaming () -> Void {
 		guard let url = URL(string: apiBaseString + StartStopStream) else { return }
 		var jsonDict: Dictionary<String, Any> = Dictionary()
@@ -216,7 +222,7 @@ public final class OwnerAndVIPCommentHandler: NSObject {
 			print("Program \(program) can not serialize")
 		}// end try - catch JSONSerialization
 	}// end func startStreaming
-
+	
 	public func postOwnerComment (comment: String, name: String = "", color: String = "white", isPerm: Bool = false) throws -> Void {
 		if comment.isEmpty { throw CommentPostError.EmptyComment }
 		var commentToPost = String(comment)
@@ -227,7 +233,7 @@ public final class OwnerAndVIPCommentHandler: NSObject {
 		let commentColor = Color.premium(rawValue: color)
 		if commentColor == nil { throw CommentPostError.InvalidColor(color)}
 		var permanent: Bool = isPerm
-
+		
 		guard let url = URL(string: apiBaseString + operatorComment) else { return }
 		if (comment.starts(with: perm)) {
 			permanent = true
@@ -251,7 +257,7 @@ public final class OwnerAndVIPCommentHandler: NSObject {
 			print("Comment \(jsonDict) can not serialize")
 		}// end try - catch JSONSerialization
 	}// end func owner comment
-
+	
 	public func clearOwnerComment () -> Void {
 		guard let url = URL(string: apiBaseString + operatorComment) else { return }
 		request.url = url
@@ -261,27 +267,35 @@ public final class OwnerAndVIPCommentHandler: NSObject {
 		let task: URLSessionDataTask = session.dataTask(with: request)
 		task.resume()
 	}// end clearOwnerComment
-
-	public func postVIPComment(comment: String, name: String, color: String) throws -> Void {
-		let vipCommentColor: Color.vip? = Color.vip(rawValue: color)
-		if vipCommentColor == nil { throw CommentPostError.InvalidColor(color)}
-		if name.isEmpty { throw CommentPostError.NameUndefined }
-		if comment.isEmpty { throw CommentPostError.EmptyComment }
-
-		guard let url = URL(string: apiBaseString + vipComment) else { return }
-		var jsonDict: Dictionary<String, Any> = Dictionary()
-		jsonDict[CommentKeys.comment] = comment
-		jsonDict[CommentKeys.name] = name
-		jsonDict[CommentKeys.color] = color
-		do {
-			request.httpBody = try JSONSerialization.data(withJSONObject: jsonDict, options: [])
-			request.url = url
-			request.method = HTTPMethod.post
-			request.setValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
-			let task: URLSessionDataTask = session.dataTask(with: request)
-			task.resume()
-		} catch {
-			print("Comment \(jsonDict) can not serialize")
-		}// end try - catch JSONSerialization
-	}// end func postVIPComment
+	
+	public func currentMovieStatus () -> Array<Context> {
+		guard let url: URL = URL(string: apiBaseString + program + mixing) else { return Array() }
+		request.url = url
+		request.setValue(nil, forHTTPHeaderField: ContentTypeKey)
+		request.method = HTTPMethod.get
+		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
+		var mixInfor: Array<Context> = Array()
+		let task: URLSessionDataTask = session.dataTask(with: request) { (dat, resp, err) in
+			if let data: Data = dat {
+				do {
+					let info: MixInfo = try JSONDecoder().decode(MixInfo.self, from: data)
+					if info.meta.errorCode == "OK", let mixing: Array<Context> = info.data?.mixing {
+						mixInfor.append(contentsOf: mixing)
+					}// end check error and optional binding check for mixing state
+				} catch let error {
+					print(error.localizedDescription)
+				}
+			}// end optional binding check for recieved data
+		}// end closure
+		task.resume()
+		let timeout: DispatchTimeoutResult = semaphore.wait(wallTimeout: DispatchWallTime.now() + 5)
+		if timeout == DispatchTimeoutResult.success {
+			return mixInfor
+		}// end check timeOut
+		
+		return mixInfor
+	}// end currentMovieStatus
+		// MARK: - Internal methods
+		// MARK: - Private methods
+		// MARK: - Delegates
 }// end class OwnerAndVIPCommentHandler
