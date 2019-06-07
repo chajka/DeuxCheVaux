@@ -52,7 +52,7 @@ public final class VideoInformation: NSObject, XMLParserDelegate {
 		// MARK: - Override
 		// MARK: - Actions
 		// MARK: - Public methods\
-	public func parse () throws -> Bool {
+	public func parse () -> Bool {
 		loadData()
 		parser.delegate = self
 		let result: Bool = parser.parse()
