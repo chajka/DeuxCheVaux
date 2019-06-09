@@ -168,6 +168,7 @@ extension CommentKeys: StringEnum { }
 
 fileprivate let Timeout: Double = 2.0
 fileprivate let Success: String = "OK"
+
 public final class OwnerCommentHandler: NSObject {
 		// MARK: - Properties
 		// MARK: - Member variables
@@ -281,12 +282,12 @@ public final class OwnerCommentHandler: NSObject {
 			if let data: Data = dat {
 				do {
 					let info: MixInfo = try JSONDecoder().decode(MixInfo.self, from: data)
-					if info.meta.errorCode == "OK", let mixing: Array<Context> = info.data?.mixing {
+					if info.meta.errorCode == Success, let mixing: Array<Context> = info.data?.mixing {
 						mixInfor.append(contentsOf: mixing)
 					}// end check error and optional binding check for mixing state
 				} catch let error {
 					print(error.localizedDescription)
-				}
+				}// end do try - catch json decode
 			}// end optional binding check for recieved data
 		}// end closure
 		task.resume()
