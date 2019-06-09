@@ -71,7 +71,7 @@ private let programExtension: String = "/extension"
 private let vipComment: String = "/bsp_comment"
 private let statistics: String = "/statistics"
 private let contents: String = "/contents"
-private let mixing: String = "/mixing"
+private let mixing: String = "/broadcast/mixing"
 
 private let perm: String = "/perm "
 private let clear: String = "/clear"
