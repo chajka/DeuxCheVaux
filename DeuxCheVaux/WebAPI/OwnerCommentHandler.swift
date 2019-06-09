@@ -362,6 +362,43 @@ public final class OwnerCommentHandler: NSObject {
 		return success
 	}// end mixing
 
+	public func mixingOff () -> Bool {
+		let streaming: Context = Context(content: program, audio: 1.0, display: MixingState.main.rawValue)
+		let mix: Mixing = Mixing(mixing: [streaming])
+		var success = false
+		
+		do {
+			let encoder: JSONEncoder = JSONEncoder()
+			encoder.outputFormatting = JSONEncoder.OutputFormatting.prettyPrinted
+			let json: Data = try encoder.encode(mix)
+			if let url: URL = URL(string: apiBaseString + mixing) {
+				request.url = url
+				request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
+				request.addValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
+				request.method = HTTPMethod.put
+				request.httpBody = json
+				let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
+				let task: URLSessionDataTask = session.dataTask(with: request) { (dat, resp, err) in
+					guard let data: Data = dat else { return }
+					do {
+						let result: MixInfo = try JSONDecoder().decode(MixInfo.self, from: data)
+						if result.meta.errorCode == Success { success = true }
+					} catch let error {
+						print(error.localizedDescription)
+					}// end do try - catch
+					semaphore.signal()
+				}// end closure
+				task.resume()
+				let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
+				if timeout == DispatchTimeoutResult.success { success = true }
+			}// end opttioonal checking for create url
+		} catch let error {
+			print(error.localizedDescription)
+		}// end do try - catch json encoding
+		
+		return success
+	}// end mixingOff
+	
 		// MARK: - Internal methods
 		// MARK: - Private methods
 		// MARK: - Delegates
