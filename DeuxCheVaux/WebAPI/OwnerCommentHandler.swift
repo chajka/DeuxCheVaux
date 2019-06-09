@@ -166,6 +166,8 @@ extension StreamControl.Key: StringEnum { }
 extension StreamControl.Value: StringEnum { }
 extension CommentKeys: StringEnum { }
 
+fileprivate let Timeout: Double = 2.0
+fileprivate let Success: String = "OK"
 public final class OwnerCommentHandler: NSObject {
 		// MARK: - Properties
 		// MARK: - Member variables
@@ -292,6 +294,7 @@ public final class OwnerCommentHandler: NSObject {
 		if timeout == DispatchTimeoutResult.success {
 			return mixInfor
 		}// end check timeOut
+		let _ = semaphore.wait(wallTimeout: DispatchWallTime.now() + Timeout)
 		
 		return mixInfor
 	}// end currentMovieStatus
