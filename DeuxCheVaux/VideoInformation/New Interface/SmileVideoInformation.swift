@@ -37,7 +37,7 @@ private struct MovieInfo: Codable {
 fileprivate let contentsAPI: String = "https://live2.nicovideo.jp/unama/tool/v1/contents/"
 
 public final class SmileVideoInformation: NSObject {
-	// MARK:   Properties
+		// MARK:   Properties
 	public let videoNumber: String
 	public private(set) var title: String!
 	public private(set) var time: String!
@@ -46,14 +46,14 @@ public final class SmileVideoInformation: NSObject {
 	public private(set) var commentCount: Int!
 	public private(set) var myListCount: Int!
 	public private(set) var tags: Array<String>
-	
-	// MARK: - Member variables
+
+		// MARK: - Member variables
 	private let cookies: Array<HTTPCookie>
 	private let session: URLSession
 	private var request: URLRequest!
 	private var stringBuffer: String
-	
-	// MARK: - Constructor/Destructor
+
+		// MARK: - Constructor/Destructor
 	public init (videoNumber video: String, cookies cookie: Array<HTTPCookie>) {
 		self.videoNumber = video
 		cookies = cookie
@@ -61,17 +61,17 @@ public final class SmileVideoInformation: NSObject {
 		tags = Array()
 		stringBuffer = String()
 	}// end init
-	
-	// MARK: - Override
-	// MARK: - Actions
-	// MARK: - Public methods\
+
+		// MARK: - Override
+		// MARK: - Actions
+		// MARK: - Public methods\
 	public func parse () -> Bool {
 		let result: Bool = checkContents()
 		
 		return result
 	}// end parse
-	
-	// MARK: - Private methods
+
+		// MARK: - Private methods
 	private func checkContents () -> Bool {
 		if let contentsAPIURL: URL = URL(string: contentsAPI) {
 			let contentsAPIforcurrentVideo = contentsAPIURL.appendingPathComponent(videoNumber)
@@ -99,9 +99,9 @@ public final class SmileVideoInformation: NSObject {
 			let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + 1.0)
 			if timeout == DispatchTimeoutResult.success { return true }
 		}// end optional binding check for make contents api base url
-		
+
 		return false
 	}// end checkContents
-	
-	// MARK: - Delegates
+
+		// MARK: - Delegates
 }// end class VideoInformation
