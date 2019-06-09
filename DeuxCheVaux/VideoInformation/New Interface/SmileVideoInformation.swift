@@ -34,8 +34,7 @@ private struct MovieInfo: Codable {
 	let data: MovieDescription?
 }// end struct MovieInfo
 
-fileprivate let InfoQueryAPI: String = "http://ext.nicovideo.jp/api/getthumbinfo/"
-fileprivate let contentsAPI: String = "http://live2.nicovideo.jp/unama/tool/v1/contents/"
+fileprivate let contentsAPI: String = "https://live2.nicovideo.jp/unama/tool/v1/contents/"
 
 public final class SmileVideoInformation: NSObject {
 	// MARK:   Properties
