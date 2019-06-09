@@ -55,11 +55,12 @@ public final class SmileVideoInformation: NSObject {
 
 		// MARK: - Constructor/Destructor
 	public init (videoNumber video: String, cookies cookie: Array<HTTPCookie>) {
-		self.videoNumber = video
+		videoNumber = video
 		cookies = cookie
 		session = URLSession(configuration: URLSessionConfiguration.default)
 		tags = Array()
 		stringBuffer = String()
+		super.init()
 	}// end init
 
 		// MARK: - Override
