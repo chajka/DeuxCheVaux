@@ -110,6 +110,14 @@ internal struct MetaInformation: Codable {
 	let errorMessage: String?
 }// end struct MetaInformation
 
+public enum MixingMode {
+	case main
+	case sub
+	case soundOnly
+	case swap
+	case swapSoundOnly
+}// end enum MixingMode
+
 public enum MixingState: String {
 	case main = "main"
 	case sub = "sub"
