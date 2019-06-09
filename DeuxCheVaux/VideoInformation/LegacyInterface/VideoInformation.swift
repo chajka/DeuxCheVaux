@@ -16,10 +16,6 @@ private enum VideoInfoTag: String {
 	case commentCount = "comment_num"
 	case mylist = "mylist_counter"
 	case tag = "tag"
-
-	static func ~= (lhs: VideoInfoTag, rhs: String) -> Bool {
-		return lhs.rawValue ~= rhs ? true : false
-	}// end ~=
 }// end enum VideoInfoTag
 
 private let InfoQueryAPI: String = "http://ext.nicovideo.jp/api/getthumbinfo/"
@@ -52,7 +48,7 @@ public final class VideoInformation: NSObject, XMLParserDelegate {
 		// MARK: - Override
 		// MARK: - Actions
 		// MARK: - Public methods\
-	public func parse () throws -> Bool {
+	public func parse () -> Bool {
 		loadData()
 		parser.delegate = self
 		let result: Bool = parser.parse()
@@ -78,24 +74,24 @@ public final class VideoInformation: NSObject, XMLParserDelegate {
 
 		// MARK: - Delegates
 	public func parser(_ parser: XMLParser, didEndElement elementName: String, namespaceURI: String?, qualifiedName qName: String?) {
-		switch elementName {
-		case .title:
-			title = String(stringBuffer)
-		case .description:
-			videoDescription = String(stringBuffer)
-		case .time:
-			time = String(stringBuffer)
-		case .view:
-			viewCount = Int(stringBuffer)
-		case .commentCount:
-			commentCount = Int(stringBuffer)
-		case .mylist:
-			myListCount = Int(stringBuffer)
-		case .tag:
-			tags.append(String(stringBuffer))
-		default:
-			break
-		}// end switch
+		if let element: VideoInfoTag = VideoInfoTag(rawValue: elementName) {
+			switch element {
+			case .title:
+				title = String(stringBuffer)
+			case .description:
+				videoDescription = String(stringBuffer)
+			case .time:
+				time = String(stringBuffer)
+			case .view:
+				viewCount = Int(stringBuffer)
+			case .commentCount:
+				commentCount = Int(stringBuffer)
+			case .mylist:
+				myListCount = Int(stringBuffer)
+			case .tag:
+				tags.append(String(stringBuffer))
+			}// end switch
+		}// end optional binding check for element name is mutch need tag
 	}// end parser did end element
 
 	public func parser(_ parser: XMLParser, foundCharacters string: String) {
