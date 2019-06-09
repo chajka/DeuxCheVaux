@@ -291,10 +291,6 @@ public final class OwnerCommentHandler: NSObject {
 			}// end optional binding check for recieved data
 		}// end closure
 		task.resume()
-		let timeout: DispatchTimeoutResult = semaphore.wait(wallTimeout: DispatchWallTime.now() + 5)
-		if timeout == DispatchTimeoutResult.success {
-			return mixInfor
-		}// end check timeOut
 		let _ = semaphore.wait(wallTimeout: DispatchWallTime.now() + Timeout)
 		
 		return mixInfor
