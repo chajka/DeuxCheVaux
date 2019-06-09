@@ -35,6 +35,7 @@ private struct MovieInfo: Codable {
 }// end struct MovieInfo
 
 fileprivate let contentsAPI: String = "https://live2.nicovideo.jp/unama/tool/v1/contents/"
+fileprivate let ContentsTimeout: Double = 2.0
 
 public final class SmileVideoInformation: NSObject {
 		// MARK:   Properties
@@ -97,7 +98,7 @@ public final class SmileVideoInformation: NSObject {
 				semaphore.signal()
 			}// end closure
 			task.resume()
-			let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + 1.0)
+			let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + ContentsTimeout)
 			if timeout == DispatchTimeoutResult.success { return true }
 		}// end optional binding check for make contents api base url
 
