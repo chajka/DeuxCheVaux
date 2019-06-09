@@ -34,8 +34,8 @@ private struct MovieInfo: Codable {
 	let data: MovieDescription?
 }// end struct MovieInfo
 
-fileprivate let contentsAPI: String = "https://live2.nicovideo.jp/unama/tool/v1/contents/"
 fileprivate let ContentsTimeout: Double = 2.0
+fileprivate let ContentsAPI: String = "https://live2.nicovideo.jp/unama/tool/v1/contents/"
 
 public final class SmileVideoInformation: NSObject {
 		// MARK:   Properties
@@ -75,7 +75,7 @@ public final class SmileVideoInformation: NSObject {
 
 		// MARK: - Private methods
 	private func checkContents () -> Bool {
-		if let contentsAPIURL: URL = URL(string: contentsAPI) {
+		if let contentsAPIURL: URL = URL(string: ContentsAPI) {
 			let contentsAPIforcurrentVideo = contentsAPIURL.appendingPathComponent(videoNumber)
 			request = URLRequest(url: contentsAPIforcurrentVideo, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 0.1)
 			request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
