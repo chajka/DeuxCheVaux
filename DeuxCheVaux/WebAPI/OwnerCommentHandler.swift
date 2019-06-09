@@ -303,6 +303,7 @@ public final class OwnerCommentHandler: NSObject {
 		
 		return mixInfor
 	}// end currentMovieStatus
+	public func mixingVideoOrOtherStreaming (target quote: String, mode mixingMode: MixingMode, volume streamingVolume: Float = 1.0, quotedVolume mixingVolume: Float = 0.1) -> Bool {
 		// MARK: - Internal methods
 		// MARK: - Private methods
 		// MARK: - Delegates
