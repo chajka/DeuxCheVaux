@@ -80,15 +80,15 @@ public final class SmileVideoInformation: NSObject {
 			request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
 			request.method = HTTPMethod.get
 			let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
-			let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat, resp, err) in
-				guard let weakSelf = self, let data: Data = dat else { return }
+			let task: URLSessionDataTask = session.dataTask(with: request) { [unowned self] (dat, resp, err) in
+				guard let data: Data = dat else { return }
 				do {
 					let description: MovieInfo = try JSONDecoder().decode(MovieInfo.self, from: data)
 					if description.meta.errorCode == "OK" {
 						if let desc: MovieDescription = description.data {
-							weakSelf.title = desc.title
-							let length: String = String(format: "4.2f", Float(desc.length / 60))
-							weakSelf.time = "\(length) min"
+							self.title = desc.title
+							let length: String = String(format: "%4.2f", Float(desc.length / 60))
+							self.time = "\(length) min"
 						}// end optional binding check for data
 					}// end if
 				} catch let error {
