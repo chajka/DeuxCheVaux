@@ -179,7 +179,7 @@ public final class ProgramInfo: NSObject {
 	private func getProgramInfomation(programNumber: String) -> ProgramInfoError {
 		let programInfoURLString = ProgramInfoFormat + programNumber + ProgramInfoSuffix
 		if let programInfoURL: URL = URL(string: programInfoURLString) {
-			var doneTransfer: Bool = false
+			let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
 			var request: URLRequest = URLRequest(url: programInfoURL)
 			request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: userSession)
 			let session: URLSession = URLSession(configuration: URLSessionConfiguration.default)
@@ -197,10 +197,10 @@ public final class ProgramInfo: NSObject {
 				} else {
 					infoErr = ProgramInfoError.URLResponseError
 				}// end
-				doneTransfer = true
+				semaphore.signal()
 			}// end completion handler
 			task.resume()
-			while (!doneTransfer) { Thread.sleep(forTimeInterval: 0.0001) }
+			_ = semaphore.wait(timeout: DispatchTime.now() + Timeout)
 			if infoErr != .NoError { return infoErr }
 			parseProperties(infomation: data)
 			parseServers(information: data)
