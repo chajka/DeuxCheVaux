@@ -92,6 +92,8 @@ extension JSONKey.social: StringEnum { }
 extension JSONKey.broadcaster: StringEnum { }
 extension JSONKey.room: StringEnum { }
 
+private let Timeout: Double = 2.0
+
 public final class ProgramInfo: NSObject {
 		// MARK:   Outlets
 		// MARK: - Properties
