@@ -61,15 +61,15 @@ public final class VideoInformation: NSObject, XMLParserDelegate {
 	private func loadData () {
 		if let url = URL(string: InfoQueryAPI + videoNumber) {
 			request = URLRequest(url: url)
-			request.httpMethod = "GET"
-			var doneTransfer: Bool = false
+			request.method = .get
+			let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
 			let task: URLSessionDataTask = session.dataTask(with: request) { (dat, resp, err) in
 				guard let data: Data = dat else { return }
 				self.parser = XMLParser(data: data)
-				doneTransfer = true
+				semaphore.signal()
 			}// end closure
 			task.resume()
-			while (!doneTransfer) { Thread.sleep(forTimeInterval: 0.001) }
+			_ = semaphore.wait(timeout: DispatchTime.now() + Timeout)
 		}// end optional checking
 	}// end load data
 
