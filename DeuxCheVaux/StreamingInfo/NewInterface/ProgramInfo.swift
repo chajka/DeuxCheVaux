@@ -101,7 +101,9 @@ public final class ProgramInfo: NSObject {
 	public private(set) var status: ProgramStatus!
 	public private(set) var isMemberOnly: Bool!
 	public private(set) var categories: Array<String>!
+	public private(set) var baseTime: Date!
 	public private(set) var startTime: Date!
+	public private(set) var endTime: Date!
 	public private(set) var programDesctiption: NSAttributedString!
 	public private(set) var broadcaster: Broadcaster!
 	public private(set) var canNicoAd: Bool!
