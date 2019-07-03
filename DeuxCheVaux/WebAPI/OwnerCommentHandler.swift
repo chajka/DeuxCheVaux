@@ -143,6 +143,33 @@ public struct Context: Codable {
 	}// end computed property MixingState
 }// end struct Context
 
+internal struct ExtendMehtod: Codable {
+	var minutes: Int
+	var type: String
+}// end ExtendMehtod
+
+internal struct ExtendMethods: Codable {
+	var methods: Array<ExtendMehtod>?
+}// end struct ExtendMethods
+
+internal struct TimeExtension: Codable {
+	var data: ExtendMethods?
+	var meta: MetaInformation
+}// end struct TimeExtension
+
+internal struct ExtendTime: Codable {
+	var minutes: Int
+}// end struct ExtendTime
+
+internal struct NewEndTime: Codable {
+	var end_time: TimeInterval
+}// end struct NewEndTime
+
+internal struct TimeExtendResult: Codable {
+	var data: NewEndTime?
+	var meta: MetaInformation
+}// end struct TimeExtendResult
+
 public struct Mixing: Codable {
 	let mixing: Array<Context>
 }// end struct Mixing
@@ -398,7 +425,76 @@ public final class OwnerCommentHandler: NSObject {
 		
 		return success
 	}// end mixingOff
-	
+
+	public func extendableTimes () -> Array<String> {
+		var extendableTimes: Array<String> = Array()
+		if let url: URL = URL(string: apiBaseString + programExtension) {
+			request.url = url
+			request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
+			request.method = .get
+			let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
+			let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
+				guard let data: Data = dat else { return }
+				do {
+					let decoder: JSONDecoder = JSONDecoder()
+					let extendableList: TimeExtension = try decoder.decode(TimeExtension.self, from: data)
+					if let methods: Array<ExtendMehtod> = extendableList.data?.methods {
+						for method: ExtendMehtod in methods {
+							extendableTimes.append(String(method.minutes))
+						}// end foreach methods
+					}// end optional binding for
+				} catch let error {
+					print(error)
+				}// end do try - catch decode result json
+				semaphore.signal()
+			}// end closure of request completion handler
+			task.resume()
+			_ = semaphore.wait(timeout: DispatchTime.now() + Timeout)
+		}// end optional binding check for make extension api url
+
+		return extendableTimes
+	}// end extendableTimes
+
+	public func extendTime (minutes min: String) -> (status: Int, newEndTime: Date?) {
+		guard let minutesToExtend: Int = Int(min) else { return (0, nil) }
+		let extend: ExtendTime = ExtendTime(minutes: minutesToExtend)
+		let encoder: JSONEncoder = JSONEncoder()
+		do {
+			let extendTimeData: Data = try encoder.encode(extend)
+			if let url: URL = URL(string: apiBaseString + programExtension) {
+				request.url = url
+				request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
+				request.method = .post
+				request.addValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
+				request.httpBody = extendTimeData
+				let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
+				var status: Int = 0
+				var newEndTime: Date? = nil
+				let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
+					guard let data: Data = dat else { return }
+					let decoder: JSONDecoder = JSONDecoder()
+					do {
+						let extendResult: TimeExtendResult = try decoder.decode(TimeExtendResult.self, from: data)
+						status = extendResult.meta.status
+						if let newEnd: TimeInterval = extendResult.data?.end_time {
+							newEndTime = Date(timeIntervalSince1970: newEnd)
+						}// end optional binding check for
+					} catch let error {
+						print(error)
+					}// end do try - catch decode json data to result
+					semaphore.signal()
+				}// end closure of request completion handler
+				task.resume()
+				_ = semaphore.wait(timeout: DispatchTime.now() + Timeout)
+				return (status, newEndTime)
+			}// end optional binding check for make extension api url
+		} catch let error {
+			print(error)
+		}// end do try - catch json encode
+
+		return (200, nil)
+	}// end extendTime
+
 		// MARK: - Internal methods
 		// MARK: - Private methods
 		// MARK: - Delegates
