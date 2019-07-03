@@ -161,7 +161,9 @@ public final class ProgramInfo: NSObject {
 		self.status = ProgramStatus(rawValue: infomation[JSONKey.data.status] as? String ?? ProgramStatus.ended.rawValue)
 		self.isMemberOnly = infomation[JSONKey.data.isMemberOnly] as? Bool ?? false
 		self.categories = infomation[JSONKey.data.categories] as? Array<String> ?? Array()
+		self.baseTime = Date(timeIntervalSince1970: infomation[JSONKey.data.vposBaseAt] as? TimeInterval ?? Date().timeIntervalSince1970)
 		self.startTime = Date(timeIntervalSince1970: infomation[JSONKey.data.beginAt] as? TimeInterval ?? Date().timeIntervalSince1970)
+		self.endTime = Date(timeIntervalSince1970: infomation[JSONKey.data.endAt] as? TimeInterval ?? Date().timeIntervalSince1970)
 		if let descriptionString = (infomation[JSONKey.data.description] as? String)?.data(using: .utf8) {
 			do {
 				let readingOptions: Dictionary<NSAttributedString.DocumentReadingOptionKey, Any> = [.documentType: NSAttributedString.DocumentType.html, .textEncodingName: "UTF-8"]
