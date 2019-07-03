@@ -143,6 +143,33 @@ public struct Context: Codable {
 	}// end computed property MixingState
 }// end struct Context
 
+internal struct ExtendMehtod: Codable {
+	var minutes: Int
+	var type: String
+}// end ExtendMehtod
+
+internal struct ExtendMethods: Codable {
+	var methods: Array<ExtendMehtod>?
+}// end struct ExtendMethods
+
+internal struct TimeExtension: Codable {
+	var data: ExtendMethods?
+	var meta: MetaInformation
+}// end struct TimeExtension
+
+internal struct ExtendTime: Codable {
+	var minutes: Int
+}// end struct ExtendTime
+
+internal struct NewEndTime: Codable {
+	var end_time: TimeInterval
+}// end struct NewEndTime
+
+internal struct TimeExtendResult: Codable {
+	var data: NewEndTime?
+	var meta: MetaInformation
+}// end struct TimeExtendResult
+
 public struct Mixing: Codable {
 	let mixing: Array<Context>
 }// end struct Mixing
