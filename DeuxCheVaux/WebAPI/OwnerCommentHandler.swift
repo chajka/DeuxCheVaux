@@ -446,24 +446,29 @@ public final class OwnerCommentHandler: NSObject {
 			request.url = url
 			request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
 			request.method = .get
-			let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
-			let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
-				guard let data: Data = dat else { return }
-				do {
-					let decoder: JSONDecoder = JSONDecoder()
-					let extendableList: TimeExtension = try decoder.decode(TimeExtension.self, from: data)
-					if let methods: Array<ExtendMehtod> = extendableList.data?.methods {
-						for method: ExtendMehtod in methods {
-							extendableTimes.append(String(method.minutes))
-						}// end foreach methods
-					}// end optional binding for
-				} catch let error {
-					print(error)
-				}// end do try - catch decode result json
-				semaphore.signal()
-			}// end closure of request completion handler
-			task.resume()
-			_ = semaphore.wait(timeout: DispatchTime.now() + Timeout)
+			var success: Bool = false
+			repeat {
+				Thread.sleep(forTimeInterval: 10)
+				let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
+				let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
+					guard let data: Data = dat else { return }
+					do {
+						let decoder: JSONDecoder = JSONDecoder()
+						let extendableList: TimeExtension = try decoder.decode(TimeExtension.self, from: data)
+						if let methods: Array<ExtendMehtod> = extendableList.data?.methods {
+							for method: ExtendMehtod in methods {
+								extendableTimes.append(String(method.minutes))
+							}// end foreach methods
+						}// end optional binding for
+					} catch let error {
+						print(error)
+					}// end do try - catch decode result json
+					semaphore.signal()
+				}// end closure of request completion handler
+				task.resume()
+				let result: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
+				if result == .success && extendableTimes.count > 0 { success = true }
+			} while (!success)
 		}// end optional binding check for make extension api url
 
 		return extendableTimes
