@@ -224,7 +224,6 @@ public final class OwnerCommentHandler: NSObject {
 	private let program: String
 	private let apiBaseString: String
 	private let cookies: Array<HTTPCookie>
-	private var request: URLRequest
 	private let session: URLSession
 	
 		// MARK: - Constructor/Destructor
@@ -233,11 +232,6 @@ public final class OwnerCommentHandler: NSObject {
 		self.cookies = cookies
 		apiBaseString = apiBase + self.program
 		session = URLSession(configuration: URLSessionConfiguration.default)
-		let url: URL = URL(string: apiBaseString)!
-		request = URLRequest(url: url)
-		if (cookies.count > 0) {
-			request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
-		}// end if have cookies
 	}// end init
 	
 		// MARK: - Override
