@@ -509,6 +509,44 @@ public final class OwnerCommentHandler: NSObject {
 		return (200, nil)
 	}// end extendTime
 
+	public func updateProgramState (newState state: String) -> (startTime: Date, endTime: Date) {
+		let nextState = ProgramState(state: state)
+		let encoder: JSONEncoder = JSONEncoder()
+		var startTime = Date()
+		var endTime = startTime
+		do {
+			let extendTimeData: Data = try encoder.encode(nextState)
+			if let url: URL = URL(string: apiBaseString + StartStopStream) {
+				var request: URLRequest = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringCacheData, timeoutInterval: Timeout)
+				request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
+				request.method = .put
+				request.addValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
+				request.httpBody = extendTimeData
+				let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
+				let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
+					guard let data: Data = dat else { return }
+					let decoder: JSONDecoder = JSONDecoder()
+					do {
+						let updateStatedResult: UpdateStateResult = try decoder.decode(UpdateStateResult.self, from: data)
+						if let newStart: TimeInterval = updateStatedResult.data?.start_time, let newEnd: TimeInterval = updateStatedResult.data?.end_time {
+							startTime = Date(timeIntervalSince1970: newStart)
+							endTime = Date(timeIntervalSince1970: newEnd)
+						}// end optional binding
+					} catch let error {
+						print(error)
+					}// end do try - catch decode json data to result
+					semaphore.signal()
+				}// end closure of request completion handler
+				task.resume()
+				_ = semaphore.wait(timeout: DispatchTime.now() + Timeout)
+			}// end optional binding check for make extension api url
+		} catch let error {
+			print(error)
+		}// end do try - catch json encode
+
+		return (startTime, endTime)
+	}// eend updateProgramState
+
 		// MARK: - Internal methods
 		// MARK: - Private methods
 		// MARK: - Delegates
