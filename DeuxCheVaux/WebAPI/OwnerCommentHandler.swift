@@ -179,6 +179,20 @@ public struct MixInfo: Codable {
 	let meta: MetaInformation
 }// end struct MixInfo
 
+internal struct ProgramState: Codable {
+	var state: String
+}// end struct ProgramState
+
+internal struct NewTimes: Codable {
+	var start_time: TimeInterval
+	var end_time: TimeInterval
+}// end struct NewTimes
+
+internal struct UpdateStateResult: Codable {
+	var data: NewTimes?
+	var meta: MetaInformation
+}// end struct UpdateStateResult
+
 enum StreamControl {
 	enum Key: String {
 		case state = "state"
