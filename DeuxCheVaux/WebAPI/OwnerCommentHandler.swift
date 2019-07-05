@@ -179,6 +179,20 @@ public struct MixInfo: Codable {
 	let meta: MetaInformation
 }// end struct MixInfo
 
+internal struct ProgramState: Codable {
+	var state: String
+}// end struct ProgramState
+
+internal struct NewTimes: Codable {
+	var start_time: TimeInterval
+	var end_time: TimeInterval
+}// end struct NewTimes
+
+internal struct UpdateStateResult: Codable {
+	var data: NewTimes?
+	var meta: MetaInformation
+}// end struct UpdateStateResult
+
 enum StreamControl {
 	enum Key: String {
 		case state = "state"
@@ -210,7 +224,6 @@ public final class OwnerCommentHandler: NSObject {
 	private let program: String
 	private let apiBaseString: String
 	private let cookies: Array<HTTPCookie>
-	private var request: URLRequest
 	private let session: URLSession
 	
 		// MARK: - Constructor/Destructor
@@ -219,11 +232,6 @@ public final class OwnerCommentHandler: NSObject {
 		self.cookies = cookies
 		apiBaseString = apiBase + self.program
 		session = URLSession(configuration: URLSessionConfiguration.default)
-		let url: URL = URL(string: apiBaseString)!
-		request = URLRequest(url: url)
-		if (cookies.count > 0) {
-			request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
-		}// end if have cookies
 	}// end init
 	
 		// MARK: - Override
@@ -231,13 +239,13 @@ public final class OwnerCommentHandler: NSObject {
 		// MARK: - Public methods
 	public func startStreaming () -> Void {
 		guard let url = URL(string: apiBaseString + StartStopStream) else { return }
+		var request: URLRequest = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringCacheData, timeoutInterval: Timeout)
 		var jsonDict: Dictionary<String, Any> = Dictionary()
 		jsonDict[StreamControl.Key.state] = StreamControl.Value.start.rawValue
 		do {
 			request.httpBody = try JSONSerialization.data(withJSONObject: jsonDict, options: [])
 			request.setValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
 			request.method = HTTPMethod.put
-			request.url = url
 			let task = session.dataTask(with: request)
 			task.resume()
 		} catch {
@@ -247,13 +255,13 @@ public final class OwnerCommentHandler: NSObject {
 	
 	public func stopStreaming () -> Void {
 		guard let url = URL(string: apiBaseString + StartStopStream) else { return }
+		var request: URLRequest = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringCacheData, timeoutInterval: Timeout)
 		var jsonDict: Dictionary<String, Any> = Dictionary()
 		jsonDict[StreamControl.Key.state] = StreamControl.Value.end.rawValue
 		do {
 			request.httpBody = try JSONSerialization.data(withJSONObject: jsonDict, options: [])
 			request.setValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
 			request.method = HTTPMethod.put
-			request.url = url
 			let task = session.dataTask(with: request)
 			task.resume()
 		} catch {
@@ -273,6 +281,8 @@ public final class OwnerCommentHandler: NSObject {
 		var permanent: Bool = isPerm
 		
 		guard let url = URL(string: apiBaseString + operatorComment) else { return }
+		var request: URLRequest = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringCacheData, timeoutInterval: Timeout)
+		request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
 		if (comment.starts(with: perm)) {
 			permanent = true
 			commentToPost = String(comment.suffix(comment.count - perm.count))
@@ -286,7 +296,6 @@ public final class OwnerCommentHandler: NSObject {
 		
 		do {
 			request.httpBody = try JSONSerialization.data(withJSONObject: jsonDict, options: [])
-			request.url = url
 			request.method = HTTPMethod.put
 			request.addValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
 			let task: URLSessionDataTask = session.dataTask(with: request)
@@ -298,7 +307,7 @@ public final class OwnerCommentHandler: NSObject {
 	
 	public func clearOwnerComment () -> Void {
 		guard let url = URL(string: apiBaseString + operatorComment) else { return }
-		request.url = url
+		var request: URLRequest = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringCacheData, timeoutInterval: Timeout)
 		request.setValue(nil, forHTTPHeaderField: ContentTypeKey)
 		request.method = HTTPMethod.delete
 		request.httpBody = nil
@@ -308,7 +317,7 @@ public final class OwnerCommentHandler: NSObject {
 	
 	public func currentMovieStatus () -> Array<Context> {
 		guard let url: URL = URL(string: apiBaseString + program + mixing) else { return Array() }
-		request.url = url
+		var request: URLRequest = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringCacheData, timeoutInterval: Timeout)
 		request.setValue(nil, forHTTPHeaderField: ContentTypeKey)
 		request.method = HTTPMethod.get
 		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
@@ -362,7 +371,7 @@ public final class OwnerCommentHandler: NSObject {
 			encoder.outputFormatting = JSONEncoder.OutputFormatting.prettyPrinted
 			let json: Data = try encoder.encode(mix)
 			if let url: URL = URL(string: apiBaseString + mixing) {
-				request.url = url
+				var request: URLRequest = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringCacheData, timeoutInterval: Timeout)
 				request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
 				request.addValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
 				request.method = HTTPMethod.put
@@ -399,7 +408,7 @@ public final class OwnerCommentHandler: NSObject {
 			encoder.outputFormatting = JSONEncoder.OutputFormatting.prettyPrinted
 			let json: Data = try encoder.encode(mix)
 			if let url: URL = URL(string: apiBaseString + mixing) {
-				request.url = url
+				var request: URLRequest = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringCacheData, timeoutInterval: Timeout)
 				request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
 				request.addValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
 				request.method = HTTPMethod.put
@@ -429,27 +438,32 @@ public final class OwnerCommentHandler: NSObject {
 	public func extendableTimes () -> Array<String> {
 		var extendableTimes: Array<String> = Array()
 		if let url: URL = URL(string: apiBaseString + programExtension) {
-			request.url = url
+			var request: URLRequest = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringCacheData, timeoutInterval: Timeout)
 			request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
 			request.method = .get
-			let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
-			let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
-				guard let data: Data = dat else { return }
-				do {
-					let decoder: JSONDecoder = JSONDecoder()
-					let extendableList: TimeExtension = try decoder.decode(TimeExtension.self, from: data)
-					if let methods: Array<ExtendMehtod> = extendableList.data?.methods {
-						for method: ExtendMehtod in methods {
-							extendableTimes.append(String(method.minutes))
-						}// end foreach methods
-					}// end optional binding for
-				} catch let error {
-					print(error)
-				}// end do try - catch decode result json
-				semaphore.signal()
-			}// end closure of request completion handler
-			task.resume()
-			_ = semaphore.wait(timeout: DispatchTime.now() + Timeout)
+			var success: Bool = false
+			repeat {
+				Thread.sleep(forTimeInterval: 10)
+				let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
+				let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
+					guard let data: Data = dat else { return }
+					do {
+						let decoder: JSONDecoder = JSONDecoder()
+						let extendableList: TimeExtension = try decoder.decode(TimeExtension.self, from: data)
+						if let methods: Array<ExtendMehtod> = extendableList.data?.methods {
+							for method: ExtendMehtod in methods {
+								extendableTimes.append(String(method.minutes))
+							}// end foreach methods
+						}// end optional binding for
+					} catch let error {
+						print(error)
+					}// end do try - catch decode result json
+					semaphore.signal()
+				}// end closure of request completion handler
+				task.resume()
+				let result: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
+				if result == .success && extendableTimes.count > 0 { success = true }
+			} while (!success)
 		}// end optional binding check for make extension api url
 
 		return extendableTimes
@@ -462,7 +476,7 @@ public final class OwnerCommentHandler: NSObject {
 		do {
 			let extendTimeData: Data = try encoder.encode(extend)
 			if let url: URL = URL(string: apiBaseString + programExtension) {
-				request.url = url
+				var request: URLRequest = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringCacheData, timeoutInterval: Timeout)
 				request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
 				request.method = .post
 				request.addValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
@@ -494,6 +508,44 @@ public final class OwnerCommentHandler: NSObject {
 
 		return (200, nil)
 	}// end extendTime
+
+	public func updateProgramState (newState state: String) -> (startTime: Date, endTime: Date) {
+		let nextState = ProgramState(state: state)
+		let encoder: JSONEncoder = JSONEncoder()
+		var startTime = Date()
+		var endTime = startTime
+		do {
+			let extendTimeData: Data = try encoder.encode(nextState)
+			if let url: URL = URL(string: apiBaseString + StartStopStream) {
+				var request: URLRequest = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringCacheData, timeoutInterval: Timeout)
+				request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
+				request.method = .put
+				request.addValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
+				request.httpBody = extendTimeData
+				let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
+				let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
+					guard let data: Data = dat else { return }
+					let decoder: JSONDecoder = JSONDecoder()
+					do {
+						let updateStatedResult: UpdateStateResult = try decoder.decode(UpdateStateResult.self, from: data)
+						if let newStart: TimeInterval = updateStatedResult.data?.start_time, let newEnd: TimeInterval = updateStatedResult.data?.end_time {
+							startTime = Date(timeIntervalSince1970: newStart)
+							endTime = Date(timeIntervalSince1970: newEnd)
+						}// end optional binding
+					} catch let error {
+						print(error)
+					}// end do try - catch decode json data to result
+					semaphore.signal()
+				}// end closure of request completion handler
+				task.resume()
+				_ = semaphore.wait(timeout: DispatchTime.now() + Timeout)
+			}// end optional binding check for make extension api url
+		} catch let error {
+			print(error)
+		}// end do try - catch json encode
+
+		return (startTime, endTime)
+	}// eend updateProgramState
 
 		// MARK: - Internal methods
 		// MARK: - Private methods

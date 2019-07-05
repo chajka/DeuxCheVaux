@@ -129,7 +129,6 @@ public final class ProgramInfo: NSObject {
 		servers.forEach { (server) in
 			var name: String = "", webSocket: URL = URL(string: "http://www.apple.com")!, xml: String = "", port: Int = 0, thread: String = ""
 			server.forEach({ (key, value) in
-				Swift.print("key \(key), value \(value)")
 				switch key {
 				case .name:
 					name = value as? String ?? ""
