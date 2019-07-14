@@ -19,7 +19,7 @@ public enum ProgramInfoError: Error {
 	case SelfReleased
 }// end enum ProgramInfoError
 
-public enum ProgramStatus: String {
+public enum ProgramStatus: String, Codable {
 	case test = "test"
 	case onAir = "onAir"
 	case ended = "ended"
