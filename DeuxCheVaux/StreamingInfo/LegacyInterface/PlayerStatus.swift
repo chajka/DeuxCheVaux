@@ -22,6 +22,7 @@ public struct MessageServer {
 	public var WebSocket: URL?
 	public var thread: String
 	public var name: String?
+	public var identifier: Int?
 
 	static func == (lhs: MessageServer, rhs: MessageServer) -> Bool {
 		return (lhs.XMLSocet == rhs.XMLSocet) && (lhs.WebSocket == rhs.WebSocket) && (lhs.thread == rhs.thread)
