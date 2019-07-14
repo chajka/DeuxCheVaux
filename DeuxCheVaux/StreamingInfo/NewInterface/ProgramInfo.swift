@@ -31,7 +31,7 @@ public struct Social {
 	public let type: SocialType
 }// end struct Social
 
-public struct Broadcaster {
+public struct BroadcasterInfo {
 	public let name: String
 	public let identifier: String
 }// end Struct Broadcaster
@@ -105,7 +105,7 @@ public final class ProgramInfo: NSObject {
 	public private(set) var startTime: Date!
 	public private(set) var endTime: Date!
 	public private(set) var programDesctiption: NSAttributedString!
-	public private(set) var broadcaster: Broadcaster!
+	public private(set) var broadcaster: BroadcasterInfo!
 	public private(set) var canNicoAd: Bool!
 	public private(set) var servers: Array<MessageServer> = Array()
 
