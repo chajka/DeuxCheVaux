@@ -22,6 +22,7 @@ public struct MessageServer {
 	public var WebSocket: URL?
 	public var thread: String
 	public var name: String?
+	public var identifier: Int?
 
 	static func == (lhs: MessageServer, rhs: MessageServer) -> Bool {
 		return (lhs.XMLSocet == rhs.XMLSocet) && (lhs.WebSocket == rhs.WebSocket) && (lhs.thread == rhs.thread)
@@ -228,7 +229,7 @@ public final class PlayerStatus: NSObject , XMLParserDelegate {
 		case .msThread:
 			thread = String(stringBuffer)
 			let xmlserver: XMLSocket = XMLSocket(address: server, port: port)
-			let ms: MessageServer = MessageServer(XMLSocet: xmlserver, WebSocket: nil, thread: thread, name: nil)
+			let ms: MessageServer = MessageServer(XMLSocet: xmlserver, WebSocket: nil, thread: thread, name: nil, identifier: nil)
 			messageServers.append(ms)
 		case .messageServerList:
 			messageServers.removeFirst()
