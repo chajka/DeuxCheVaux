@@ -229,7 +229,7 @@ public final class PlayerStatus: NSObject , XMLParserDelegate {
 		case .msThread:
 			thread = String(stringBuffer)
 			let xmlserver: XMLSocket = XMLSocket(address: server, port: port)
-			let ms: MessageServer = MessageServer(XMLSocet: xmlserver, WebSocket: nil, thread: thread, name: nil)
+			let ms: MessageServer = MessageServer(XMLSocet: xmlserver, WebSocket: nil, thread: thread, name: nil, identifier: nil)
 			messageServers.append(ms)
 		case .messageServerList:
 			messageServers.removeFirst()
