@@ -16,6 +16,7 @@ public enum ProgramInfoError: Error {
 	case NoProgramError
 	case URLResponseError
 	case JSONParseError
+	case SelfReleased
 }// end enum ProgramInfoError
 
 public enum ProgramStatus: String {
