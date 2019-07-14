@@ -175,7 +175,6 @@ public final class ProgramInfo: NSObject {
 				semaphore.signal()
 			}// end completion handler
 			task.resume()
-//			semaphore.wait()
 			let timeoutResult: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
 			if timeoutResult == .success, let descHTML: String = descriptionHTML, let descStr: String = descriptionString {
 				if let descriptiionData: Data = descHTML.data(using: String.Encoding.utf8) {
