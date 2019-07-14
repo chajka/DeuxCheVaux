@@ -89,50 +89,6 @@ private enum RoomKeys: String {
 	}// end func ~=
 }// end enum RoomKey
 
-//private enum JSONKey {
-//	enum toplevel: String {
-//		case meta = "meta"
-//		case data = "data"
-//	}// end enum toplevel
-//	enum data: String {
-//		case beginAt = "beginAt"
-//		case socialGroup = "socialGroup"
-//		case status = "status"
-//		case isMemberOnly = "isMemberOnly"
-//		case categories = "categories"
-//		case vposBaseAt = "vposBaseAt"
-//		case description = "description"
-//		case endAt = "endAt"
-//		case title = "title"
-//		case broadcaster = "broadcaster"
-//		case isUserNiconicoAdsEnabled = "isUserNiconicoAdsEnabled"
-//		case rooms = "rooms"
-//	}// dataKey
-//	enum social: String {
-//		case communityLevel = "communityLevel"
-//		case id = "id"
-//		case name = "name"
-//		case type = "type"
-//	}// end socialKeys
-//	enum broadcaster: String {
-//		case id = "id"
-//		case name = "name"
-//	}// end enum broadcaster
-//	enum room: String {
-//		case id = "id"
-//		case name = "name"
-//		case thread = "threadId"
-//		case webSocket = "webSocketUri"
-//		case xmlSocket = "xmlSocketUri"
-//	}// end enum room
-//}// end public enum JSONKey
-//
-//extension JSONKey.toplevel: StringEnum { }
-//extension JSONKey.data: StringEnum { }
-//extension JSONKey.social: StringEnum { }
-//extension JSONKey.broadcaster: StringEnum { }
-//extension JSONKey.room: StringEnum { }
-
 private let Timeout: Double = 2.0
 
 public final class ProgramInfo: NSObject {
