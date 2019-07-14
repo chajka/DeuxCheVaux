@@ -165,61 +165,6 @@ public final class ProgramInfo: NSObject {
 		// MARK: - Actions
 		// MARK: - Public methods
 		// MARK: - Private methods
-	private func parseServers(information: Dictionary<String, Any>) {
-		guard let servers: Array<Dictionary<String, Any>> = information[JSONKey.data.rooms] as? Array<Dictionary<String, Any>> else { return }
-		servers.forEach { (server) in
-			var name: String = "", webSocket: URL = URL(string: "http://www.apple.com")!, xml: String = "", port: Int = 0, thread: String = ""
-			server.forEach({ (key, value) in
-				switch key {
-				case .name:
-					name = value as? String ?? ""
-				case .thread:
-					thread = value as? String ?? ""
-				case .webSocket:
-					webSocket = URL(string: value as? String ?? "") ?? URL(string: "http://live2.nicovideo.jp/")!
-				case .xmlSocket:
-					let xmlSocket: URL = URL(string: value as? String ?? "") ?? URL(string: "http://live2.nicovideo.jp/")!
-					xml = xmlSocket.host!
-					port = xmlSocket.port!
-				default:
-					break
-				}// end switch
-			})// end foreach
-			let xmlSocket: XMLSocket = XMLSocket(address: xml, port: port)
-			let serv: MessageServer = MessageServer(XMLSocet: xmlSocket, WebSocket: webSocket, thread: thread, name: name)
-			self.servers.append(serv)
-		}// end foreach servers
-	}// end func parseServers
-
-	private func parseProperties(infomation: Dictionary<String, Any>) {
-		guard let social: Dictionary<String, Any> = infomation[JSONKey.data.socialGroup] as? Dictionary<String, Any> else { return }
-		let level: Int = social[JSONKey.social.communityLevel] as? Int ?? 1
-		let communityIdentifier: String = social[JSONKey.social.id] as? String ?? ""
-		let communityName: String = social[JSONKey.social.name] as? String ?? ""
-		let type: SocialType = SocialType(rawValue: social[JSONKey.social.type] as? String ?? SocialType.community.rawValue) ?? SocialType.community
-		self.social = Social(name: communityName, identifier: communityIdentifier, level: level, type: type)
-		self.status = ProgramStatus(rawValue: infomation[JSONKey.data.status] as? String ?? ProgramStatus.ended.rawValue)
-		self.isMemberOnly = infomation[JSONKey.data.isMemberOnly] as? Bool ?? false
-		self.categories = infomation[JSONKey.data.categories] as? Array<String> ?? Array()
-		self.baseTime = Date(timeIntervalSince1970: infomation[JSONKey.data.vposBaseAt] as? TimeInterval ?? Date().timeIntervalSince1970)
-		self.startTime = Date(timeIntervalSince1970: infomation[JSONKey.data.beginAt] as? TimeInterval ?? Date().timeIntervalSince1970)
-		self.endTime = Date(timeIntervalSince1970: infomation[JSONKey.data.endAt] as? TimeInterval ?? Date().timeIntervalSince1970)
-		if let descriptionString = (infomation[JSONKey.data.description] as? String)?.data(using: .utf8) {
-			do {
-				let readingOptions: Dictionary<NSAttributedString.DocumentReadingOptionKey, Any> = [.documentType: NSAttributedString.DocumentType.html, .textEncodingName: "UTF-8"]
-				programDesctiption = try NSAttributedString(data: descriptionString, options: readingOptions, documentAttributes: nil)
-			} catch {
-				programDesctiption = NSAttributedString(string: (infomation[JSONKey.data.description] as? String ?? ""))
-			}
-		}// end if
-		if let broadcaster: Dictionary<String, String> = infomation[JSONKey.data.broadcaster] as? Dictionary<String, String> {
-			let ownerName: String = broadcaster[JSONKey.broadcaster.name] ?? ""
-			let identifier: String = broadcaster[JSONKey.broadcaster.id] ?? ""
-			self.broadcaster = Broadcaster(name: ownerName, identifier: identifier)
-		}// end optional checking
-		self.canNicoAd = infomation[JSONKey.data.isUserNiconicoAdsEnabled] as? Bool ?? false
-	}// end parseProperties
-
 	private func getProgramInfomation(programNumber: String) -> ProgramInfoError {
 		let programInfoURLString = ProgramInfoFormat + programNumber + ProgramInfoSuffix
 		if let programInfoURL: URL = URL(string: programInfoURLString) {
@@ -290,8 +235,6 @@ public final class ProgramInfo: NSObject {
 				}// end optional binding check for string convert to data
 			}
 			if infoErr != .NoError { return infoErr }
-			parseProperties(infomation: data)
-			parseServers(information: data)
  		}// end if URL can allocated
 
 		return ProgramInfoError.NoError
