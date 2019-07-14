@@ -11,6 +11,46 @@ import Cocoa
 let ProgramInfoFormat: String = "http://live2.nicovideo.jp/watch/"
 let ProgramInfoSuffix: String = "/programinfo"
 
+public struct Room: Codable {
+	let webSocketUri: String
+	let xmlSocketUri: String
+	let name: String
+	let id: Int
+	let threadId: String
+}// end struct Room
+
+public struct SocialGroup: Codable {
+	let type: String
+	let id: String
+	let name: String
+	let communityLevel: Int
+}// end struct SocialGroup
+
+public struct Broadcaster: Codable {
+	let name: String
+	let id: String
+}// end struct Broadcaster
+
+public struct ProtramInformation: Codable {
+	let title: String
+	let description: String
+	let isMemberOnly: Bool
+	let vposBaseAt: TimeInterval
+	let beginAt: TimeInterval
+	let endAt: TimeInterval
+	let status: ProgramStatus
+	let categories: Array<String>
+	let rooms: Array<Room>
+	let isUserNiconicoAdsEnabled: Bool
+	let socialGroup: SocialGroup
+	let broadcaster: Broadcaster
+}// end struct ProtramInformation
+
+fileprivate struct ProgramInfoJSON: Codable {
+	let meta: MetaInformation
+	let data: ProtramInformation?
+}// end struct ProgramInfoJSON
+
 public enum ProgramInfoError: Error {
 	case NoError
 	case NoProgramError
