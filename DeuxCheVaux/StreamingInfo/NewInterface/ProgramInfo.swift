@@ -274,7 +274,21 @@ public final class ProgramInfo: NSObject {
 				semaphore.signal()
 			}// end completion handler
 			task.resume()
-			_ = semaphore.wait(timeout: DispatchTime.now() + Timeout)
+//			semaphore.wait()
+			let timeoutResult: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
+			if timeoutResult == .success, let descHTML: String = descriptionHTML, let descStr: String = descriptionString {
+				if let descriptiionData: Data = descHTML.data(using: String.Encoding.utf8) {
+					do {
+						let readingOptions: Dictionary<NSAttributedString.DocumentReadingOptionKey, Any> = [.documentType: NSAttributedString.DocumentType.html, .textEncodingName: "utf-8"]
+						programDesctiption = try NSAttributedString(data: descriptiionData, options: readingOptions, documentAttributes: nil)
+					} catch let error {
+						Swift.print(error.localizedDescription)
+						programDesctiption = NSAttributedString(string: descStr)
+					}// end do try - catch make attributed string
+				} else {
+					programDesctiption = NSAttributedString(string: descStr)
+				}// end optional binding check for string convert to data
+			}
 			if infoErr != .NoError { return infoErr }
 			parseProperties(infomation: data)
 			parseServers(information: data)
