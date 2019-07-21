@@ -47,21 +47,21 @@ private enum POSTKey {
 		case Lang = "lang_flag"
 		case Seat = "seat_flag"
 	}// end enum Key
-	
+
 	enum UseLocale: String {
 		case UseLocale = "1"
 	}// end enum
-	
+
 	enum Locale: String {
 		case Null = "null"
 	}// end enum
-	
+
 	enum Lang: String {
 		case ja = "1"
 		case zh = "2"
 		case en = "4"
 	}// end enum
-	
+
 	enum Seat: String {
 		case ja = "1"
 		case zh = "4"
@@ -108,7 +108,7 @@ public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
 			}// end didSet
 		}// end computed property set
 	}// end property writeable
-	
+
 	private let server: String
 	private let port: Int
 	private let thread: String
@@ -119,13 +119,13 @@ public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
 	private let baseTiem: Date
 	private let isPremium: Bool
 	private let cookies: Array<HTTPCookie>
-	
+
 	private var finishRunLoop: Bool = true
-	
+
 	private var inputStream: InputStream?
 	private var outputStream: OutputStream?
 	private var inputRemnant: Data = Data()
-	
+
 	public var delegate: XMLSocketCommentVectorDelegate!
 
 	public init(playerStatus: PlayerStatus, serverOffset: Int, history: Int = defaultHistroryCount, cookies: Array<HTTPCookie>, inRunLoop runLoop: RunLoop? = nil) {
@@ -170,7 +170,7 @@ public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
 		self.runLoop = runLoop
 		writeable = false
 	}// end init
-	
+
 	deinit {
 		if finishRunLoop != true { _ = close() }
 	}// end deinit
@@ -197,27 +197,27 @@ public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
 			stream.open()
 			stream.schedule(in: runLoop, forMode: RunLoop.Mode.default)
 		}// end foreach streams
-		
+
 		return true
 	}// end func open
-	
+
 	public func close() -> Bool {
 		if finishRunLoop == true { return false }
-		
+
 		guard let readStream = inputStream, let writeStream = outputStream else { return false }
 		guard let runLoop = runLoop else { return false }
 		for stream in [readStream, writeStream] {
 			stream.remove(from: runLoop, forMode: RunLoop.Mode.default)
 			stream.close()
 		}// end foreach streams
-		
+
 		inputStream = nil
 		outputStream = nil
 		stopRunLoop()
-		
+
 		return true
 	}// end function close
-	
+
 	public func comment(comment: String, command: Array<String>) -> Void {
 		let chatXMLElement: XMLElement = XMLElement(name: XML.Name.Chat.rawValue, stringValue: comment)
 		var attributes: Dictionary<String, String> = Dictionary()
@@ -225,11 +225,11 @@ public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
 		attributes[XML.Attr.UserID] = userIdentifier
 		attributes[XML.Attr.Premium] = isPremium ? "1" : "0"
 		attributes[XML.Attr.Locale] = userLanguage.rawValue
-		
+
 		if !command.isEmpty {
 			attributes[XML.Attr.Command] = command.joined(separator: " ")
 		}// end if have command
-		
+
 		heartbeat { (watchCount, commentCount, ticket) in
 			if !ticket.isEmpty {
 				self.postkey(commentCount: commentCount, ticket: ticket, callback: { (postkey) in
@@ -237,14 +237,14 @@ public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
 					attributes[XML.Attr.Postkey] = postkey
 					attributes[XML.Attr.Vops] = String(Int((-self.baseTiem.timeIntervalSinceNow) * 100))
 					chatXMLElement.setAttributesAs(attributes)
-					
+
 					let chatElement: String = chatXMLElement.xmlString + "\0"
 					self.write(chatElement)
 				})// end closure for postkey
 			}// end if
 		}// end closure for heartbeat
 	}// end function comment
-	
+
 	public func heartbeat(_ callback: @escaping heartbeatCallback) -> Void {
 		guard let heartbeatURL = URL(string: (heartbeatFormat + program)) else { return }
 		let config = URLSessionConfiguration.default
@@ -254,7 +254,7 @@ public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
 			let cookiesForHeader = HTTPCookie.requestHeaderFields(with: cookies)
 			req.allHTTPHeaderFields = cookiesForHeader
 		}// end if have cookies
-		
+
 		let task: URLSessionDataTask = session.dataTask(with: req) { (dat, res, err) in
 			guard let data = dat else { return }
 			do {
@@ -288,10 +288,10 @@ public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
 			}// end try - catch
 		}// end completion handler
 		task.resume()
-		
+
 		return
 	}// end function heartbeat
-	
+
 	private func write(_ message: String) -> Void {
 		if (finishRunLoop) { return }
 		guard let writeStream: OutputStream = outputStream, let stringDataToWrite: Data = message.data(using: String.Encoding.utf8) else { return }
@@ -302,7 +302,7 @@ public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
 		data.deallocate()
 		Thread.sleep(forTimeInterval: 3)
 	}// end function write
-	
+
 	public func stream(_ aStream: Stream, handle eventCode: Stream.Event) {
 		switch aStream {
 		case outputStream!:
@@ -313,7 +313,7 @@ public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
 			break
 		}// end switch
 	}// end function stream: handleEventCode
-	
+
 	private func handleWriteStreamEvent(eventCode: Stream.Event) -> Void {
 		guard let _ = outputStream else { return }
 		switch eventCode {
@@ -328,7 +328,7 @@ public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
 			print ("Write stream unknown Event Ocurred : \(eventCode)")
 		}// end switch
 	}// end function handleWriteSreamEvent
-	
+
 	private func handleReadStreamEvent(eventCode: Stream.Event) -> Void {
 		var buffer = [UInt8](repeating: 0, count: BufferSize)
 		guard let readStream = inputStream else { return }
@@ -357,7 +357,7 @@ public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
 						comments.append(comment)
 					}// end if
 				}// end foreach comment strings
-				
+
 				guard let commentSocketDelegate = delegate else { return }
 				for comment in comments {
 					do {
@@ -372,7 +372,7 @@ public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
 			print("event is not has bytes available \(eventCode)")
 		}// end switch by event code
 	}// end function handleReadStreamEvent
-	
+
 	private func postkey(commentCount: Int, ticket: String, callback: @escaping PostKeyCallBack) -> Void {
 		let (postkeyURL, params) =  makePostKeyURL(commentCount: commentCount, ticket: ticket)
 		let config = URLSessionConfiguration.default
@@ -384,7 +384,7 @@ public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
 			let cookiesForHeader = HTTPCookie.requestHeaderFields(with: cookies)
 			req.allHTTPHeaderFields = cookiesForHeader
 		}// end if have cookie(s)
-		
+
 		let task: URLSessionDataTask = session.dataTask(with: req) { (dat, resp, err) in
 			guard let data: Data = dat else { return }
 			let postkeyResult = String(data: data, encoding: String.Encoding.utf8)!
@@ -399,7 +399,7 @@ public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
 		}// end process recieved data
 		task.resume()
 	}// end func postkey
-	
+
 	private func makePostKeyURL(commentCount: Int, ticket: String) -> (URL, String) {
 		let therad: String = [POSTKey.Key.Thread.rawValue, thread].joined(separator: "=")
 		let block: String = [POSTKey.Key.Block.rawValue, String(Int((commentCount + 1) / 100))].joined(separator: "=")
@@ -418,19 +418,19 @@ public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
 			lang = [POSTKey.Key.Lang.rawValue, POSTKey.Lang.en.rawValue].joined(separator: "=")
 			seat = [POSTKey.Key.Seat.rawValue, POSTKey.Seat.en.rawValue].joined(separator: "=")
 		}// end switch
-		
+
 		let params: String = [therad, block, useLocale, lang, locale, seat].joined(separator: "&")
 		let postkeyURLandParamStr: String = postkeyFormat + program
 		let postkeysURL: URL = URL(string: postkeyURLandParamStr)!
-		
+
 		return (postkeysURL, params)
 	}// end function makePostKeyURL
-	
+
 	private func stopRunLoop() -> Void {
 		finishRunLoop = true
 		let _: Timer = Timer(timeInterval: 0, target: self, selector: #selector(noop(timer: )), userInfo: nil, repeats: false)
 	}// end function stopRunLoop
-	
+
 	@objc private func noop(timer: Timer) -> Void {
 		// dummy noop function for terminate private run loop
 	}// end function noop

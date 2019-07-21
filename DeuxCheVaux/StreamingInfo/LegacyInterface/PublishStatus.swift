@@ -13,7 +13,7 @@ private enum PublishStatusKey: String {
 	case vote = "allow_vote"
 	case rtmpurl = "url"
 	case stream = "stream"
-	
+
 	static func ~= (lhs: PublishStatusKey, rhs: String) -> Bool {
 		return lhs.rawValue == rhs ? true : false
 	}// end func ~=
@@ -76,11 +76,11 @@ public final class PublishStatus: NSObject ,XMLParserDelegate {
 			break
 		}
 	}// end func parser didEndElement
-	
+
 	public func parser(_ parser: XMLParser, didStartElement elementName: String, namespaceURI: String?, qualifiedName qName: String?, attributes attributeDict: [String : String] = [: ]) {
 		stringBuffer = String()
 	}// end function parser didStartElement
-	
+
 	public func parser(_ parser: XMLParser, foundCharacters string: String) {
 		stringBuffer += string
 	}// end func parser foundCharracters

@@ -9,24 +9,24 @@
 import XCTest
 
 class PlayerStatusTest: XCTestCase {
-	
+
 	private var cookie: HTTPCookie!
-	
+
 	override func setUp() {
 		super.setUp()
 		cookie = HTTPCookie(properties: [HTTPCookiePropertyKey.name: "user_session", HTTPCookiePropertyKey.value: user_session_value, HTTPCookiePropertyKey.domain: "nicovideo.jp", HTTPCookiePropertyKey.path: "/"])
 	}
-	
+
 	override func tearDown() {
 		// Put teardown code here. This method is called after the invocation of each test method in the class.
 		super.tearDown()
 	}
-	
+
 	func test01_allocation() {
 		let playerstatus: PlayerStatus = PlayerStatus(program: liveNumber, cookies: [cookie])
 		XCTAssertNotNil(playerstatus, "player status is nil")
 	}
-	
+
 	func test02_properties() {
 		let playerstatus: PlayerStatus = PlayerStatus(program: liveNumber, cookies: [cookie])
 		XCTAssertNotNil(playerstatus, "player status is nil")
@@ -47,7 +47,7 @@ class PlayerStatusTest: XCTestCase {
 		XCTAssertFalse(playerstatus.listenerIsVIP, "property listener is VIP is not true")
 		XCTAssertGreaterThan(playerstatus.messageServers.count, 0, "property message servers is empty")
 	}
-	
+
 	func testPerformanceExample() {
 		// This is an example of a performance test case.
 		self.measure {
