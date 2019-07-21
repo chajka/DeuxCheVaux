@@ -16,7 +16,7 @@ private enum VideoInfoTag: String {
 	case commentCount = "comment_num"
 	case mylist = "mylist_counter"
 	case tag = "tag"
-	
+
 	static func ~= (lhs: VideoInfoTag, rhs: String) -> Bool {
 		return lhs.rawValue ~= rhs ? true : false
 	}// end ~=
@@ -69,7 +69,7 @@ public final class SmileVideoInformation: NSObject {
 		// MARK: - Public methods\
 	public func parse () -> Bool {
 		let result: Bool = checkContents()
-		
+
 		return result
 	}// end parse
 

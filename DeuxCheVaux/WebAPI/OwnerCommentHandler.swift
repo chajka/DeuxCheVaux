@@ -225,7 +225,7 @@ public final class OwnerCommentHandler: NSObject {
 	private let apiBaseString: String
 	private let cookies: Array<HTTPCookie>
 	private let session: URLSession
-	
+
 		// MARK: - Constructor/Destructor
 	public init (program: String, cookies: Array<HTTPCookie>) {
 		self.program = program
@@ -233,7 +233,7 @@ public final class OwnerCommentHandler: NSObject {
 		apiBaseString = apiBase + self.program
 		session = URLSession(configuration: URLSessionConfiguration.default)
 	}// end init
-	
+
 		// MARK: - Override
 		// MARK: - Actions
 		// MARK: - Public methods
@@ -252,7 +252,7 @@ public final class OwnerCommentHandler: NSObject {
 			print("Program \(program) can not serialize")
 		}// end try - catch JSONSerialization
 	}// end func startStreaming
-	
+
 	public func stopStreaming () -> Void {
 		guard let url = URL(string: apiBaseString + StartStopStream) else { return }
 		var request: URLRequest = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringCacheData, timeoutInterval: Timeout)
@@ -268,7 +268,7 @@ public final class OwnerCommentHandler: NSObject {
 			print("Program \(program) can not serialize")
 		}// end try - catch JSONSerialization
 	}// end func startStreaming
-	
+
 	public func postOwnerComment (comment: String, name: String = "", color: String = "white", isPerm: Bool = false) throws -> Void {
 		if comment.isEmpty { throw CommentPostError.EmptyComment }
 		var commentToPost = String(comment)
@@ -279,7 +279,7 @@ public final class OwnerCommentHandler: NSObject {
 		let commentColor = Color.premium(rawValue: color)
 		if commentColor == nil { throw CommentPostError.InvalidColor(color)}
 		var permanent: Bool = isPerm
-		
+
 		guard let url = URL(string: apiBaseString + operatorComment) else { return }
 		var request: URLRequest = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringCacheData, timeoutInterval: Timeout)
 		request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
@@ -287,13 +287,13 @@ public final class OwnerCommentHandler: NSObject {
 			permanent = true
 			commentToPost = String(comment.suffix(comment.count - perm.count))
 		}// end if comment include permanent command
-		
+
 		var jsonDict: Dictionary<String, Any> = Dictionary()
 		jsonDict[CommentKeys.comment] = commentToPost
 		if permanent { jsonDict[CommentKeys.perm] = true }
 		if !name.isEmpty { jsonDict[CommentKeys.name] = name }
 		if !color.isEmpty { jsonDict[CommentKeys.color] = color }
-		
+
 		do {
 			request.httpBody = try JSONSerialization.data(withJSONObject: jsonDict, options: [])
 			request.method = HTTPMethod.put
@@ -304,7 +304,7 @@ public final class OwnerCommentHandler: NSObject {
 			print("Comment \(jsonDict) can not serialize")
 		}// end try - catch JSONSerialization
 	}// end func owner comment
-	
+
 	public func clearOwnerComment () -> Void {
 		guard let url = URL(string: apiBaseString + operatorComment) else { return }
 		var request: URLRequest = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringCacheData, timeoutInterval: Timeout)
@@ -314,7 +314,7 @@ public final class OwnerCommentHandler: NSObject {
 		let task: URLSessionDataTask = session.dataTask(with: request)
 		task.resume()
 	}// end clearOwnerComment
-	
+
 	public func currentMovieStatus () -> Array<Context> {
 		guard let url: URL = URL(string: apiBaseString + program + mixing) else { return Array() }
 		var request: URLRequest = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringCacheData, timeoutInterval: Timeout)
@@ -336,7 +336,7 @@ public final class OwnerCommentHandler: NSObject {
 		}// end closure
 		task.resume()
 		let _ = semaphore.wait(wallTimeout: DispatchWallTime.now() + Timeout)
-		
+
 		return mixInfor
 	}// end currentMovieStatus
 
@@ -402,7 +402,7 @@ public final class OwnerCommentHandler: NSObject {
 		let streaming: Context = Context(content: program, audio: 1.0, display: MixingState.main.rawValue)
 		let mix: Mixing = Mixing(mixing: [streaming])
 		var success = false
-		
+
 		do {
 			let encoder: JSONEncoder = JSONEncoder()
 			encoder.outputFormatting = JSONEncoder.OutputFormatting.prettyPrinted
@@ -431,7 +431,7 @@ public final class OwnerCommentHandler: NSObject {
 		} catch let error {
 			print(error.localizedDescription)
 		}// end do try - catch json encoding
-		
+
 		return success
 	}// end mixingOff
 

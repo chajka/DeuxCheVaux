@@ -47,11 +47,11 @@ public enum UserLanguage: String {
 	case ja = "ja-jp"
 	case zh = "zh-tw"
 	case en = "en-us"
-	
+
 	static func ~= (lhs: UserLanguage, rhs: String) -> Bool {
 		return lhs.rawValue == rhs ? true : false
 	}// end func ~=
-	
+
 	static func == (lhs: UserLanguage, rhs: String) -> Bool {
 		return lhs.rawValue == rhs ? true : false
 	}// end func ==
@@ -79,7 +79,7 @@ enum PlayerStatusKey: String {
 	case msPort = "port"
 	case msThread = "thread"
 	case messageServerList = "ms_list"
-	
+
 	static func ~= (lhs: PlayerStatusKey, rhs: String) -> Bool {
 		return lhs.rawValue == rhs ? true : false
 	}// end func ~=
@@ -102,23 +102,23 @@ public final class PlayerStatus: NSObject , XMLParserDelegate {
 	public private(set) var startTime: Date!
 	public private(set) var endTime: Date!
 	public private(set) var communityThumbnaiURL: URL!
-	
+
 	public private(set) var listenerIdentifier: String!
 	public private(set) var listenerName: String!
 	public private(set) var listenerIsPremium: Bool!
 	public private(set) var listenerLanguage: UserLanguage!
 	public private(set) var listenerIsVIP: Bool!
-	
+
 	public private(set) var messageServers: Array<MessageServer> = Array()
-	
+
 		// MARK: - Member variables
 	private var userSession: Array<HTTPCookie>
 	private var stringBuffer: String = String()
-	
+
 	private var server: String!
 	private var port: Int!
 	private var thread: String!
-	
+
 		// MARK: - Constructor/Destructor
 	public init(program: String, cookies: Array<HTTPCookie>) {
 		userSession = cookies
