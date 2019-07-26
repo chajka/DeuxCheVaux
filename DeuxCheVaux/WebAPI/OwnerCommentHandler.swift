@@ -196,6 +196,16 @@ internal struct UpdateStateResult: Codable {
 	var meta: MetaInformation
 }// end struct UpdateStateResult
 
+public enum EnqueteError {
+	case noError
+	case itemCountUnderTwo
+	case itemCountOverNine
+	case encodeError
+	case urlError
+	case timeoutError
+	case apiError
+}// end enum EnqueteError
+
 enum StreamControl {
 	enum Key: String {
 		case state = "state"
