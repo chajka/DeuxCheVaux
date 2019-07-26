@@ -395,6 +395,39 @@ public final class OwnerCommentHandler: NSObject {
 		return .encodeError
 	}// end questionary
 
+	public func displayQuestionaryResult () -> (success: Bool, answers: Array<EnqueteItem>?) {
+		guard let url: URL = URL(string: UserNamaAPIBase + program + QuestionaryResult) else { return (false, nil) }
+
+		var request: URLRequest = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringLocalAndRemoteCacheData, timeoutInterval: Timeout)
+		request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
+		request.method = .post
+		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
+		let decoder: JSONDecoder = JSONDecoder()
+		var success: Bool = false
+		var answers: Array<EnqueteItem>?
+		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, req: URLResponse?, err: Error?) in
+			guard let data: Data = dat else {
+				semaphore.signal()
+				return
+			}// end guard
+			do {
+				let result: EnqueteResult = try decoder.decode(EnqueteResult.self, from: data)
+				if let data: EnqueteData = result.data, result.meta.status == 200 {
+					success = true
+					answers = data.items
+				}// end if
+			} catch let error {
+				print(error.localizedDescription)
+			}// end do try - catch decode result
+			semaphore.signal()
+		}// end closurre
+		task.resume()
+		let timeout: DispatchTimeoutResult = semaphore.wait(timeout: .now() + Timeout)
+		if timeout == .timedOut || !success { success = false }
+
+		return (success, answers)
+	}// end displayQuestionaryResult
+
 	public func currentMovieStatus () -> Array<Context> {
 		guard let url: URL = URL(string: apiBaseString + program + mixing) else { return Array() }
 		var request: URLRequest = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringCacheData, timeoutInterval: Timeout)
