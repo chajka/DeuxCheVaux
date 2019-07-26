@@ -348,6 +348,53 @@ public final class OwnerCommentHandler: NSObject {
 		task.resume()
 	}// end clearOwnerComment
 
+	public func questionary (title question: String, choices items: Array<String>) -> EnqueteError {
+		let capableItemSount: Set = Set(2...9)
+		let itemCount: Int = items.count
+		if !capableItemSount.contains(itemCount) {
+			if itemCount < 2 { return .itemCountUnderTwo }
+			else { return .itemCountOverNine }
+		}// end if items count is invalid
+		guard let url: URL = URL(string: UserNamaAPIBase + program + Questionary) else { return .urlError }
+
+		var request: URLRequest = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringLocalAndRemoteCacheData, timeoutInterval: Timeout)
+		request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
+		request.setValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
+		request.method = .post
+		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
+		let enquetee: Enquete = Enquete(question: question, items: items)
+		let encoder: JSONEncoder = JSONEncoder()
+		let decoder: JSONDecoder = JSONDecoder()
+		do {
+			var result: EnqueteResult?
+			let data: Data = try encoder.encode(enquetee)
+			request.httpBody = data
+			let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, req: URLResponse?, err: Error?) in
+				guard let data: Data = dat else {
+					semaphore.signal()
+					return
+				}// end guard
+				do {
+					result = try decoder.decode(EnqueteResult.self, from: data)
+					semaphore.signal()
+				} catch let error {
+					print(error.localizedDescription)
+				}// end do try - catch decode result data
+			}// end closure
+			task.resume()
+			let timeout: DispatchTimeoutResult = semaphore.wait(timeout: .now() + Timeout)
+			if timeout == .timedOut { return .timeoutError }
+			if let result: EnqueteResult = result {
+				if result.meta.status == 200 { return .noError }
+				else { return .apiError }
+			}// end if check result
+		} catch let error {
+			print(error.localizedDescription)
+		}// end do try - catch encode Enquete struct to JSON string data
+
+		return .encodeError
+	}// end questionary
+
 	public func currentMovieStatus () -> Array<Context> {
 		guard let url: URL = URL(string: apiBaseString + program + mixing) else { return Array() }
 		var request: URLRequest = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringCacheData, timeoutInterval: Timeout)
