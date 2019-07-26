@@ -297,9 +297,11 @@ public final class OwnerCommentHandler: NSObject {
 		var jsonDict: Dictionary<String, Any> = Dictionary()
 		jsonDict[StreamControl.Key.state] = StreamControl.Value.end.rawValue
 		do {
-			request.httpBody = try JSONSerialization.data(withJSONObject: jsonDict, options: [])
+			request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
+			request.addValue(UserAgent, forHTTPHeaderField: UserAgentKey)
 			request.setValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
 			request.method = HTTPMethod.put
+			request.httpBody = try JSONSerialization.data(withJSONObject: jsonDict, options: [])
 			let task = session.dataTask(with: request)
 			task.resume()
 		} catch {
