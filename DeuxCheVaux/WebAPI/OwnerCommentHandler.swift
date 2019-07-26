@@ -350,6 +350,8 @@ public final class OwnerCommentHandler: NSObject {
 	public func clearOwnerComment () -> Void {
 		guard let url = URL(string: apiBaseString + operatorComment) else { return }
 		var request: URLRequest = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringCacheData, timeoutInterval: Timeout)
+		request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
+		request.addValue(UserAgent, forHTTPHeaderField: UserAgentKey)
 		request.setValue(nil, forHTTPHeaderField: ContentTypeKey)
 		request.method = HTTPMethod.delete
 		request.httpBody = nil
