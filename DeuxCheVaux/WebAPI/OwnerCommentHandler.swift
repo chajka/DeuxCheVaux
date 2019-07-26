@@ -475,6 +475,8 @@ public final class OwnerCommentHandler: NSObject {
 	public func currentMovieStatus () -> Array<Context> {
 		guard let url: URL = URL(string: apiBaseString + program + mixing) else { return Array() }
 		var request: URLRequest = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringCacheData, timeoutInterval: Timeout)
+		request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
+		request.addValue(UserAgent, forHTTPHeaderField: UserAgentKey)
 		request.setValue(nil, forHTTPHeaderField: ContentTypeKey)
 		request.method = HTTPMethod.get
 		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
