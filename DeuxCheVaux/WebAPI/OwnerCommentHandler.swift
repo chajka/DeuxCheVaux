@@ -63,6 +63,9 @@ public enum CommentPostError: Error {
 	case InvalidColor(String)
 }// end public enum CommentPostError
 
+private let UserAgentKey: String = "User-Agent"
+private let UserAgent: String = "Charleston/0.6 (DeuxCheVaux 0.3.4.0)"
+
 private let apiBase: String = "https://live2.nicovideo.jp/watch/"
 private let UserNamaAPIBase: String = "https://live2.nicovideo.jp/unama/watch/"
 
