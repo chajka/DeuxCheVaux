@@ -64,6 +64,7 @@ public enum CommentPostError: Error {
 }// end public enum CommentPostError
 
 private let apiBase: String = "https://live2.nicovideo.jp/watch/"
+private let UserNamaAPIBase: String = "https://live2.nicovideo.jp/unama/watch/"
 
 private let StartStopStream: String = "/segment"
 private let operatorComment: String = "/operator_comment"
@@ -72,6 +73,8 @@ private let vipComment: String = "/bsp_comment"
 private let statistics: String = "/statistics"
 private let contents: String = "/contents"
 private let mixing: String = "/broadcast/mixing"
+private let Questionary: String = "/enquete"
+private let QuestionaryResult: String = "/enquete/result"
 
 private let perm: String = "/perm "
 private let clear: String = "/clear"
