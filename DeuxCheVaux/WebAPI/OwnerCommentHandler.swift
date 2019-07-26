@@ -532,6 +532,7 @@ public final class OwnerCommentHandler: NSObject {
 			if let url: URL = URL(string: apiBaseString + mixing) {
 				var request: URLRequest = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringCacheData, timeoutInterval: Timeout)
 				request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
+				request.addValue(UserAgent, forHTTPHeaderField: UserAgentKey)
 				request.addValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
 				request.method = HTTPMethod.put
 				request.httpBody = json
