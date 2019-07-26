@@ -63,6 +63,9 @@ public enum CommentPostError: Error {
 	case InvalidColor(String)
 }// end public enum CommentPostError
 
+private let UserAgentKey: String = "User-Agent"
+private let UserAgent: String = "Charleston/0.6 (DeuxCheVaux 0.3.4.0)"
+
 private let apiBase: String = "https://live2.nicovideo.jp/watch/"
 private let UserNamaAPIBase: String = "https://live2.nicovideo.jp/unama/watch/"
 
@@ -276,9 +279,11 @@ public final class OwnerCommentHandler: NSObject {
 		var jsonDict: Dictionary<String, Any> = Dictionary()
 		jsonDict[StreamControl.Key.state] = StreamControl.Value.start.rawValue
 		do {
-			request.httpBody = try JSONSerialization.data(withJSONObject: jsonDict, options: [])
+			request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
+			request.addValue(UserAgent, forHTTPHeaderField: UserAgentKey)
 			request.setValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
 			request.method = HTTPMethod.put
+			request.httpBody = try JSONSerialization.data(withJSONObject: jsonDict, options: [])
 			let task = session.dataTask(with: request)
 			task.resume()
 		} catch {
@@ -292,9 +297,11 @@ public final class OwnerCommentHandler: NSObject {
 		var jsonDict: Dictionary<String, Any> = Dictionary()
 		jsonDict[StreamControl.Key.state] = StreamControl.Value.end.rawValue
 		do {
-			request.httpBody = try JSONSerialization.data(withJSONObject: jsonDict, options: [])
+			request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
+			request.addValue(UserAgent, forHTTPHeaderField: UserAgentKey)
 			request.setValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
 			request.method = HTTPMethod.put
+			request.httpBody = try JSONSerialization.data(withJSONObject: jsonDict, options: [])
 			let task = session.dataTask(with: request)
 			task.resume()
 		} catch {
@@ -328,9 +335,11 @@ public final class OwnerCommentHandler: NSObject {
 		if !color.isEmpty { jsonDict[CommentKeys.color] = color }
 
 		do {
-			request.httpBody = try JSONSerialization.data(withJSONObject: jsonDict, options: [])
+			request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
+			request.addValue(UserAgent, forHTTPHeaderField: UserAgentKey)
 			request.method = HTTPMethod.put
 			request.addValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
+			request.httpBody = try JSONSerialization.data(withJSONObject: jsonDict, options: [])
 			let task: URLSessionDataTask = session.dataTask(with: request)
 			task.resume()
 		} catch {
@@ -341,6 +350,8 @@ public final class OwnerCommentHandler: NSObject {
 	public func clearOwnerComment () -> Void {
 		guard let url = URL(string: apiBaseString + operatorComment) else { return }
 		var request: URLRequest = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringCacheData, timeoutInterval: Timeout)
+		request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
+		request.addValue(UserAgent, forHTTPHeaderField: UserAgentKey)
 		request.setValue(nil, forHTTPHeaderField: ContentTypeKey)
 		request.method = HTTPMethod.delete
 		request.httpBody = nil
@@ -359,6 +370,7 @@ public final class OwnerCommentHandler: NSObject {
 
 		var request: URLRequest = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringLocalAndRemoteCacheData, timeoutInterval: Timeout)
 		request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
+		request.addValue(UserAgent, forHTTPHeaderField: UserAgentKey)
 		request.setValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
 		request.method = .post
 		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
@@ -400,6 +412,7 @@ public final class OwnerCommentHandler: NSObject {
 
 		var request: URLRequest = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringLocalAndRemoteCacheData, timeoutInterval: Timeout)
 		request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
+		request.addValue(UserAgent, forHTTPHeaderField: UserAgentKey)
 		request.method = .post
 		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
 		let decoder: JSONDecoder = JSONDecoder()
@@ -433,6 +446,7 @@ public final class OwnerCommentHandler: NSObject {
 
 		var request: URLRequest = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringLocalAndRemoteCacheData, timeoutInterval: Timeout)
 		request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
+		request.addValue(UserAgent, forHTTPHeaderField: UserAgentKey)
 		request.method = .delete
 		var success: Bool = false
 		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
@@ -461,6 +475,8 @@ public final class OwnerCommentHandler: NSObject {
 	public func currentMovieStatus () -> Array<Context> {
 		guard let url: URL = URL(string: apiBaseString + program + mixing) else { return Array() }
 		var request: URLRequest = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringCacheData, timeoutInterval: Timeout)
+		request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
+		request.addValue(UserAgent, forHTTPHeaderField: UserAgentKey)
 		request.setValue(nil, forHTTPHeaderField: ContentTypeKey)
 		request.method = HTTPMethod.get
 		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
@@ -516,6 +532,7 @@ public final class OwnerCommentHandler: NSObject {
 			if let url: URL = URL(string: apiBaseString + mixing) {
 				var request: URLRequest = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringCacheData, timeoutInterval: Timeout)
 				request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
+				request.addValue(UserAgent, forHTTPHeaderField: UserAgentKey)
 				request.addValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
 				request.method = HTTPMethod.put
 				request.httpBody = json
@@ -553,6 +570,7 @@ public final class OwnerCommentHandler: NSObject {
 			if let url: URL = URL(string: apiBaseString + mixing) {
 				var request: URLRequest = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringCacheData, timeoutInterval: Timeout)
 				request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
+				request.addValue(UserAgent, forHTTPHeaderField: UserAgentKey)
 				request.addValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
 				request.method = HTTPMethod.put
 				request.httpBody = json
@@ -583,6 +601,7 @@ public final class OwnerCommentHandler: NSObject {
 		if let url: URL = URL(string: apiBaseString + programExtension) {
 			var request: URLRequest = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringCacheData, timeoutInterval: Timeout)
 			request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
+			request.addValue(UserAgent, forHTTPHeaderField: UserAgentKey)
 			request.method = .get
 			var success: Bool = false
 			repeat {
@@ -621,6 +640,7 @@ public final class OwnerCommentHandler: NSObject {
 			if let url: URL = URL(string: apiBaseString + programExtension) {
 				var request: URLRequest = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringCacheData, timeoutInterval: Timeout)
 				request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
+				request.addValue(UserAgent, forHTTPHeaderField: UserAgentKey)
 				request.method = .post
 				request.addValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
 				request.httpBody = extendTimeData
@@ -662,6 +682,7 @@ public final class OwnerCommentHandler: NSObject {
 			if let url: URL = URL(string: apiBaseString + StartStopStream) {
 				var request: URLRequest = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringCacheData, timeoutInterval: Timeout)
 				request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
+				request.addValue(UserAgent, forHTTPHeaderField: UserAgentKey)
 				request.method = .put
 				request.addValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
 				request.httpBody = extendTimeData
