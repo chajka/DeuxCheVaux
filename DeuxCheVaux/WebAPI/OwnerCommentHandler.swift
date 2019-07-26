@@ -206,6 +206,26 @@ public enum EnqueteError {
 	case apiError
 }// end enum EnqueteError
 
+internal struct Enquete: Codable {
+	let question: String
+	let items: Array<String>
+}// end struct Enquete
+
+public struct EnqueteItem: Codable {
+	public let name: String
+	public let rate: Float
+}// end struct EnqueteItem
+
+internal struct EnqueteData: Codable {
+	let title: String
+	let items: Array<EnqueteItem>
+}// end struct EnqueteData
+
+internal struct EnqueteResult: Codable {
+	let data: EnqueteData?
+	let meta: MetaInformation
+}// end struct EnqueteResult
+
 enum StreamControl {
 	enum Key: String {
 		case state = "state"
