@@ -335,9 +335,11 @@ public final class OwnerCommentHandler: NSObject {
 		if !color.isEmpty { jsonDict[CommentKeys.color] = color }
 
 		do {
-			request.httpBody = try JSONSerialization.data(withJSONObject: jsonDict, options: [])
+			request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
+			request.addValue(UserAgent, forHTTPHeaderField: UserAgentKey)
 			request.method = HTTPMethod.put
 			request.addValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
+			request.httpBody = try JSONSerialization.data(withJSONObject: jsonDict, options: [])
 			let task: URLSessionDataTask = session.dataTask(with: request)
 			task.resume()
 		} catch {
