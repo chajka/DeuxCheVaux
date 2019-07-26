@@ -640,6 +640,7 @@ public final class OwnerCommentHandler: NSObject {
 			if let url: URL = URL(string: apiBaseString + programExtension) {
 				var request: URLRequest = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringCacheData, timeoutInterval: Timeout)
 				request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
+				request.addValue(UserAgent, forHTTPHeaderField: UserAgentKey)
 				request.method = .post
 				request.addValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
 				request.httpBody = extendTimeData
