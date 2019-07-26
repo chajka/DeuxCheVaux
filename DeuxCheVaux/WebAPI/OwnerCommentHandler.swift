@@ -446,6 +446,7 @@ public final class OwnerCommentHandler: NSObject {
 
 		var request: URLRequest = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringLocalAndRemoteCacheData, timeoutInterval: Timeout)
 		request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
+		request.addValue(UserAgent, forHTTPHeaderField: UserAgentKey)
 		request.method = .delete
 		var success: Bool = false
 		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
