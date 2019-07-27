@@ -8,12 +8,18 @@
 
 import Cocoa
 
+	// MARK: common structure
 internal struct MetaInformation: Codable {
 	let status: Int
 	let errorCode: String
 	let errorMessage: String?
 }// end struct MetaInformation
 
+internal struct ProgramState: Codable {
+	var state: String
+}// end struct ProgramState
+
+// MARK: miixing / quote specific structure
 public enum MixingMode {
 	case main
 	case sub
@@ -47,6 +53,16 @@ public struct Context: Codable {
 	}// end computed property MixingState
 }// end struct Context
 
+public struct Mixing: Codable {
+	let mixing: Array<Context>
+}// end struct Mixing
+
+public struct MixInfo: Codable {
+	let data: Mixing?
+	let meta: MetaInformation
+}// end struct MixInfo
+
+	// MARK: end time enhancement specific definition
 internal struct ExtendMehtod: Codable {
 	var minutes: Int
 	var type: String
@@ -74,19 +90,6 @@ internal struct TimeExtendResult: Codable {
 	var meta: MetaInformation
 }// end struct TimeExtendResult
 
-public struct Mixing: Codable {
-	let mixing: Array<Context>
-}// end struct Mixing
-
-public struct MixInfo: Codable {
-	let data: Mixing?
-	let meta: MetaInformation
-}// end struct MixInfo
-
-internal struct ProgramState: Codable {
-	var state: String
-}// end struct ProgramState
-
 internal struct NewTimes: Codable {
 	var start_time: TimeInterval
 	var end_time: TimeInterval
@@ -97,6 +100,7 @@ internal struct UpdateStateResult: Codable {
 	var meta: MetaInformation
 }// end struct UpdateStateResult
 
+	// MAR: Questioonary specific definition
 public enum EnqueteError {
 	case noError
 	case itemCountUnderTwo
@@ -127,6 +131,7 @@ internal struct EnqueteResult: Codable {
 	let meta: MetaInformation
 }// end struct EnqueteResult
 
+	// MARK: State control specfic definition
 enum StreamControl {
 	enum Key: String {
 		case state = "state"
