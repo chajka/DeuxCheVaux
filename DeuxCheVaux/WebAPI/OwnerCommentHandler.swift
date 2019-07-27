@@ -8,108 +8,6 @@
 
 import Cocoa
 
-public enum Color {
-	enum normal: String {
-		case white = "white"
-		case red = "red"
-		case pink = "pink"
-		case orange = "orange"
-		case yellow = "yellow"
-		case green = "green"
-		case cyan = "cyan"
-		case blue = "bule"
-		case purple = "purple"
-		case black = "black"
-	}// end enum normal member usable comment color
-	enum vip: String {
-		case white = "white"
-		case red = "red"
-		case green = "green"
-		case blue = "bule"
-		case cyan = "cyan"
-		case yellow = "yellow"
-		case purple = "purple"
-		case pink = "pink"
-		case orange = "orange"
-		case niconicowhite = "niconicowhite"
-	}// end enum
-	enum premium: String {
-		case white = "white"
-		case red = "red"
-		case pink = "pink"
-		case orange = "orange"
-		case yellow = "yellow"
-		case green = "green"
-		case cyan = "cyan"
-		case blue = "bule"
-		case purple = "purple"
-		case black = "black"
-		case white2 = "white2"
-		case red2 = "red2"
-		case pink2 = "pink2"
-		case orange2 = "orange2"
-		case yellow2 = "yellow2"
-		case green2 = "green2"
-		case cyan2 = "cyan2"
-		case blue2 = "bule2"
-		case purple2 = "purple2"
-		case black2 = "black2"
-	}// end enum premium member usable comment color
-}// end usable color for comment
-
-public enum CommentPostError: Error {
-	case EmptyComment
-	case NameUndefined
-	case InvalidColor(String)
-}// end public enum CommentPostError
-
-private let UserAgentKey: String = "User-Agent"
-private let UserAgent: String = "Charleston/0.6 (DeuxCheVaux 0.3.4.0)"
-
-private let apiBase: String = "https://live2.nicovideo.jp/watch/"
-private let UserNamaAPIBase: String = "https://live2.nicovideo.jp/unama/watch/"
-
-private let StartStopStream: String = "/segment"
-private let operatorComment: String = "/operator_comment"
-private let programExtension: String = "/extension"
-private let vipComment: String = "/bsp_comment"
-private let statistics: String = "/statistics"
-private let contents: String = "/contents"
-private let mixing: String = "/broadcast/mixing"
-private let Questionary: String = "/enquete"
-private let QuestionaryResult: String = "/enquete/result"
-
-private let perm: String = "/perm "
-private let clear: String = "/clear"
-
-private let ContentTypeKey: String = "Content-type"
-private let ContentTypeJSON: String = "application/json"
-
-public enum HTTPMethod: String {
-	case get = "GET"
-	case post = "POST"
-	case put = "PUT"
-	case delete = "DELETE"
-}// end enum httpMehod
-
-public extension URLRequest {
-	var method: HTTPMethod? {
-		get {
-			if let method: String = self.httpMethod {
-				return HTTPMethod(rawValue: method)
-			}// end get
-			return nil
-		}// end get
-		set {
-			if let httpMehtod: HTTPMethod = newValue {
-				self.httpMethod = httpMehtod.rawValue
-			} else {
-				self.httpMethod = ""
-			}// end if
-		}// end set
-	}// end property extension of URLRequest
-}// end of extension of URLRequest
-
 internal struct MetaInformation: Codable {
 	let status: Int
 	let errorCode: String
@@ -254,6 +152,95 @@ extension CommentKeys: StringEnum { }
 fileprivate let Timeout: Double = 2.0
 fileprivate let Success: String = "OK"
 
+public enum Color {
+	enum normal: String {
+		case white = "white"
+		case red = "red"
+		case pink = "pink"
+		case orange = "orange"
+		case yellow = "yellow"
+		case green = "green"
+		case cyan = "cyan"
+		case blue = "bule"
+		case purple = "purple"
+		case black = "black"
+	}// end enum normal member usable comment color
+	enum premium: String {
+		case white = "white"
+		case red = "red"
+		case pink = "pink"
+		case orange = "orange"
+		case yellow = "yellow"
+		case green = "green"
+		case cyan = "cyan"
+		case blue = "bule"
+		case purple = "purple"
+		case black = "black"
+		case white2 = "white2"
+		case red2 = "red2"
+		case pink2 = "pink2"
+		case orange2 = "orange2"
+		case yellow2 = "yellow2"
+		case green2 = "green2"
+		case cyan2 = "cyan2"
+		case blue2 = "bule2"
+		case purple2 = "purple2"
+		case black2 = "black2"
+	}// end enum premium member usable comment color
+}// end usable color for comment
+
+public enum CommentPostError: Error {
+	case EmptyComment
+	case NameUndefined
+	case InvalidColor(String)
+}// end public enum CommentPostError
+
+private let UserAgentKey: String = "User-Agent"
+private let UserAgent: String = "Charleston/0.6 (DeuxCheVaux 0.3.4.0)"
+private let ContentTypeKey: String = "Content-type"
+private let ContentTypeJSON: String = "application/json"
+
+private let apiBase: String = "https://live2.nicovideo.jp/watch/"
+private let UserNamaAPIBase: String = "https://live2.nicovideo.jp/unama/watch/"
+
+private let StartStopStream: String = "/segment"
+private let operatorComment: String = "/operator_comment"
+private let programExtension: String = "/extension"
+private let vipComment: String = "/bsp_comment"
+private let statistics: String = "/statistics"
+private let contents: String = "/contents"
+private let mixing: String = "/broadcast/mixing"
+private let Questionary: String = "/enquete"
+private let QuestionaryResult: String = "/enquete/result"
+
+private let perm: String = "/perm "
+private let clear: String = "/clear"
+
+public extension URLRequest {
+	enum HTTPMethod: String {
+		case get = "GET"
+		case post = "POST"
+		case put = "PUT"
+		case delete = "DELETE"
+	}// end enum httpMehod
+	
+	var method: HTTPMethod? {
+		get {
+			if let method: String = self.httpMethod {
+				return HTTPMethod(rawValue: method)
+			}// end get
+			return nil
+		}// end get
+		set {
+			if let httpMehtod: HTTPMethod = newValue {
+				self.httpMethod = httpMehtod.rawValue
+			} else {
+				self.httpMethod = ""
+			}// end if
+		}// end set
+	}// end property extension of URLRequest
+}// end of extension of URLRequest
+
 public final class OwnerCommentHandler: NSObject {
 		// MARK: - Properties
 		// MARK: - Member variables
@@ -282,7 +269,7 @@ public final class OwnerCommentHandler: NSObject {
 			request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
 			request.addValue(UserAgent, forHTTPHeaderField: UserAgentKey)
 			request.setValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
-			request.method = HTTPMethod.put
+			request.method = URLRequest.HTTPMethod.put
 			request.httpBody = try JSONSerialization.data(withJSONObject: jsonDict, options: [])
 			let task = session.dataTask(with: request)
 			task.resume()
@@ -300,7 +287,7 @@ public final class OwnerCommentHandler: NSObject {
 			request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
 			request.addValue(UserAgent, forHTTPHeaderField: UserAgentKey)
 			request.setValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
-			request.method = HTTPMethod.put
+			request.method = URLRequest.HTTPMethod.put
 			request.httpBody = try JSONSerialization.data(withJSONObject: jsonDict, options: [])
 			let task = session.dataTask(with: request)
 			task.resume()
@@ -337,7 +324,7 @@ public final class OwnerCommentHandler: NSObject {
 		do {
 			request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
 			request.addValue(UserAgent, forHTTPHeaderField: UserAgentKey)
-			request.method = HTTPMethod.put
+			request.method = URLRequest.HTTPMethod.put
 			request.addValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
 			request.httpBody = try JSONSerialization.data(withJSONObject: jsonDict, options: [])
 			let task: URLSessionDataTask = session.dataTask(with: request)
@@ -353,7 +340,7 @@ public final class OwnerCommentHandler: NSObject {
 		request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
 		request.addValue(UserAgent, forHTTPHeaderField: UserAgentKey)
 		request.setValue(nil, forHTTPHeaderField: ContentTypeKey)
-		request.method = HTTPMethod.delete
+		request.method = URLRequest.HTTPMethod.delete
 		request.httpBody = nil
 		let task: URLSessionDataTask = session.dataTask(with: request)
 		task.resume()
@@ -478,7 +465,7 @@ public final class OwnerCommentHandler: NSObject {
 		request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
 		request.addValue(UserAgent, forHTTPHeaderField: UserAgentKey)
 		request.setValue(nil, forHTTPHeaderField: ContentTypeKey)
-		request.method = HTTPMethod.get
+		request.method = URLRequest.HTTPMethod.get
 		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
 		var mixInfor: Array<Context> = Array()
 		let task: URLSessionDataTask = session.dataTask(with: request) { (dat, resp, err) in
@@ -534,7 +521,7 @@ public final class OwnerCommentHandler: NSObject {
 				request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
 				request.addValue(UserAgent, forHTTPHeaderField: UserAgentKey)
 				request.addValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
-				request.method = HTTPMethod.put
+				request.method = URLRequest.HTTPMethod.put
 				request.httpBody = json
 				let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
 				let task: URLSessionDataTask = session.dataTask(with: request) { (dat, resp, err) in
@@ -572,7 +559,7 @@ public final class OwnerCommentHandler: NSObject {
 				request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
 				request.addValue(UserAgent, forHTTPHeaderField: UserAgentKey)
 				request.addValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
-				request.method = HTTPMethod.put
+				request.method = URLRequest.HTTPMethod.put
 				request.httpBody = json
 				let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
 				let task: URLSessionDataTask = session.dataTask(with: request) { (dat, resp, err) in

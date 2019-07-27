@@ -378,7 +378,7 @@ public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
 		let config = URLSessionConfiguration.default
 		let session = URLSession(configuration: config)
 		var req = URLRequest(url: postkeyURL)
-		req.httpMethod = HTTPMethod.post.rawValue
+		req.method = URLRequest.HTTPMethod.post
 		req.httpBody = params.data(using: .utf8)
 		if !cookies.isEmpty {
 			let cookiesForHeader = HTTPCookie.requestHeaderFields(with: cookies)
