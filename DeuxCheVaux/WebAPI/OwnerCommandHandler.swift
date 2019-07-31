@@ -9,9 +9,10 @@
 import Cocoa
 
 	// MARK: common structure
+fileprivate let NoError: Int = 200
 internal struct MetaInformation: Codable {
 	let status: Int
-	let errorCode: String
+	let errorCode: String?
 	let errorMessage: String?
 }// end struct MetaInformation
 
@@ -19,13 +20,12 @@ internal struct ProgramState: Codable {
 	var state: String
 }// end struct ProgramState
 
-// MARK: miixing / quote specific structure
+	// MARK: miixing / quote specific structure
 public enum MixingMode {
 	case main
 	case sub
 	case soundOnly
 	case swap
-	case swapSoundOnly
 }// end enum MixingMode
 
 public enum MixingState: String {
@@ -53,6 +53,7 @@ public struct Context: Codable {
 	}// end computed property MixingState
 }// end struct Context
 
+	// MARK: Old mixing api specific definition
 public struct Mixing: Codable {
 	let mixing: Array<Context>
 }// end struct Mixing
@@ -61,6 +62,69 @@ public struct MixInfo: Codable {
 	let data: Mixing?
 	let meta: MetaInformation
 }// end struct MixInfo
+
+	// MARK: New mixing api specific definition
+public enum QuateSource: String, Codable {
+	case mySelf = "self"
+	case quote = "quote"
+}// end enum QuateSource
+
+internal struct Source: Codable {
+	let source: QuateSource
+	let volume: Float
+	let isSoundOnly: Bool?
+}// end struct Source
+
+public enum ConteentType: String, Codable {
+	case video = "video"
+	case live = "live"
+}// end enum ConteentsType
+
+internal struct Content: Codable {
+	let id: String
+	let type: ConteentType
+}// end struct Contents
+
+internal struct Layout: Codable {
+	let main: Source
+	let sub: Source
+}// end struct Layout
+
+internal struct Quatation: Codable {
+	let layout: Layout
+	let contents: Array<Content>
+}// end struct Quatation
+
+internal struct CurrentQuatation: Codable {
+	let meta: MetaInformation
+	let layout: Layout?
+	let currentContent: Content?
+}// end struct CurrentQuatation
+
+internal struct UpdateLayout: Codable {
+	let layout: Layout
+}// end struct UpdateLayout
+
+internal struct UpdateContents: Codable {
+	let contents: Array<Content>
+}// end struct UpdateContents
+
+internal struct QuoteResult: Codable {
+	let meta: MetaInformation
+}// end struct QuoteResult
+
+internal struct MovieInfo: Codable {
+	let id: String
+	let length: Int
+	let title: String
+	let userIdentifier: String
+	let quotable: Bool
+}// end struct MovieInfo
+
+internal struct QuatableResult: Codable {
+	let meta: MetaInformation
+	let data: MovieInfo?
+}// end struct QuatableResult
 
 	// MARK: end time enhancement specific definition
 internal struct ExtendMehtod: Codable {
@@ -155,7 +219,12 @@ extension StreamControl.Value: StringEnum { }
 extension CommentKeys: StringEnum { }
 
 fileprivate let Timeout: Double = 2.0
+fileprivate let DefaultVolume: Float = 0.5
 fileprivate let Success: String = "OK"
+internal let SmileVideoPrefix: String = "sm"
+internal let NicoMoviewPrefix: String = "nm"
+internal let SmileOfficialPrefix: String = "so"
+internal let NicoNicoLivePrefix: String = "lv"
 
 public enum Color {
 	enum normal: String {
@@ -205,30 +274,34 @@ private let UserAgent: String = "Charleston/0.6 (DeuxCheVaux 0.3.4.0)"
 private let ContentTypeKey: String = "Content-type"
 private let ContentTypeJSON: String = "application/json"
 
-private let apiBase: String = "https://live2.nicovideo.jp/watch/"
+private let ApiBase: String = "https://live2.nicovideo.jp/watch/"
 private let UserNamaAPIBase: String = "https://live2.nicovideo.jp/unama/watch/"
+private let QuateAPIBase: String = "https://lapi.spi.nicovideo.jp/v1/tools/live/contents/"
+private let QuatableAPIBase: String = "https://lapi.spi.nicovideo.jp/v1/tools/live/quote/services/video/contents/"
 
 private let StartStopStream: String = "/segment"
 private let operatorComment: String = "/operator_comment"
 private let programExtension: String = "/extension"
-private let vipComment: String = "/bsp_comment"
 private let statistics: String = "/statistics"
 private let contents: String = "/contents"
-private let mixing: String = "/broadcast/mixing"
 private let Questionary: String = "/enquete"
 private let QuestionaryResult: String = "/enquete/result"
+private let QuateSuffix: String = "/quotation"
+private let QuateLayout: String = "/quotation/layout"
+private let QuateContents: String = "/quotation/contents"
 
 private let perm: String = "/perm "
 private let clear: String = "/clear"
 
+public enum HTTPMethod: String {
+	case get = "GET"
+	case post = "POST"
+	case put = "PUT"
+	case delete = "DELETE"
+	case patch = "PATCH"
+}// end enum httpMehod
+
 public extension URLRequest {
-	enum HTTPMethod: String {
-		case get = "GET"
-		case post = "POST"
-		case put = "PUT"
-		case delete = "DELETE"
-	}// end enum httpMehod
-	
 	var method: HTTPMethod? {
 		get {
 			if let method: String = self.httpMethod {
@@ -240,17 +313,19 @@ public extension URLRequest {
 			if let httpMehtod: HTTPMethod = newValue {
 				self.httpMethod = httpMehtod.rawValue
 			} else {
-				self.httpMethod = ""
-			}// end if
+				self.httpMethod = HTTPMethod.get.rawValue
+			}// end optional binding check for new value is member of enum HTTPMethod
 		}// end set
-	}// end property extension of URLRequest
+	}// end computed property extension of URLRequest
 }// end of extension of URLRequest
 
-public final class OwnerCommentHandler: NSObject {
+public final class OwnerCommandHandler: NSObject {
 		// MARK: - Properties
 		// MARK: - Member variables
 	private let program: String
 	private let apiBaseString: String
+	private let videoPrefixSet: Set<String>
+	private let capableVolumeRange: Range<Float> = Range(uncheckedBounds: (lower: 0.0, upper: 1.0))
 	private let cookies: Array<HTTPCookie>
 	private let session: URLSession
 
@@ -258,7 +333,8 @@ public final class OwnerCommentHandler: NSObject {
 	public init (program: String, cookies: Array<HTTPCookie>) {
 		self.program = program
 		self.cookies = cookies
-		apiBaseString = apiBase + self.program
+		videoPrefixSet = Set(arrayLiteral: SmileVideoPrefix, NicoMoviewPrefix, SmileOfficialPrefix)
+		apiBaseString = ApiBase + self.program
 		session = URLSession(configuration: URLSessionConfiguration.default)
 	}// end init
 
@@ -274,7 +350,7 @@ public final class OwnerCommentHandler: NSObject {
 			request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
 			request.addValue(UserAgent, forHTTPHeaderField: UserAgentKey)
 			request.setValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
-			request.method = URLRequest.HTTPMethod.put
+			request.method = .put
 			request.httpBody = try JSONSerialization.data(withJSONObject: jsonDict, options: [])
 			let task = session.dataTask(with: request)
 			task.resume()
@@ -292,7 +368,7 @@ public final class OwnerCommentHandler: NSObject {
 			request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
 			request.addValue(UserAgent, forHTTPHeaderField: UserAgentKey)
 			request.setValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
-			request.method = URLRequest.HTTPMethod.put
+			request.method = .put
 			request.httpBody = try JSONSerialization.data(withJSONObject: jsonDict, options: [])
 			let task = session.dataTask(with: request)
 			task.resume()
@@ -329,7 +405,7 @@ public final class OwnerCommentHandler: NSObject {
 		do {
 			request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
 			request.addValue(UserAgent, forHTTPHeaderField: UserAgentKey)
-			request.method = URLRequest.HTTPMethod.put
+			request.method = .put
 			request.addValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
 			request.httpBody = try JSONSerialization.data(withJSONObject: jsonDict, options: [])
 			let task: URLSessionDataTask = session.dataTask(with: request)
@@ -345,7 +421,7 @@ public final class OwnerCommentHandler: NSObject {
 		request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
 		request.addValue(UserAgent, forHTTPHeaderField: UserAgentKey)
 		request.setValue(nil, forHTTPHeaderField: ContentTypeKey)
-		request.method = URLRequest.HTTPMethod.delete
+		request.method = .delete
 		request.httpBody = nil
 		let task: URLSessionDataTask = session.dataTask(with: request)
 		task.resume()
@@ -464,130 +540,105 @@ public final class OwnerCommentHandler: NSObject {
 		return success
 	}// end endQuestionary
 
-	public func currentMovieStatus () -> Array<Context> {
-		guard let url: URL = URL(string: apiBaseString + program + mixing) else { return Array() }
-		var request: URLRequest = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringCacheData, timeoutInterval: Timeout)
+		// MARK: quote
+	public func checkQuotable (_ video: String) -> Bool {
+		guard let url: URL = URL(string: QuatableAPIBase + video) else { return false }
+
+		var request: URLRequest = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringLocalCacheData, timeoutInterval: Timeout)
 		request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
 		request.addValue(UserAgent, forHTTPHeaderField: UserAgentKey)
-		request.setValue(nil, forHTTPHeaderField: ContentTypeKey)
-		request.method = URLRequest.HTTPMethod.get
+		request.method = .delete
+		var quotable: Bool = false
 		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
-		var mixInfor: Array<Context> = Array()
-		let task: URLSessionDataTask = session.dataTask(with: request) { (dat, resp, err) in
-			if let data: Data = dat {
-				do {
-					let info: MixInfo = try JSONDecoder().decode(MixInfo.self, from: data)
-					if info.meta.errorCode == Success, let mixing: Array<Context> = info.data?.mixing {
-						mixInfor.append(contentsOf: mixing)
-					}// end check error and optional binding check for mixing state
-				} catch let error {
-					print(error.localizedDescription)
-				}// end do try - catch json decode
-			}// end optional binding check for recieved data
-		}// end closure
+		let decoder: JSONDecoder = JSONDecoder()
+		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
+			guard let data: Data = dat else {
+				semaphore.signal()
+				return
+			}// end guard check data is not nil
+			do {
+				let result: QuatableResult = try decoder.decode(QuatableResult.self, from: data)
+				if let info: MovieInfo = result.data {
+					quotable = info.quotable
+				}// end optional binding check for have data section from decoded json structure
+			} catch let error {
+				print(error.localizedDescription)
+			}// end do try - catch decode recieved json
+			
+		}// end closure for url request result data handler
 		task.resume()
-		let _ = semaphore.wait(wallTimeout: DispatchWallTime.now() + Timeout)
+		let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
+		if timeout == .timedOut || !quotable { quotable = false }
 
-		return mixInfor
-	}// end currentMovieStatus
+		return quotable
+	}// end checkQuotable
 
-	public func mixingVideoOrOtherStreaming (target quote: String, mode mixingMode: MixingMode, volume streamingVolume: Float = 1.0, quotedVolume mixingVolume: Float = 0.1) -> Bool {
-		var broadcast: String
-		var quoted: String
+	public func startQuatation (quote quoteContent: String, mode mixingMode: MixingMode, mainVolume main: Float, quoteVolume quote: Float) -> Bool {
+		var type: ConteentType? = nil
+		let quoteContentPrefix: String = String(quoteContent.prefix(2))
+		if videoPrefixSet.contains(quoteContentPrefix) { type = .video }
+		else if quoteContentPrefix == NicoNicoLivePrefix { type = .live }
+		guard let url: URL = URL(string: QuateAPIBase + program + QuateSuffix), let contentType: ConteentType = type else { return false }
+
+		var mainSource: Source
+		var subSource: Source
+		let content: Content = Content(id: quoteContent, type: contentType)
+		let mainVolume: Float = capableVolumeRange.contains(main) ? main : DefaultVolume
+		let quoteVolume: Float = capableVolumeRange.contains(quote) ? quote : DefaultVolume
 		switch mixingMode {
+		case .main:
+			mainSource = Source(source: .quote, volume: mainVolume, isSoundOnly: nil)
+			subSource = Source(source: .mySelf, volume: quoteVolume, isSoundOnly: true)
 		case .sub:
-			broadcast = MixingState.main.rawValue
-			quoted = MixingState.sub.rawValue
+			mainSource = Source(source: .mySelf, volume: mainVolume, isSoundOnly: nil)
+			subSource = Source(source: .quote, volume: quoteVolume, isSoundOnly: false)
 		case .soundOnly:
-			broadcast = MixingState.main.rawValue
-			quoted = MixingState.soundonly.rawValue
+			mainSource = Source(source: .mySelf, volume: mainVolume, isSoundOnly: nil)
+			subSource = Source(source: .quote, volume: quoteVolume, isSoundOnly: true)
 		case .swap:
-			broadcast = MixingState.sub.rawValue
-			quoted = MixingState.main.rawValue
-		case .swapSoundOnly:
-			broadcast = MixingState.soundonly.rawValue
-			quoted = MixingState.main.rawValue
-		case .main: fallthrough
-		default:
-			broadcast = MixingState.sub.rawValue
-			quoted = MixingState.main.rawValue
-		}// end switch case by selected tag
+			mainSource = Source(source: .quote, volume: mainVolume, isSoundOnly: nil)
+			subSource = Source(source: .mySelf, volume: quoteVolume, isSoundOnly: false)
+		}// end switch case by quote mode
+		let layout: Layout = Layout(main: mainSource, sub: subSource)
+		let quotation: Quatation = Quatation(layout: layout, contents: [content])
 
-		let streaming: Context = Context(content: program, audio: streamingVolume, display: broadcast)
-		let mixed: Context = Context(content: quote, audio: mixingVolume, display: quoted)
-		let mix: Mixing = Mixing(mixing: [streaming, mixed])
-		var success = false
+		let encoder: JSONEncoder = JSONEncoder()
+		var quotationJSON: Data
 		do {
-			let encoder: JSONEncoder = JSONEncoder()
-			encoder.outputFormatting = JSONEncoder.OutputFormatting.prettyPrinted
-			let json: Data = try encoder.encode(mix)
-			if let url: URL = URL(string: apiBaseString + mixing) {
-				var request: URLRequest = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringCacheData, timeoutInterval: Timeout)
-				request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
-				request.addValue(UserAgent, forHTTPHeaderField: UserAgentKey)
-				request.addValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
-				request.method = URLRequest.HTTPMethod.put
-				request.httpBody = json
-				let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
-				let task: URLSessionDataTask = session.dataTask(with: request) { (dat, resp, err) in
-					guard let data: Data = dat else { return }
-					do {
-						let result: MixInfo = try JSONDecoder().decode(MixInfo.self, from: data)
-						if result.meta.errorCode == Success { success = true }
-					} catch let error {
-						print(error.localizedDescription)
-					}// end do try - catch
-					semaphore.signal()
-				}// end closure
-				task.resume()
-				let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
-				if timeout == DispatchTimeoutResult.success { success = true }
-			}// end opttioonal checking for create url
+			quotationJSON = try encoder.encode(quotation)
 		} catch let error {
 			print(error.localizedDescription)
-		}// end do try - catch json encoding
+			return false
+		}// end do try - catch encode layout struct to json
+		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
+		var request: URLRequest = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringLocalAndRemoteCacheData, timeoutInterval: Timeout)
+		request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
+		request.addValue(UserAgent, forHTTPHeaderField: UserAgentKey)
+		request.addValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
+		request.httpBody = quotationJSON
+		request.method = .post
+		var success: Bool = false
+		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, req:  URLResponse?, err:  Error?) in
+			guard let data: Data = dat else {
+				semaphore.signal()
+				return
+			}// end guard is not satisfied
+			do {
+				let decoder: JSONDecoder = JSONDecoder()
+				let result: QuoteResult = try decoder.decode(QuoteResult.self, from: data)
+				if result.meta.status == NoError { success = true }
+			} catch let error {
+				print(error.localizedDescription)
+			}// end do try - catch decode reesult data to meta information
+		}// end closure completion handler
+		task.resume()
+		let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
+		if timeout == .timedOut { success = false }
 
 		return success
-	}// end mixing
+	}// end startQuatation
 
-	public func mixingOff () -> Bool {
-		let streaming: Context = Context(content: program, audio: 1.0, display: MixingState.main.rawValue)
-		let mix: Mixing = Mixing(mixing: [streaming])
-		var success = false
-
-		do {
-			let encoder: JSONEncoder = JSONEncoder()
-			encoder.outputFormatting = JSONEncoder.OutputFormatting.prettyPrinted
-			let json: Data = try encoder.encode(mix)
-			if let url: URL = URL(string: apiBaseString + mixing) {
-				var request: URLRequest = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringCacheData, timeoutInterval: Timeout)
-				request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
-				request.addValue(UserAgent, forHTTPHeaderField: UserAgentKey)
-				request.addValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
-				request.method = URLRequest.HTTPMethod.put
-				request.httpBody = json
-				let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
-				let task: URLSessionDataTask = session.dataTask(with: request) { (dat, resp, err) in
-					guard let data: Data = dat else { return }
-					do {
-						let result: MixInfo = try JSONDecoder().decode(MixInfo.self, from: data)
-						if result.meta.errorCode == Success { success = true }
-					} catch let error {
-						print(error.localizedDescription)
-					}// end do try - catch
-					semaphore.signal()
-				}// end closure
-				task.resume()
-				let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
-				if timeout == DispatchTimeoutResult.success { success = true }
-			}// end opttioonal checking for create url
-		} catch let error {
-			print(error.localizedDescription)
-		}// end do try - catch json encoding
-
-		return success
-	}// end mixingOff
-
+		// MARK: end time extension
 	public func extendableTimes () -> Array<String> {
 		var extendableTimes: Array<String> = Array()
 		if let url: URL = URL(string: apiBaseString + programExtension) {
