@@ -9,7 +9,19 @@
 import Cocoa
 
 	// MARK: common structure
-fileprivate let NoError: Int = 200
+public enum ResultStatus: Equatable {
+	case success
+	case clientError(Int, String?, String?)
+	case serverError(Int, String?, String?)
+	case apiAddressError
+	case argumentError
+	case encodeRequestError
+	case decodeResultError
+	case recieveDetaNilError
+	case timeout
+	case unknownError
+}// end enum ResultStatus
+
 internal struct MetaInformation: Codable {
 	let status: Int
 	let errorCode: String?
