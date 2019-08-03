@@ -126,7 +126,7 @@ internal struct UpdateContents: Codable {
 	let contents: Array<Content>
 }// end struct UpdateContents
 
-internal struct QuoteResult: Codable {
+internal struct MetaResult: Codable {
 	let meta: MetaInformation
 }// end struct QuoteResult
 
