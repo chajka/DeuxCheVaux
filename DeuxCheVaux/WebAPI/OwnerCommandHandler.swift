@@ -102,7 +102,7 @@ internal struct Layout: Codable {
 	let sub: Source
 }// end struct Layout
 
-internal struct Quatation: Codable {
+internal struct Quotation: Codable {
 	let layout: Layout
 	let contents: Array<Content>
 }// end struct Quatation
