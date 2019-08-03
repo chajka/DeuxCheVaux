@@ -678,33 +678,35 @@ public final class OwnerCommandHandler: NSObject {
 		return status
 	}// end layoutQuotation
 
+	public func stopQuotation () -> ResultStatus {
+		guard let url: URL = URL(string: QuateAPIBase + program + QuoteSuffix) else { return .apiAddressError }
+
+		let request: URLRequest = makeRequest(url: url, method: .delete)
+		var status: ResultStatus = .unknownError
 		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
-		var request: URLRequest = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringLocalAndRemoteCacheData, timeoutInterval: Timeout)
-		request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
-		request.addValue(UserAgent, forHTTPHeaderField: UserAgentKey)
-		request.addValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
-		request.httpBody = quotationJSON
-		request.method = .post
-		var success: Bool = false
-		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, req:  URLResponse?, err:  Error?) in
-			guard let data: Data = dat else {
+		let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, req:  URLResponse?, err:  Error?) in
+			guard let weakSelf = self, let data: Data = dat else {
+				status = .recieveDetaNilError
 				semaphore.signal()
 				return
 			}// end guard is not satisfied
 			do {
 				let decoder: JSONDecoder = JSONDecoder()
-				let result: QuoteResult = try decoder.decode(QuoteResult.self, from: data)
-				if result.meta.status == NoError { success = true }
+				let meta: MetaResult = try decoder.decode(MetaResult.self, from: data)
+				status = weakSelf.checkMetaInformation(meta.meta)
 			} catch let error {
+				status = .decodeResultError
 				print(error.localizedDescription)
 			}// end do try - catch decode reesult data to meta information
 		}// end closure completion handler
 		task.resume()
 		let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
-		if timeout == .timedOut { success = false }
+		if timeout == .timedOut {
+			status = .timeout
+		}// end if timeout
 
-		return success
-	}// end startQuatation
+		return status
+	}// end stopQuotation
 
 		// MARK: end time extension
 	public func extendableTimes () -> Array<String> {
