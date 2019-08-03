@@ -755,6 +755,18 @@ public final class OwnerCommandHandler: NSObject {
 	}// eend updateProgramState
 
 		// MARK: - Internal methods
+	internal func makeRequest (url requestURL: URL, method requestMethod: HTTPMethod, contentsType type: String? = nil) -> URLRequest {
+		var request: URLRequest = URLRequest(url: requestURL, cachePolicy: URLRequest.CachePolicy.reloadIgnoringLocalAndRemoteCacheData, timeoutInterval: Timeout)
+		request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
+		request.addValue(UserAgent, forHTTPHeaderField: UserAgentKey)
+		if let contentsType: String = type {
+			request.addValue(contentsType, forHTTPHeaderField: ContentTypeKey)
+		}// end optional binding check for contents type
+		request.method = requestMethod
+		
+		return request
+	}// end makeRequest
+	
 		// MARK: - Private methods
 		// MARK: - Delegates
 }// end class OwnerAndVIPCommentHandler
