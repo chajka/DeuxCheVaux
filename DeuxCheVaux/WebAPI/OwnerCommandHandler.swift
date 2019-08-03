@@ -709,39 +709,40 @@ public final class OwnerCommandHandler: NSObject {
 	}// end stopQuotation
 
 		// MARK: end time extension
-	public func extendableTimes () -> Array<String> {
-		var extendableTimes: Array<String> = Array()
-		if let url: URL = URL(string: apiBaseString + programExtension) {
-			var request: URLRequest = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringCacheData, timeoutInterval: Timeout)
-			request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
-			request.addValue(UserAgent, forHTTPHeaderField: UserAgentKey)
-			request.method = .get
-			var success: Bool = false
-			repeat {
-				Thread.sleep(forTimeInterval: 10)
-				let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
-				let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
-					guard let data: Data = dat else { return }
-					do {
-						let decoder: JSONDecoder = JSONDecoder()
-						let extendableList: TimeExtension = try decoder.decode(TimeExtension.self, from: data)
-						if let methods: Array<ExtendMehtod> = extendableList.data?.methods {
-							for method: ExtendMehtod in methods {
-								extendableTimes.append(String(method.minutes))
-							}// end foreach methods
-						}// end optional binding for
-					} catch let error {
-						print(error)
-					}// end do try - catch decode result json
-					semaphore.signal()
-				}// end closure of request completion handler
-				task.resume()
-				let result: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
-				if result == .success && extendableTimes.count > 0 { success = true }
-			} while (!success)
-		}// end optional binding check for make extension api url
+	public func extendableTimes () -> (times: Array<String>, status: ResultStatus) {
+		guard let url: URL = URL(string: apiBaseString + programExtension) else { return (Array(), .apiAddressError) }
+		var status: ResultStatus = .unknownError
+		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
+		var extendableMinutes: Array<String> = Array()
+		let request: URLRequest = makeRequest(url: url, method: .get)
+		let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, rest: URLResponse?, err: Error?) in
+			guard let weakSelf = self, let data: Data = dat else {
+				status = .recieveDetaNilError
+				semaphore.signal()
+				return
+			}// end guard
+			do {
+				let decoder: JSONDecoder = JSONDecoder()
+				let extendableList: TimeExtension = try decoder.decode(TimeExtension.self, from: data)
+				status = weakSelf.checkMetaInformation(extendableList.meta)
+				if let methods: Array<ExtendMehtod> = extendableList.data?.methods {
+					for method: ExtendMehtod in methods {
+						extendableMinutes.append(String(method.minutes))
+					}// end foreach methods
+				}// end optional binding for
+				semaphore.signal()
+			} catch let error {
+				status = .decodeResultError
+				print(error.localizedDescription)
+			}// end do try - catch decode recived json to struct
+		}// end closure of request completion handler
+		task.resume()
+		let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
+		if timeout == .timedOut {
+			status = .timeout
+		}// end if timeout
 
-		return extendableTimes
+		return (extendableMinutes, status)
 	}// end extendableTimes
 
 	public func extendTime (minutes min: String) -> (status: Int, newEndTime: Date?) {
