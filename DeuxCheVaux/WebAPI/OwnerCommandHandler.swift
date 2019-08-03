@@ -745,45 +745,47 @@ public final class OwnerCommandHandler: NSObject {
 		return (extendableMinutes, status)
 	}// end extendableTimes
 
-	public func extendTime (minutes min: String) -> (status: Int, newEndTime: Date?) {
-		guard let minutesToExtend: Int = Int(min) else { return (0, nil) }
+	public func extendTime (minutes min: String) -> (newEndTime: Date?, status: ResultStatus) {
+		guard let url: URL = URL(string: apiBaseString + programExtension), let minutesToExtend: Int = Int(min) else { return (nil, .apiAddressError) }
 		let extend: ExtendTime = ExtendTime(minutes: minutesToExtend)
-		let encoder: JSONEncoder = JSONEncoder()
+		var newEndTime: Date? = nil
+		var status: ResultStatus = .unknownError
 		do {
+			let encoder: JSONEncoder = JSONEncoder()
 			let extendTimeData: Data = try encoder.encode(extend)
-			if let url: URL = URL(string: apiBaseString + programExtension) {
-				var request: URLRequest = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringCacheData, timeoutInterval: Timeout)
-				request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
-				request.addValue(UserAgent, forHTTPHeaderField: UserAgentKey)
-				request.method = .post
-				request.addValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
-				request.httpBody = extendTimeData
-				let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
-				var status: Int = 0
-				var newEndTime: Date? = nil
-				let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
-					guard let data: Data = dat else { return }
-					let decoder: JSONDecoder = JSONDecoder()
-					do {
-						let extendResult: TimeExtendResult = try decoder.decode(TimeExtendResult.self, from: data)
-						status = extendResult.meta.status
-						if let newEnd: TimeInterval = extendResult.data?.end_time {
-							newEndTime = Date(timeIntervalSince1970: newEnd)
-						}// end optional binding check for
-					} catch let error {
-						print(error)
-					}// end do try - catch decode json data to result
+			var request: URLRequest = makeRequest(url: url, method: .post, contentsType: ContentTypeJSON)
+			request.httpBody = extendTimeData
+			let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
+			let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, resp: URLResponse?, err: Error?) in
+				guard let weakSelf = self, let data: Data = dat else {
+					status = .recieveDetaNilError
 					semaphore.signal()
-				}// end closure of request completion handler
-				task.resume()
-				_ = semaphore.wait(timeout: DispatchTime.now() + Timeout)
-				return (status, newEndTime)
-			}// end optional binding check for make extension api url
+					return
+				}// end guard
+				do {
+					let decoder: JSONDecoder = JSONDecoder()
+					let extendResult: TimeExtendResult = try decoder.decode(TimeExtendResult.self, from: data)
+					status = weakSelf.checkMetaInformation(extendResult.meta)
+					if let newEnd: TimeInterval = extendResult.data?.end_time {
+						newEndTime = Date(timeIntervalSince1970: newEnd)
+					}// end optional binding check for
+				} catch let error {
+					print(error)
+					status = .decodeResultError
+				}// end do try - catch decode json data to result
+				semaphore.signal()
+			}// end closure of request completion handler
+			task.resume()
+			let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
+			if timeout == .timedOut {
+				status = .timeout
+			}// end if timeout
 		} catch let error {
 			print(error)
+			return (nil, .encodeRequestError)
 		}// end do try - catch json encode
 
-		return (200, nil)
+		return (newEndTime, status)
 	}// end extendTime
 
 	public func updateProgramState (newState state: String) -> (startTime: Date, endTime: Date) {
