@@ -112,6 +112,7 @@ internal struct UpdatteQuotation: Codable {
 	let `repeat`: Bool
 }// end struct UpdatteQuotation
 
+internal struct CurrentQuotation: Codable {
 	let meta: MetaInformation
 	let layout: Layout?
 	let currentContent: Content?
