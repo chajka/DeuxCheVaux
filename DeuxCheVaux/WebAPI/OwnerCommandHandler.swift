@@ -550,23 +550,23 @@ public final class OwnerCommandHandler: NSObject {
 	}// end endQuestionary
 
 		// MARK: quote
-	public func checkQuotable (_ video: String) -> Bool {
-		guard let url: URL = URL(string: QuatableAPIBase + video) else { return false }
+	public func checkQuotable (_ video: String) -> (quotable: Bool, status: ResultStatus) {
+		guard let url: URL = URL(string: QuatableAPIBase + video) else { return (false, .apiAddressError) }
 
-		var request: URLRequest = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringLocalCacheData, timeoutInterval: Timeout)
-		request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
-		request.addValue(UserAgent, forHTTPHeaderField: UserAgentKey)
-		request.method = .delete
+		let request: URLRequest = makeRequest(url: url, method: .get)
+		var status: ResultStatus = .unknownError
 		var quotable: Bool = false
 		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
-		let decoder: JSONDecoder = JSONDecoder()
-		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
-			guard let data: Data = dat else {
+		let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, resp: URLResponse?, err: Error?) in
+			guard let weakSelf = self, let data: Data = dat else {
+				status = .recieveDetaNilError
 				semaphore.signal()
 				return
 			}// end guard check data is not nil
 			do {
+				let decoder: JSONDecoder = JSONDecoder()
 				let result: QuatableResult = try decoder.decode(QuatableResult.self, from: data)
+				status = weakSelf.checkMetaInformation(result.meta)
 				if let info: MovieInfo = result.data {
 					quotable = info.quotable
 				}// end optional binding check for have data section from decoded json structure
@@ -577,9 +577,12 @@ public final class OwnerCommandHandler: NSObject {
 		}// end closure for url request result data handler
 		task.resume()
 		let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
-		if timeout == .timedOut || !quotable { quotable = false }
+		if timeout == .timedOut {
+			quotable = false
+			status = .timeout
+		}// end if timeout
 
-		return quotable
+		return (quotable, status)
 	}// end checkQuotable
 
 	public func startQuatation (quote quoteContent: String, mode mixingMode: MixingMode, mainVolume main: Float, quoteVolume quote: Float) -> Bool {
