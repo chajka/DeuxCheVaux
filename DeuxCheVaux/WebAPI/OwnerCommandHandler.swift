@@ -788,43 +788,49 @@ public final class OwnerCommandHandler: NSObject {
 		return (newEndTime, status)
 	}// end extendTime
 
-	public func updateProgramState (newState state: String) -> (startTime: Date, endTime: Date) {
+	public func updateProgramState (newState state: NextProgramStatus) -> (startTime: Date, endTime: Date, status: ResultStatus) {
 		let nextState = ProgramState(state: state)
-		let encoder: JSONEncoder = JSONEncoder()
 		var startTime = Date()
 		var endTime = startTime
+		guard let url: URL = URL(string: apiBaseString + StartStopStream) else { return (startTime, endTime, .apiAddressError) }
+		var status: ResultStatus = .unknownError
 		do {
+			let encoder: JSONEncoder = JSONEncoder()
 			let extendTimeData: Data = try encoder.encode(nextState)
-			if let url: URL = URL(string: apiBaseString + StartStopStream) {
-				var request: URLRequest = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringCacheData, timeoutInterval: Timeout)
-				request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
-				request.addValue(UserAgent, forHTTPHeaderField: UserAgentKey)
-				request.method = .put
-				request.addValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
-				request.httpBody = extendTimeData
-				let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
-				let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
-					guard let data: Data = dat else { return }
-					let decoder: JSONDecoder = JSONDecoder()
-					do {
-						let updateStatedResult: UpdateStateResult = try decoder.decode(UpdateStateResult.self, from: data)
-						if let newStart: TimeInterval = updateStatedResult.data?.start_time, let newEnd: TimeInterval = updateStatedResult.data?.end_time {
-							startTime = Date(timeIntervalSince1970: newStart)
-							endTime = Date(timeIntervalSince1970: newEnd)
-						}// end optional binding
-					} catch let error {
-						print(error)
-					}// end do try - catch decode json data to result
+			var request: URLRequest = makeRequest(url: url, method: .put, contentsType: ContentTypeJSON)
+			request.httpBody = extendTimeData
+			let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
+			let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, resp: URLResponse?, err: Error?) in
+				guard let weakSelf = self, let data: Data = dat else {
+					status = .recieveDetaNilError
 					semaphore.signal()
-				}// end closure of request completion handler
-				task.resume()
-				_ = semaphore.wait(timeout: DispatchTime.now() + Timeout)
-			}// end optional binding check for make extension api url
+					return
+				}// end guard
+				do {
+					let decoder: JSONDecoder = JSONDecoder()
+					let updateStatedResult: UpdateStateResult = try decoder.decode(UpdateStateResult.self, from: data)
+					status = weakSelf.checkMetaInformation(updateStatedResult.meta)
+					if let newStart: TimeInterval = updateStatedResult.data?.start_time, let newEnd: TimeInterval = updateStatedResult.data?.end_time {
+						startTime = Date(timeIntervalSince1970: newStart)
+						endTime = Date(timeIntervalSince1970: newEnd)
+					}// end optional binding
+				} catch let error {
+					print(error)
+					status = .decodeResultError
+				}// end do try - catch decode json data to result
+				semaphore.signal()
+			}// end closure of request completion handler
+			task.resume()
+			let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
+			if timeout == .timedOut {
+				status = .timeout
+			}// end if timeout
 		} catch let error {
 			print(error)
+			status = .encodeRequestError
 		}// end do try - catch json encode
 
-		return (startTime, endTime)
+		return (startTime, endTime, status)
 	}// eend updateProgramState
 
 		// MARK: - Internal methods
