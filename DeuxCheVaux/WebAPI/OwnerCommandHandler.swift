@@ -249,7 +249,7 @@ internal let SmileOfficialPrefix: String = "so"
 internal let NicoNicoLivePrefix: String = "lv"
 
 public enum Color {
-	enum normal: String {
+	public enum normal: String, Codable {
 		case white = "white"
 		case red = "red"
 		case pink = "pink"
@@ -261,7 +261,7 @@ public enum Color {
 		case purple = "purple"
 		case black = "black"
 	}// end enum normal member usable comment color
-	enum premium: String {
+	public enum premium: String, Codable {
 		case white = "white"
 		case red = "red"
 		case pink = "pink"
