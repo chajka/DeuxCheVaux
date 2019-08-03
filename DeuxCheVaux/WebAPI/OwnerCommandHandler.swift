@@ -285,6 +285,14 @@ public enum Color {
 	}// end enum premium member usable comment color
 }// end usable color for comment
 
+internal struct OperatorComment: Codable {
+	let text: String
+	let userName: String?
+	let color: Color.premium?
+	let isPermanent: Bool?
+	let link: String?
+}// end struct OperatorComment
+
 public enum CommentPostError: Error {
 	case EmptyComment
 	case NameUndefined
