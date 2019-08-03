@@ -29,7 +29,7 @@ internal struct MetaInformation: Codable {
 }// end struct MetaInformation
 
 internal struct ProgramState: Codable {
-	var state: String
+	var state: NextProgramStatus
 }// end struct ProgramState
 
 	// MARK: miixing / quote specific structure
