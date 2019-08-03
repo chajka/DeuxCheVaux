@@ -414,16 +414,34 @@ public final class OwnerCommandHandler: NSObject {
 		return status
 	}// end func owner comment
 
-	public func clearOwnerComment () -> Void {
-		guard let url = URL(string: apiBaseString + operatorComment) else { return }
-		var request: URLRequest = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringCacheData, timeoutInterval: Timeout)
-		request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
-		request.addValue(UserAgent, forHTTPHeaderField: UserAgentKey)
-		request.setValue(nil, forHTTPHeaderField: ContentTypeKey)
-		request.method = .delete
-		request.httpBody = nil
-		let task: URLSessionDataTask = session.dataTask(with: request)
+	public func clearOwnerComment () -> ResultStatus {
+		guard let url = URL(string: apiBaseString + operatorComment) else { return .apiAddressError }
+		var status: ResultStatus = .unknownError
+		let request: URLRequest = makeRequest(url: url, method: .delete)
+		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
+		let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, resp: URLResponse?, err: Error?) in
+			guard let weakSelf = self, let data: Data = dat else {
+				status = .recieveDetaNilError
+				semaphore.signal()
+				return
+			}// end guard
+			do {
+				let decoder: JSONDecoder = JSONDecoder()
+				let meta: MetaResult = try decoder.decode(MetaResult.self, from: data)
+				status = weakSelf.checkMetaInformation(meta.meta)
+			} catch let error {
+				status = .decodeResultError
+				print(error.localizedDescription)
+			}// end do try - catch decode recieved data
+			semaphore.signal()
+		}// end closure of request completion handler
 		task.resume()
+		let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
+		if timeout == .timedOut {
+			status = .timeout
+		}// end if timeout
+
+		return status
 	}// end clearOwnerComment
 
 	public func questionary (title question: String, choices items: Array<String>) -> EnqueteError {
