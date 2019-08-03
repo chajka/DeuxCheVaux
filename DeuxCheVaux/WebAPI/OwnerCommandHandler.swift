@@ -371,42 +371,47 @@ public final class OwnerCommandHandler: NSObject {
 		// MARK: - Override
 		// MARK: - Actions
 		// MARK: - Public methods
-	public func postOwnerComment (comment: String, name: String = "", color: String = "white", isPerm: Bool = false) throws -> Void {
-		if comment.isEmpty { throw CommentPostError.EmptyComment }
-		var commentToPost = String(comment)
+	public func postOwnerComment (comment: String, name: String?, color: Color.premium?, isPerm: Bool? = false, link: String? = nil) -> ResultStatus {
+		if comment.isEmpty { return .argumentError }
 		if (comment.starts(with: clear)) {
-			clearOwnerComment()
-			return
+			return clearOwnerComment()
 		}// end if comment is clear command
-		let commentColor = Color.premium(rawValue: color)
-		if commentColor == nil { throw CommentPostError.InvalidColor(color)}
-		var permanent: Bool = isPerm
+		guard let url = URL(string: apiBaseString + operatorComment) else { return .argumentError }
+		let commentToPost: OperatorComment = OperatorComment(text: comment, userName: name, color: color, isPermanent: isPerm, link: link)
 
-		guard let url = URL(string: apiBaseString + operatorComment) else { return }
-		var request: URLRequest = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringCacheData, timeoutInterval: Timeout)
-		request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
-		if (comment.starts(with: perm)) {
-			permanent = true
-			commentToPost = String(comment.suffix(comment.count - perm.count))
-		}// end if comment include permanent command
-
-		var jsonDict: Dictionary<String, Any> = Dictionary()
-		jsonDict[CommentKeys.comment] = commentToPost
-		if permanent { jsonDict[CommentKeys.perm] = true }
-		if !name.isEmpty { jsonDict[CommentKeys.name] = name }
-		if !color.isEmpty { jsonDict[CommentKeys.color] = color }
-
+		var status: ResultStatus = .unknownError
+		var request: URLRequest = makeRequest(url: url, method: .put, contentsType: ContentTypeJSON)
+		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
 		do {
-			request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
-			request.addValue(UserAgent, forHTTPHeaderField: UserAgentKey)
-			request.method = .put
-			request.addValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
-			request.httpBody = try JSONSerialization.data(withJSONObject: jsonDict, options: [])
-			let task: URLSessionDataTask = session.dataTask(with: request)
+			let encoder: JSONEncoder = JSONEncoder()
+			request.httpBody = try encoder.encode(commentToPost)
+			let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, resp: URLResponse?, err: Error?) in
+				guard let weakSelf = self, let data: Data = dat else {
+					status = .recieveDetaNilError
+					semaphore.signal()
+					return
+				}// end guard
+				do {
+					let decoder: JSONDecoder = JSONDecoder()
+					let meta: MetaResult = try decoder.decode(MetaResult.self, from: data)
+					status = weakSelf.checkMetaInformation(meta.meta)
+				} catch let error {
+					status = .decodeResultError
+					print(error.localizedDescription)
+				}// end do try - catch decode recieved data
+				semaphore.signal()
+			}// end closure of request completion handler
 			task.resume()
-		} catch {
-			print("Comment \(jsonDict) can not serialize")
+			let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
+			if timeout == .timedOut {
+				status = .timeout
+			}// end if timeout
+		} catch let error {
+			status = .encodeRequestError
+			print(error.localizedDescription)
 		}// end try - catch JSONSerialization
+
+		return status
 	}// end func owner comment
 
 	public func clearOwnerComment () -> Void {
