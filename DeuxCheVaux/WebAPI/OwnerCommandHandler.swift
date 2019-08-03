@@ -585,43 +585,56 @@ public final class OwnerCommandHandler: NSObject {
 		return (quotable, status)
 	}// end checkQuotable
 
-	public func startQuatation (quote quoteContent: String, mode mixingMode: MixingMode, mainVolume main: Float, quoteVolume quote: Float) -> Bool {
+	public func startQuotation (quote quoteContent: String, mode mixingMode: MixingMode, mainVolume main: Float, quoteVolume quote: Float) -> ResultStatus {
 		var type: ConteentType? = nil
 		let quoteContentPrefix: String = String(quoteContent.prefix(2))
 		if videoPrefixSet.contains(quoteContentPrefix) { type = .video }
 		else if quoteContentPrefix == NicoNicoLivePrefix { type = .live }
-		guard let url: URL = URL(string: QuateAPIBase + program + QuateSuffix), let contentType: ConteentType = type else { return false }
+		guard let url: URL = URL(string: QuateAPIBase + program + QuoteSuffix), let contentType: ConteentType = type else { return .apiAddressError }
 
 		var mainSource: Source
 		var subSource: Source
+		(mainSource, subSource) = makeLayers(mode: mixingMode, mainVolume: main, quoteVolume: quote)
 		let content: Content = Content(id: quoteContent, type: contentType)
-		let mainVolume: Float = capableVolumeRange.contains(main) ? main : DefaultVolume
-		let quoteVolume: Float = capableVolumeRange.contains(quote) ? quote : DefaultVolume
-		switch mixingMode {
-		case .main:
-			mainSource = Source(source: .quote, volume: mainVolume, isSoundOnly: nil)
-			subSource = Source(source: .mySelf, volume: quoteVolume, isSoundOnly: true)
-		case .sub:
-			mainSource = Source(source: .mySelf, volume: mainVolume, isSoundOnly: nil)
-			subSource = Source(source: .quote, volume: quoteVolume, isSoundOnly: false)
-		case .soundOnly:
-			mainSource = Source(source: .mySelf, volume: mainVolume, isSoundOnly: nil)
-			subSource = Source(source: .quote, volume: quoteVolume, isSoundOnly: true)
-		case .swap:
-			mainSource = Source(source: .quote, volume: mainVolume, isSoundOnly: nil)
-			subSource = Source(source: .mySelf, volume: quoteVolume, isSoundOnly: false)
-		}// end switch case by quote mode
 		let layout: Layout = Layout(main: mainSource, sub: subSource)
-		let quotation: Quatation = Quatation(layout: layout, contents: [content])
+		let quotation: Quotation = Quotation(layout: layout, contents: [content])
 
-		let encoder: JSONEncoder = JSONEncoder()
-		var quotationJSON: Data
+		var status: ResultStatus = .unknownError
 		do {
+			let encoder: JSONEncoder = JSONEncoder()
+			var quotationJSON: Data
 			quotationJSON = try encoder.encode(quotation)
+			var request: URLRequest = makeRequest(url: url, method: .post, contentsType: ContentTypeJSON)
+			request.httpBody = quotationJSON
+			let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
+			let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, req:  URLResponse?, err:  Error?) in
+				guard let weakSelf = self, let data: Data = dat else {
+					status = .recieveDetaNilError
+					semaphore.signal()
+					return
+				}// end guard is not satisfied
+				do {
+					let decoder: JSONDecoder = JSONDecoder()
+					let result: MetaResult = try decoder.decode(MetaResult.self, from: data)
+					status = weakSelf.checkMetaInformation(result.meta)
+				} catch let error {
+					status = .decodeResultError
+					print(error.localizedDescription)
+				}// end do try - catch decode reesult data to meta information
+			}// end closure completion handler
+			task.resume()
+			let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
+			if timeout == .timedOut {
+				status = .timeout
+			}// end if timeout
 		} catch let error {
 			print(error.localizedDescription)
-			return false
+			return .encodeRequestError
 		}// end do try - catch encode layout struct to json
+
+		return status
+	}// end startQuotation
+
 		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
 		var request: URLRequest = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringLocalAndRemoteCacheData, timeoutInterval: Timeout)
 		request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
