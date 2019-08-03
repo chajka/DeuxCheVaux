@@ -138,8 +138,8 @@ public final class ProgramInfo: NSObject {
 					return
 				}// end guard else
 				if recievedData.count > 0 && Int(response.statusCode / 100) == 2 {
-					let decoder: JSONDecoder = JSONDecoder()
 					do {
+						let decoder: JSONDecoder = JSONDecoder()
 						let result: ProgramInfoJSON = try decoder.decode(ProgramInfoJSON.self, from: recievedData)
 						if let programInfo: ProtramInformation = result.data {
 							infoErr = ProgramInfoError.NoError
