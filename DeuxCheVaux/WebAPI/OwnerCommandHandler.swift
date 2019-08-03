@@ -213,11 +213,11 @@ internal struct EnqueteResult: Codable {
 }// end struct EnqueteResult
 
 	// MARK: State control specfic definition
-enum StreamControl {
-	enum Key: String {
+public enum StreamControl {
+	enum key: String {
 		case state = "state"
 	}// end enum Key
-	enum Value: String {
+	public enum value: String, Codable {
 		case start = "on_air"
 		case end = "end"
 	}// end enum value
