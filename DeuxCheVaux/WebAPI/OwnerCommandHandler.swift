@@ -77,7 +77,7 @@ public struct MixInfo: Codable {
 
 	// MARK: New mixing api specific definition
 public enum QuateSource: String, Codable {
-	case mySelf = "self"
+	case `self` = "self"
 	case quote = "quote"
 }// end enum QuateSource
 
