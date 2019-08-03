@@ -768,5 +768,26 @@ public final class OwnerCommandHandler: NSObject {
 	}// end makeRequest
 	
 		// MARK: - Private methods
+	private func checkMetaInformation (_ meta: MetaInformation) -> ResultStatus {
+		var status: ResultStatus
+		var errorCode: String? = nil
+		if let code: String = meta.errorCode { errorCode = code }
+		var errorMessage: String? = nil
+		if let message: String = meta.errorMessage { errorMessage = message }
+		let statusCode: Int = meta.status / 100
+		switch statusCode {
+		case 2:
+			status = .success
+		case 4:
+			status = .clientError(meta.status, errorCode, errorMessage)
+		case 5:
+			status = .serverError(meta.status, errorCode, errorMessage)
+		default:
+			status = .unknownError
+		}// end switch case by first digit of status code
+
+		return status
+	}// end checkMetaInformation
+
 		// MARK: - Delegates
 }// end class OwnerAndVIPCommentHandler
