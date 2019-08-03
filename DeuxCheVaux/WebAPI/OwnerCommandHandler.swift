@@ -236,8 +236,8 @@ enum CommentKeys: String {
 	case link = "link"
 }// end enum CommentKeys
 
-extension StreamControl.Key: StringEnum { }
-extension StreamControl.Value: StringEnum { }
+extension StreamControl.key: StringEnum { }
+extension StreamControl.value: StringEnum { }
 extension CommentKeys: StringEnum { }
 
 fileprivate let Timeout: Double = 2.0
