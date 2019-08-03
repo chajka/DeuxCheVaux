@@ -371,42 +371,6 @@ public final class OwnerCommandHandler: NSObject {
 		// MARK: - Override
 		// MARK: - Actions
 		// MARK: - Public methods
-	public func startStreaming () -> Void {
-		guard let url = URL(string: apiBaseString + StartStopStream) else { return }
-		var request: URLRequest = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringCacheData, timeoutInterval: Timeout)
-		var jsonDict: Dictionary<String, Any> = Dictionary()
-		jsonDict[StreamControl.Key.state] = StreamControl.Value.start.rawValue
-		do {
-			request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
-			request.addValue(UserAgent, forHTTPHeaderField: UserAgentKey)
-			request.setValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
-			request.method = .put
-			request.httpBody = try JSONSerialization.data(withJSONObject: jsonDict, options: [])
-			let task = session.dataTask(with: request)
-			task.resume()
-		} catch {
-			print("Program \(program) can not serialize")
-		}// end try - catch JSONSerialization
-	}// end func startStreaming
-
-	public func stopStreaming () -> Void {
-		guard let url = URL(string: apiBaseString + StartStopStream) else { return }
-		var request: URLRequest = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringCacheData, timeoutInterval: Timeout)
-		var jsonDict: Dictionary<String, Any> = Dictionary()
-		jsonDict[StreamControl.Key.state] = StreamControl.Value.end.rawValue
-		do {
-			request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
-			request.addValue(UserAgent, forHTTPHeaderField: UserAgentKey)
-			request.setValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
-			request.method = .put
-			request.httpBody = try JSONSerialization.data(withJSONObject: jsonDict, options: [])
-			let task = session.dataTask(with: request)
-			task.resume()
-		} catch {
-			print("Program \(program) can not serialize")
-		}// end try - catch JSONSerialization
-	}// end func startStreaming
-
 	public func postOwnerComment (comment: String, name: String = "", color: String = "white", isPerm: Bool = false) throws -> Void {
 		if comment.isEmpty { throw CommentPostError.EmptyComment }
 		var commentToPost = String(comment)
