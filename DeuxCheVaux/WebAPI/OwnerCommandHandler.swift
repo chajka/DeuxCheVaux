@@ -223,6 +223,11 @@ public enum StreamControl {
 	}// end enum value
 }// end enum StreamControl
 
+public enum NextProgramStatus: String, Codable {
+	case onAir = "on_air"
+	case ended = "end"
+}// end enum ProgramStatus
+
 enum CommentKeys: String {
 	case comment = "text"
 	case name = "userName"
