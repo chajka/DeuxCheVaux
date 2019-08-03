@@ -635,6 +635,49 @@ public final class OwnerCommandHandler: NSObject {
 		return status
 	}// end startQuotation
 
+	public func layoutQuotation (mode mixingMode: MixingMode, mainVolume main: Float, quoteVolume quote: Float, repeat enableRepeat: Bool) -> ResultStatus {
+		guard let url: URL = URL(string: QuateAPIBase + program + QuoteLayout) else { return .apiAddressError }
+
+		var mainSource: Source
+		var subSource: Source
+		(mainSource, subSource) = makeLayers(mode: mixingMode, mainVolume: main, quoteVolume: quote)
+		let layout: Layout = Layout(main: mainSource, sub: subSource)
+		let newLayout: UpdatteQuotation = UpdatteQuotation(layout: layout, repeat: enableRepeat)
+		var status: ResultStatus = .unknownError
+		var layoutJSON: Data
+		do {
+			let encoder: JSONEncoder = JSONEncoder()
+			layoutJSON = try encoder.encode(newLayout)
+			var request: URLRequest = makeRequest(url: url, method: .patch, contentsType: ContentTypeJSON)
+			request.httpBody = layoutJSON
+			let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
+			let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, req:  URLResponse?, err:  Error?) in
+				guard let weakSelf = self, let data: Data = dat else {
+					semaphore.signal()
+					return
+				}// end guard is not satisfied
+				do {
+					let decoder: JSONDecoder = JSONDecoder()
+					let result: MetaResult = try decoder.decode(MetaResult.self, from: data)
+					status = weakSelf.checkMetaInformation(result.meta)
+				} catch let error {
+					status = .decodeResultError
+					print(error.localizedDescription)
+				}// end do try - catch decode reesult data to meta information
+			}// end closure completion handler
+			task.resume()
+			let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
+			if timeout == .timedOut {
+				status = .timeout
+			}// end if timeout
+		} catch let error {
+			status = .encodeRequestError
+			print(error.localizedDescription)
+		}// end do try - catch encode layout change request to json
+
+		return status
+	}// end layoutQuotation
+
 		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
 		var request: URLRequest = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringLocalAndRemoteCacheData, timeoutInterval: Timeout)
 		request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
