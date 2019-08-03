@@ -789,5 +789,28 @@ public final class OwnerCommandHandler: NSObject {
 		return status
 	}// end checkMetaInformation
 
+	private func makeLayers (mode mixingMode: MixingMode, mainVolume main: Float, quoteVolume quote: Float) -> (main: Source, sub: Source) {
+		var mainSource: Source
+		var subSource: Source
+		let mainVolume: Float = capableVolumeRange.contains(main) ? main : DefaultVolume
+		let quoteVolume: Float = capableVolumeRange.contains(quote) ? quote : DefaultVolume
+		switch mixingMode {
+		case .main:
+			mainSource = Source(source: .quote, volume: mainVolume, isSoundOnly: nil)
+			subSource = Source(source: .`self`, volume: quoteVolume, isSoundOnly: true)
+		case .sub:
+			mainSource = Source(source: .`self`, volume: mainVolume, isSoundOnly: nil)
+			subSource = Source(source: .quote, volume: quoteVolume, isSoundOnly: false)
+		case .soundOnly:
+			mainSource = Source(source: .`self`, volume: mainVolume, isSoundOnly: nil)
+			subSource = Source(source: .quote, volume: quoteVolume, isSoundOnly: true)
+		case .swap:
+			mainSource = Source(source: .quote, volume: mainVolume, isSoundOnly: nil)
+			subSource = Source(source: .`self`, volume: quoteVolume, isSoundOnly: false)
+		}// end switch case by quote mode
+
+		return (mainSource, subSource)
+	}// end makeLayers
+
 		// MARK: - Delegates
 }// end class OwnerAndVIPCommentHandler
