@@ -488,38 +488,35 @@ public final class OwnerCommandHandler: NSObject {
 		return status
 	}// end questionary
 
-	public func displayQuestionaryResult () -> (success: Bool, answers: Array<EnqueteItem>?) {
-		guard let url: URL = URL(string: UserNamaAPIBase + program + QuestionaryResult) else { return (false, nil) }
+	public func displayQuestionaryResult () -> (answers: Array<EnqueteItem>?, status: ResultStatus) {
+		guard let url: URL = URL(string: UserNamaAPIBase + program + QuestionaryResult) else { return (nil, .apiAddressError) }
 
-		var request: URLRequest = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringLocalAndRemoteCacheData, timeoutInterval: Timeout)
-		request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
-		request.addValue(UserAgent, forHTTPHeaderField: UserAgentKey)
-		request.method = .post
+		var status: ResultStatus = .unknownError
+		let request: URLRequest = makeRequest(url: url, method: .post)
 		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
 		let decoder: JSONDecoder = JSONDecoder()
-		var success: Bool = false
 		var answers: Array<EnqueteItem>?
-		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, req: URLResponse?, err: Error?) in
-			guard let data: Data = dat else {
+		let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, req: URLResponse?, err: Error?) in
+			guard let weakSelf = self, let data: Data = dat else {
 				semaphore.signal()
 				return
 			}// end guard
 			do {
 				let result: EnqueteResult = try decoder.decode(EnqueteResult.self, from: data)
-				if let data: EnqueteData = result.data, result.meta.status == 200 {
-					success = true
-					answers = data.items
-				}// end if
+				status = weakSelf.checkMetaInformation(result.meta)
+				answers = result.data?.items
 			} catch let error {
 				print(error.localizedDescription)
 			}// end do try - catch decode result
 			semaphore.signal()
 		}// end closurre
 		task.resume()
-		let timeout: DispatchTimeoutResult = semaphore.wait(timeout: .now() + Timeout)
-		if timeout == .timedOut || !success { success = false }
+		let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
+		if timeout == .timedOut {
+			status = .timeout
+		}// end if timeout
 
-		return (success, answers)
+		return (answers, status)
 	}// end displayQuestionaryResult
 
 	public func endQuestionary () -> Bool {
