@@ -8,7 +8,7 @@
 
 import XCTest
 
-class OwnerAndVIPCommentHandlerTest: XCTestCase {
+class OwnerCommandHandlerTest: XCTestCase {
 
 	private var cookie: HTTPCookie!
 
@@ -23,19 +23,18 @@ class OwnerAndVIPCommentHandlerTest: XCTestCase {
     }
 
     func test01_allocation() {
-		let operatorCommentor: OwnerAndVIPCommentHandler = OwnerAndVIPCommentHandler(program: liveNumber, cookies: [cookie])
+		let operatorCommentor: OwnerCommandHandler = OwnerCommandHandler(program: liveNumber, cookies: [cookie])
 		XCTAssertNotNil(operatorCommentor, "operatorCommentor can not initialized")
     }
 
 	func test02_ownerComment() {
-		let operatorCommentor: OwnerAndVIPCommentHandler = OwnerAndVIPCommentHandler(program: liveNumber, cookies: [cookie])
+		let operatorCommentor: OwnerCommandHandler = OwnerCommandHandler(program: liveNumber, cookies: [cookie])
 		do {
 			try operatorCommentor.postOwnerComment(comment: "test comment", name: "Чайка", color: "green", isPerm: false)
 			Thread.sleep(forTimeInterval: 10)
 			try operatorCommentor.postOwnerComment(comment: "/perm test comment", color: "red", isPerm: false)
 			Thread.sleep(forTimeInterval: 20)
 			operatorCommentor.clearOwnerComment()
-			try operatorCommentor.postVIPComment(comment: "BSP Comment test", name: "Чайка", color: "cyan")
 		} catch {
 			XCTAssertTrue(false, "JSON serialization throw error")
 		}
