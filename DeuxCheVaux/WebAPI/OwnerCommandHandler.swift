@@ -136,7 +136,7 @@ internal struct MovieInfo: Codable {
 	let id: String
 	let length: Int
 	let title: String
-	let userIdentifier: String
+	let userId: String
 	let quotable: Bool
 }// end struct MovieInfo
 
