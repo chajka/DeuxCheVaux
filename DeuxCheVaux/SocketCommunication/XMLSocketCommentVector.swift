@@ -378,7 +378,7 @@ public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
 		let config = URLSessionConfiguration.default
 		let session = URLSession(configuration: config)
 		var req = URLRequest(url: postkeyURL)
-		req.httpMethod = HTTPMethod.post.rawValue
+		req.method = .post
 		req.httpBody = params.data(using: .utf8)
 		if !cookies.isEmpty {
 			let cookiesForHeader = HTTPCookie.requestHeaderFields(with: cookies)
@@ -392,7 +392,7 @@ public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
 			if (postkeys.count == 2) {
 				let postkey: String = String(postkeys.last!)
 				callback(postkey)
-			} else  {
+			} else {
 				Swift.print(postkeyURL)
 				return
 			}// end if

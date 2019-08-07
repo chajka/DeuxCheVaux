@@ -138,8 +138,8 @@ public final class ProgramInfo: NSObject {
 					return
 				}// end guard else
 				if recievedData.count > 0 && Int(response.statusCode / 100) == 2 {
-					let decoder: JSONDecoder = JSONDecoder()
 					do {
+						let decoder: JSONDecoder = JSONDecoder()
 						let result: ProgramInfoJSON = try decoder.decode(ProgramInfoJSON.self, from: recievedData)
 						if let programInfo: ProtramInformation = result.data {
 							infoErr = ProgramInfoError.NoError
@@ -182,7 +182,7 @@ public final class ProgramInfo: NSObject {
 						let readingOptions: Dictionary<NSAttributedString.DocumentReadingOptionKey, Any> = [.documentType: NSAttributedString.DocumentType.html, .textEncodingName: "utf-8"]
 						programDesctiption = try NSAttributedString(data: descriptiionData, options: readingOptions, documentAttributes: nil)
 					} catch let error {
-						Swift.print(error.localizedDescription)
+						print(error.localizedDescription)
 						programDesctiption = NSAttributedString(string: descStr)
 					}// end do try - catch make attributed string
 				} else {

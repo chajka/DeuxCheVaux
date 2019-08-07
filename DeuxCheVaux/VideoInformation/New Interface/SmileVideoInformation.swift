@@ -29,7 +29,7 @@ internal struct MovieDescription: Codable {
 	let userId: String
 }// end struct MovieDescription
 
-private struct MovieInfo: Codable {
+private struct MovieInformation: Codable {
 	let meta: MetaInformation
 	let data: MovieDescription?
 }// end struct MovieInfo
@@ -79,12 +79,12 @@ public final class SmileVideoInformation: NSObject {
 			let contentsAPIforcurrentVideo = contentsAPIURL.appendingPathComponent(videoNumber)
 			request = URLRequest(url: contentsAPIforcurrentVideo, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 0.1)
 			request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
-			request.method = HTTPMethod.get
+			request.method = .get
 			let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
 			let task: URLSessionDataTask = session.dataTask(with: request) { [unowned self] (dat, resp, err) in
 				guard let data: Data = dat else { return }
 				do {
-					let description: MovieInfo = try JSONDecoder().decode(MovieInfo.self, from: data)
+					let description: MovieInformation = try JSONDecoder().decode(MovieInformation.self, from: data)
 					if description.meta.errorCode == "OK" {
 						if let desc: MovieDescription = description.data {
 							self.title = desc.title
