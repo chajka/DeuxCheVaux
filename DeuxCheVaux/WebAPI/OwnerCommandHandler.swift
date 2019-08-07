@@ -891,6 +891,9 @@ public final class OwnerCommandHandler: NSObject {
 		case .swap:
 			mainSource = Source(source: .quote, volume: mainVolume, isSoundOnly: nil)
 			subSource = Source(source: .`self`, volume: quoteVolume, isSoundOnly: false)
+		case .swapSoundOnly:
+			mainSource = Source(source: .quote, volume: mainVolume, isSoundOnly: nil)
+			subSource = Source(source: .`self`, volume: quoteVolume, isSoundOnly: true)
 		}// end switch case by quote mode
 
 		return (mainSource, subSource)
