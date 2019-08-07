@@ -182,7 +182,7 @@ public final class ProgramInfo: NSObject {
 						let readingOptions: Dictionary<NSAttributedString.DocumentReadingOptionKey, Any> = [.documentType: NSAttributedString.DocumentType.html, .textEncodingName: "utf-8"]
 						programDesctiption = try NSAttributedString(data: descriptiionData, options: readingOptions, documentAttributes: nil)
 					} catch let error {
-						Swift.print(error.localizedDescription)
+						print(error.localizedDescription)
 						programDesctiption = NSAttributedString(string: descStr)
 					}// end do try - catch make attributed string
 				} else {
