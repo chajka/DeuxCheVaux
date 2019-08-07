@@ -18,6 +18,7 @@ public enum ResultStatus: Equatable {
 	case encodeRequestError
 	case decodeResultError
 	case recieveDetaNilError
+	case quotePermissionError
 	case timeout
 	case unknownError
 }// end enum ResultStatus
