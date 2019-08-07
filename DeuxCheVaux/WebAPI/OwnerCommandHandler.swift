@@ -34,11 +34,12 @@ internal struct ProgramState: Codable {
 }// end struct ProgramState
 
 	// MARK: miixing / quote specific structure
-public enum MixingMode {
-	case main
-	case sub
-	case soundOnly
-	case swap
+public enum MixingMode: Int {
+	case main = 1
+	case sub = 2
+	case soundOnly = 3
+	case swap = 4
+	case swapSoundOnly = 5
 }// end enum MixingMode
 
 public enum MixingState: String {
