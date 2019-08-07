@@ -575,7 +575,7 @@ public final class OwnerCommandHandler: NSObject {
 			} catch let error {
 				print(error.localizedDescription)
 			}// end do try - catch decode recieved json
-			
+			semaphore.signal()
 		}// end closure for url request result data handler
 		task.resume()
 		let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
@@ -623,6 +623,7 @@ public final class OwnerCommandHandler: NSObject {
 					status = .decodeResultError
 					print(error.localizedDescription)
 				}// end do try - catch decode reesult data to meta information
+				semaphore.signal()
 			}// end closure completion handler
 			task.resume()
 			let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
@@ -666,6 +667,7 @@ public final class OwnerCommandHandler: NSObject {
 					status = .decodeResultError
 					print(error.localizedDescription)
 				}// end do try - catch decode reesult data to meta information
+				semaphore.signal()
 			}// end closure completion handler
 			task.resume()
 			let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
@@ -700,6 +702,7 @@ public final class OwnerCommandHandler: NSObject {
 				status = .decodeResultError
 				print(error.localizedDescription)
 			}// end do try - catch decode reesult data to meta information
+			semaphore.signal()
 		}// end closure completion handler
 		task.resume()
 		let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
