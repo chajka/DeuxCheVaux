@@ -8,6 +8,7 @@
 
 import Cocoa
 
+internal let FramewrokName: String = "DeuxCheVaux"
 
 public final class DeuxCheVaux: NSObject {
 }// end class DeuxCheVaux
