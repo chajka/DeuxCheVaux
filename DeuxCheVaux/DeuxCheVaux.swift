@@ -31,6 +31,17 @@ public final class DeuxCheVaux: NSObject {
 
 		// MARK: - Member variables
 		// MARK: - Constructor/Destructor
+	private override init() {
+		applicationName = ""
+		applicationVersionMajor = 0.0
+		applicationVersionMinor = 0
+		applicationVersionFix = 0
+		frameworkName = FramewrokName
+		framewrokVersionMajor = 0.3
+		framewrokVersionMinor = 5
+		framerokVersionFix = 0
+	}// end private init
+
 		// MARK: - Override
 		// MARK: - Actions
 		// MARK: - Public methods
