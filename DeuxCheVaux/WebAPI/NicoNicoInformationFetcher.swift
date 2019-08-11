@@ -17,13 +17,15 @@ public final class NicoNicoInformationFetcher: NSObject {
 		// MARK: - Properties
 		// MARK: - Member variables
 	private var session: URLSessionConfiguration
+	private let cookies: Array<HTTPCookie>
 
 		// MARK: - Constructor/Destructor
-	public override init () {
+	public init (_ cookie: Array<HTTPCookie>) {
 		session = URLSessionConfiguration.default
 		session.timeoutIntervalForRequest = RequestTimeOut
 		session.timeoutIntervalForResource = DataTimeOut
 		session.httpCookieAcceptPolicy = HTTPCookie.AcceptPolicy.onlyFromMainDocumentDomain
+		self.cookies = cookie
 	}// end init
 
 		// MARK: - Override
