@@ -301,9 +301,9 @@ public enum CommentPostError: Error {
 	case InvalidColor(String)
 }// end public enum CommentPostError
 
-private let UserAgentKey: String = "User-Agent"
-private let ContentTypeKey: String = "Content-type"
-private let ContentTypeJSON: String = "application/json"
+internal let UserAgentKey: String = "User-Agent"
+internal let ContentTypeKey: String = "Content-type"
+internal let ContentTypeJSON: String = "application/json"
 
 private let ApiBase: String = "https://live2.nicovideo.jp/watch/"
 private let UserNamaAPIBase: String = "https://live2.nicovideo.jp/unama/watch/"
