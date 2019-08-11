@@ -9,5 +9,14 @@
 import Cocoa
 
 public final class NicoNicoInformationFetcher: NSObject {
-
+		// MARK:   Outlets
+		// MARK: - Properties
+		// MARK: - Member variables
+		// MARK: - Constructor/Destructor
+		// MARK: - Override
+		// MARK: - Actions
+		// MARK: - Public methods
+		// MARK: - Internal methods
+		// MARK: - Private methods
+		// MARK: - Delegates
 }// end NicoNicoInformationFetcher
