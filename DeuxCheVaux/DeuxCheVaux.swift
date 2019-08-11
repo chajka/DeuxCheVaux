@@ -11,4 +11,14 @@ import Cocoa
 internal let FramewrokName: String = "DeuxCheVaux"
 
 public final class DeuxCheVaux: NSObject {
+		// MARK:   Class Variable
+		// MARK: - Properties
+		// MARK: - Member variables
+		// MARK: - Constructor/Destructor
+		// MARK: - Override
+		// MARK: - Actions
+		// MARK: - Public methods
+		// MARK: - Internal methods
+		// MARK: - Private methods
+		// MARK: - Delegates
 }// end class DeuxCheVaux
