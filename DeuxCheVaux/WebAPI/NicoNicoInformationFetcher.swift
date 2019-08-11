@@ -33,5 +33,19 @@ public final class NicoNicoInformationFetcher: NSObject {
 		// MARK: - Public methods
 		// MARK: - Internal methods
 		// MARK: - Private methods
+	private func makeRequest (url requestURL: URL, method requestMethod: HTTPMethod, contentsType type: String? = nil) -> URLRequest {
+		let deuxCheVaux: DeuxCheVaux = DeuxCheVaux.shared
+		let userAgent: String = deuxCheVaux.userAgent
+		var request: URLRequest = URLRequest(url: requestURL, cachePolicy: URLRequest.CachePolicy.reloadIgnoringLocalAndRemoteCacheData, timeoutInterval: Timeout)
+		request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
+		request.addValue(userAgent, forHTTPHeaderField: UserAgentKey)
+		if let contentsType: String = type {
+			request.addValue(contentsType, forHTTPHeaderField: ContentTypeKey)
+		}// end optional binding check for contents type
+		request.method = requestMethod
+ 
+		return request
+	}// end makeRequest
+
 		// MARK: - Delegates
 }// end NicoNicoInformationFetcher
