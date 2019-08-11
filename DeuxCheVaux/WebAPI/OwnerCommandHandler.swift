@@ -839,7 +839,8 @@ public final class OwnerCommandHandler: NSObject {
 	}// eend updateProgramState
 
 		// MARK: - Internal methods
-	internal func makeRequest (url requestURL: URL, method requestMethod: HTTPMethod, contentsType type: String? = nil) -> URLRequest {
+		// MARK: - Private methods
+	private func makeRequest (url requestURL: URL, method requestMethod: HTTPMethod, contentsType type: String? = nil) -> URLRequest {
 		var request: URLRequest = URLRequest(url: requestURL, cachePolicy: URLRequest.CachePolicy.reloadIgnoringLocalAndRemoteCacheData, timeoutInterval: Timeout)
 		request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
 		request.addValue(UserAgent, forHTTPHeaderField: UserAgentKey)
@@ -850,8 +851,6 @@ public final class OwnerCommandHandler: NSObject {
 		
 		return request
 	}// end makeRequest
-	
-		// MARK: - Private methods
 	private func checkMetaInformation (_ meta: MetaInformation) -> ResultStatus {
 		var status: ResultStatus
 		var errorCode: String? = nil
