@@ -8,6 +8,6 @@
 
 import Cocoa
 
-class NicoNicoInformationFetcher: NSObject {
+public final class NicoNicoInformationFetcher: NSObject {
 
-}
+}// end NicoNicoInformationFetcher
