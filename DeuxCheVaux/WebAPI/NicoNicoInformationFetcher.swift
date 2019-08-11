@@ -8,8 +8,9 @@
 
 import Cocoa
 
-private let RequestTimeOut: TimeInterval = 2.0
-private let DataTimeOut: TimeInterval = 2.0
+fileprivate let RequestTimeOut: TimeInterval = 2.0
+fileprivate let DataTimeOut: TimeInterval = 2.0
+fileprivate let Timeout: Double = 2.0
 
 public final class NicoNicoInformationFetcher: NSObject {
 		// MARK:   Outlets
