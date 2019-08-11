@@ -12,7 +12,7 @@ internal let FramewrokName: String = "DeuxCheVaux"
 
 public final class DeuxCheVaux: NSObject {
 		// MARK:   Class Variable
-	static let shared: DeuxCheVaux = DeuxCheVaux()
+	public static let shared: DeuxCheVaux = DeuxCheVaux()
 
 		// MARK: - Properties
 	public var applicationName: String
