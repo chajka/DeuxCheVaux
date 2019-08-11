@@ -16,15 +16,16 @@ public final class NicoNicoInformationFetcher: NSObject {
 		// MARK:   Outlets
 		// MARK: - Properties
 		// MARK: - Member variables
-	private var session: URLSessionConfiguration
+	private var session: URLSession
 	private let cookies: Array<HTTPCookie>
 
 		// MARK: - Constructor/Destructor
 	public init (_ cookie: Array<HTTPCookie>) {
-		session = URLSessionConfiguration.default
-		session.timeoutIntervalForRequest = RequestTimeOut
-		session.timeoutIntervalForResource = DataTimeOut
-		session.httpCookieAcceptPolicy = HTTPCookie.AcceptPolicy.onlyFromMainDocumentDomain
+		let sessionConfiguration = URLSessionConfiguration.default
+		sessionConfiguration.timeoutIntervalForRequest = RequestTimeOut
+		sessionConfiguration.timeoutIntervalForResource = DataTimeOut
+		sessionConfiguration.httpCookieAcceptPolicy = HTTPCookie.AcceptPolicy.onlyFromMainDocumentDomain
+		session = URLSession(configuration: sessionConfiguration)
 		self.cookies = cookie
 	}// end init
 
