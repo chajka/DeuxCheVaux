@@ -15,6 +15,7 @@ fileprivate let NicknameNodeName: String = "nickname"
 fileprivate let CouldNotParse = "Could not parse"
 
 fileprivate let NicknameAPIFormat: String = "http://seiga.nicovideo.jp/api/user/info?id="
+fileprivate let VitaAPIFormat: String = "http://api.ce.nicovideo.jp/api/v1/user.info?user_id="
 
 public final class NicoNicoInformationFetcher: NSObject {
 		// MARK:   Outlets
@@ -36,9 +37,16 @@ public final class NicoNicoInformationFetcher: NSObject {
 		// MARK: - Override
 		// MARK: - Actions
 		// MARK: - Public methods
+	public func fetchNickName (forIdentifier userIdentifieer: String) -> String? {
+		if let nickname = seigaNickName(fromSeigaAPI: userIdentifieer) {
+			return nickname
+		}// end if
+		return vitaNickname(fromVitaAPI: userIdentifieer)
+	}// end fetchNickName
+
 		// MARK: - Internal methods
 		// MARK: - Private methods
-	private func fetchNickname (fromSeigaAPI identifier: String) -> String? {
+	private func seigaNickName (fromSeigaAPI identifier: String) -> String? {
 		guard let url = URL(string: NicknameAPIFormat + identifier) else { return nil }
 		let request: URLRequest = makeRequest(url: url, method: .get)
 		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
@@ -66,7 +74,7 @@ public final class NicoNicoInformationFetcher: NSObject {
 		return nickname
 	}// end fetchNickname from seiga api
 
-	private func fetchNickname (fromVitaAPI identifier: String) -> String? {
+	private func vitaNickname (fromVitaAPI identifier: String) -> String? {
 		guard let url = URL(string: VitaAPIFormat + identifier) else { return nil }
 		let request: URLRequest = makeRequest(url: url, method: .get)
 		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
