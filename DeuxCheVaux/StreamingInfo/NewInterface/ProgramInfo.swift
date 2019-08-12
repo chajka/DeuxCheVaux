@@ -93,7 +93,7 @@ private let Timeout: Double = 2.0
 
 public final class ProgramInfo: NSObject {
 		// MARK: class method
-	public static func programURL (program programNumber: String) -> URL {
+	public static func urlForProgram (program programNumber: String) -> URL {
 		return URL(string: ProgramInfoFormat + programNumber + ProgramInfoSuffix)!
 	}// end programURL
 
