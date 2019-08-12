@@ -33,14 +33,6 @@ public enum SocialType: String {
 	case community = "community"
 	case channel = "channel"
 	case official = "official"
-
-	static func ~= (lhs: SocialType, rhs: String) -> Bool {
-		return lhs.rawValue == rhs ? true : false
-	}// end func ~=
-
-	static func == (lhs: SocialType, rhs: String) -> Bool {
-		return lhs.rawValue == rhs ? true : false
-	}// end func ==
 }// end enum SocialType
 
 public enum UserLanguage: String {
@@ -163,16 +155,6 @@ public final class PlayerStatus: NSObject , XMLParserDelegate {
 		case .programDescription:
 			desc = String(stringBuffer)
 		case .socialType:
-			switch stringBuffer {
-			case .community:
-				socialType = .community
-			case .channel:
-				socialType = .channel
-			case .official:
-				socialType = .official
-			default:
-				socialType = .community
-			}// end switch case by provider type
 		case .communityName:
 			community = String(stringBuffer)
 		case .ownerFlag:
@@ -236,6 +218,18 @@ public final class PlayerStatus: NSObject , XMLParserDelegate {
 		default:
 			break
 		}// end switch case by element name
+				if let social: SocialType = SocialType(rawValue: stringBuffer) {
+					switch social {
+					case .community:
+						socialType = .community
+					case .channel:
+						socialType = .channel
+					case .official:
+						socialType = .official
+					}// end switch case by provider type
+				} else {
+					socialType = .community
+				}// end optional binding for string buffer is much to member of SocialType
 	}// end func parser didEndElement
 
 	public func parser(_ parser: XMLParser, didStartElement elementName: String, namespaceURI: String?, qualifiedName qName: String?, attributes attributeDict: [String : String] = [: ]) {
