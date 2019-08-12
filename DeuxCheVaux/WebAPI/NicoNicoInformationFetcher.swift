@@ -86,6 +86,29 @@ public final class NicoNicoInformationFetcher: NSObject {
 		return thumbnail
 	}// end communityThumbnail
 
+	public func rawData (forURL url: URL, httpMethod method: HTTPMethod, HTTOBody body: Data? = nil, contentsType type: String? = nil) -> Data? {
+		var rawData: Data? = nil
+		var request: URLRequest = makeRequest(url: url, method: method)
+		if let body: Data = body, let type: String = type {
+			request.addValue(type, forHTTPHeaderField: ContentTypeKey)
+			request.httpBody = body
+		}// end optional binding for
+		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
+		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
+			guard let data: Data = dat else {
+				semaphore.signal()
+				return
+			}// end guard else
+			rawData = data
+			semaphore.signal()
+		}// end closure
+		task.resume()
+		let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
+		if timeout == .timedOut { rawData = nil }
+
+		return rawData
+	}// end rawData
+
 		// MARK: - Internal methods
 		// MARK: - Private methods
 	private func seigaNickName (fromSeigaAPI identifier: String) -> String? {
