@@ -63,10 +63,6 @@ enum PlayerStatusKey: String {
 	case msPort = "port"
 	case msThread = "thread"
 	case messageServerList = "ms_list"
-
-	static func ~= (lhs: PlayerStatusKey, rhs: String) -> Bool {
-		return lhs.rawValue == rhs ? true : false
-	}// end func ~=
 }// end enum PlayerStatusKey
 
 let playerStatusFormat: String = "http://watch.live.nicovideo.jp/api/getplayerstatus?v="
@@ -114,92 +110,18 @@ public final class PlayerStatus: NSObject , XMLParserDelegate {
 		// MARK: - Actions
 		// MARK: - Public methods
 		// MARK: - Private methods
-	private func getPlayerStatus(programNumber: String) -> Void {
-		let playerStatusURLString: String = playerStatusFormat + programNumber
-		if let playerStatusURL: URL = URL(string: playerStatusURLString) {
-			let session: URLSession = URLSession(configuration: URLSessionConfiguration.default)
-			var request = URLRequest(url: playerStatusURL)
-			var parser: XMLParser?
-			var recievieDone: Bool = false
-			request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: userSession)
-			let task: URLSessionDataTask = session.dataTask(with: request) { (dat, req, err) in
-				guard let data = dat else { return }
-				parser = XMLParser(data: data)
-				recievieDone = true
-			}// end closure
-			task.resume()
-			while !recievieDone { Thread.sleep(forTimeInterval: 0.1) }
-			if let playerStatusParser: XMLParser = parser {
-				playerStatusParser.delegate = self
-				playerStatusParser.parse()
-			}
-		}// end if url is not empty
-	}// end function getPlayerStatus
-
 		// MARK: - Delegates
 			// MARK: NSXMLParserDelegate
 	public func parser(_ parser: XMLParser, didEndElement elementName: String, namespaceURI: String?, qualifiedName qName: String?) {
-		switch elementName {
-		case .programNumber:
-			number = String(stringBuffer)
-		case .programTitle:
-			title = String(stringBuffer)
-		case .programDescription:
-			desc = String(stringBuffer)
-		case .socialType:
-		case .communityName:
-			community = String(stringBuffer)
-		case .ownerFlag:
-			isOwner = stringBuffer == "1" ? true : false
-		case .ownerIdentifier:
-			ownerIdentifier = String(stringBuffer)
-		case .ownerName:
-			ownerName = String(stringBuffer)
-		case .baseTime:
-			let baseTimeStr = stringBuffer
-			let baseTimeInterval = TimeInterval(baseTimeStr)
-			if let unixTime: TimeInterval = baseTimeInterval {
-				baseTime = Date(timeIntervalSince1970: unixTime)
-			}// end unix time string can convert unix time
-		case .startTime:
-			let startTimeStr = stringBuffer
-			let startTimeInterval = TimeInterval(startTimeStr)
-			if let unixTime: TimeInterval = startTimeInterval {
-				startTime = Date(timeIntervalSince1970: unixTime)
-			}// end unix time string can convert unix time
-		case .endTime:
-			let endTimeStr = stringBuffer
-			let endTimeInterval = TimeInterval(endTimeStr)
-			if let unixTime: TimeInterval = endTimeInterval {
-				endTime = Date(timeIntervalSince1970: unixTime)
-			}// end unix time string can convert unix time
-		case .communityThumbail:
-			communityThumbnaiURL = URL(string: stringBuffer)
-		case .listenerIdentifier:
-			listenerIdentifier = String(stringBuffer)
-		case .listenerName:
-			listenerName = String(stringBuffer)
-		case .listenerIsPremium:
-			listenerIsPremium = stringBuffer == "1" ? true : false
-		case .listenerLanguage:
-		case .listenerIsVIP:
-			listenerIsVIP = stringBuffer == "1" ? true : false
-		case .msAddress:
-			server = String(stringBuffer)
-		case .msPort:
-			if let portNumber: Int = Int(stringBuffer) {
-				port = portNumber
-			}
-		case .msThread:
-			thread = String(stringBuffer)
-			let xmlserver: XMLSocket = XMLSocket(address: server, port: port)
-			let ms: MessageServer = MessageServer(XMLSocet: xmlserver, WebSocket: nil, thread: thread, name: nil, identifier: nil)
-			messageServers.append(ms)
-		case .messageServerList:
-			messageServers.removeFirst()
-		default:
-			break
-		}// end switch case by element name
+		if let element: PlayerStatusKey = PlayerStatusKey(rawValue: elementName) {
+			switch element {
+			case .programNumber:
+				number = String(stringBuffer)
+			case .programTitle:
+				title = String(stringBuffer)
+			case .programDescription:
+				desc = String(stringBuffer)
+			case .socialType:
 				if let social: SocialType = SocialType(rawValue: stringBuffer) {
 					switch social {
 					case .community:
@@ -212,6 +134,41 @@ public final class PlayerStatus: NSObject , XMLParserDelegate {
 				} else {
 					socialType = .community
 				}// end optional binding for string buffer is much to member of SocialType
+			case .communityName:
+				community = String(stringBuffer)
+			case .ownerFlag:
+				isOwner = stringBuffer == "1" ? true : false
+			case .ownerIdentifier:
+				ownerIdentifier = String(stringBuffer)
+			case .ownerName:
+				ownerName = String(stringBuffer)
+			case .baseTime:
+				let baseTimeStr = stringBuffer
+				let baseTimeInterval = TimeInterval(baseTimeStr)
+				if let unixTime: TimeInterval = baseTimeInterval {
+					baseTime = Date(timeIntervalSince1970: unixTime)
+				}// end unix time string can convert unix time
+			case .startTime:
+				let startTimeStr = stringBuffer
+				let startTimeInterval = TimeInterval(startTimeStr)
+				if let unixTime: TimeInterval = startTimeInterval {
+					startTime = Date(timeIntervalSince1970: unixTime)
+				}// end unix time string can convert unix time
+			case .endTime:
+				let endTimeStr = stringBuffer
+				let endTimeInterval = TimeInterval(endTimeStr)
+				if let unixTime: TimeInterval = endTimeInterval {
+					endTime = Date(timeIntervalSince1970: unixTime)
+				}// end unix time string can convert unix time
+			case .communityThumbail:
+				communityThumbnaiURL = URL(string: stringBuffer)
+			case .listenerIdentifier:
+				listenerIdentifier = String(stringBuffer)
+			case .listenerName:
+				listenerName = String(stringBuffer)
+			case .listenerIsPremium:
+				listenerIsPremium = stringBuffer == "1" ? true : false
+			case .listenerLanguage:
 				if let userLang: UserLanguage = UserLanguage(rawValue: stringBuffer) {
 					switch userLang {
 					case .ja:
@@ -224,6 +181,23 @@ public final class PlayerStatus: NSObject , XMLParserDelegate {
 				} else {
 					listenerLanguage = .ja
 				}// end if optional binding check for string value is match to user language
+			case .listenerIsVIP:
+				listenerIsVIP = stringBuffer == "1" ? true : false
+			case .msAddress:
+				server = String(stringBuffer)
+			case .msPort:
+				if let portNumber: Int = Int(stringBuffer) {
+					port = portNumber
+				}// end if port number is convert to integer
+			case .msThread:
+				thread = String(stringBuffer)
+				let xmlserver: XMLSocket = XMLSocket(address: server, port: port)
+				let ms: MessageServer = MessageServer(XMLSocet: xmlserver, WebSocket: nil, thread: thread, name: nil, identifier: nil)
+				messageServers.append(ms)
+			case .messageServerList:
+				messageServers.removeFirst()
+			}// end switch case by element name
+		}// end if optional binding check for element name is member of PlayerStatusKey
 	}// end func parser didEndElement
 
 	public func parser(_ parser: XMLParser, didStartElement elementName: String, namespaceURI: String?, qualifiedName qName: String?, attributes attributeDict: [String : String] = [: ]) {
