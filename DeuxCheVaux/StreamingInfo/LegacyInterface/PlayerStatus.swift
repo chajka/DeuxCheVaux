@@ -39,14 +39,6 @@ public enum UserLanguage: String {
 	case ja = "ja-jp"
 	case zh = "zh-tw"
 	case en = "en-us"
-
-	static func ~= (lhs: UserLanguage, rhs: String) -> Bool {
-		return lhs.rawValue == rhs ? true : false
-	}// end func ~=
-
-	static func == (lhs: UserLanguage, rhs: String) -> Bool {
-		return lhs.rawValue == rhs ? true : false
-	}// end func ==
 }// end public enum UserLanguage
 
 enum PlayerStatusKey: String {
@@ -190,16 +182,6 @@ public final class PlayerStatus: NSObject , XMLParserDelegate {
 		case .listenerIsPremium:
 			listenerIsPremium = stringBuffer == "1" ? true : false
 		case .listenerLanguage:
-			switch stringBuffer {
-			case .ja:
-				listenerLanguage = .ja
-			case .zh:
-				listenerLanguage = .zh
-			case .en:
-				listenerLanguage = .en
-			default:
-				listenerLanguage = .ja
-			}// end switch case by user language
 		case .listenerIsVIP:
 			listenerIsVIP = stringBuffer == "1" ? true : false
 		case .msAddress:
@@ -230,6 +212,18 @@ public final class PlayerStatus: NSObject , XMLParserDelegate {
 				} else {
 					socialType = .community
 				}// end optional binding for string buffer is much to member of SocialType
+				if let userLang: UserLanguage = UserLanguage(rawValue: stringBuffer) {
+					switch userLang {
+					case .ja:
+						listenerLanguage = .ja
+					case .zh:
+						listenerLanguage = .zh
+					case .en:
+						listenerLanguage = .en
+					}// end switch case by user language
+				} else {
+					listenerLanguage = .ja
+				}// end if optional binding check for string value is match to user language
 	}// end func parser didEndElement
 
 	public func parser(_ parser: XMLParser, didStartElement elementName: String, namespaceURI: String?, qualifiedName qName: String?, attributes attributeDict: [String : String] = [: ]) {
