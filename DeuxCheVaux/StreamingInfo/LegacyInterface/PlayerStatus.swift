@@ -96,7 +96,6 @@ public final class PlayerStatus: NSObject , XMLParserDelegate {
 	public private(set) var messageServers: Array<MessageServer> = Array()
 
 		// MARK: - Member variables
-	private var userSession: Array<HTTPCookie>
 	private var stringBuffer: String = String()
 
 	private var server: String!
@@ -104,10 +103,11 @@ public final class PlayerStatus: NSObject , XMLParserDelegate {
 	private var thread: String!
 
 		// MARK: - Constructor/Destructor
-	public init(program: String, cookies: Array<HTTPCookie>) {
-		userSession = cookies
+	public init(xmlData data: Data) {
 		super.init()
-		getPlayerStatus(programNumber: program)
+		let parser: XMLParser = XMLParser(data: data)
+		parser.delegate = self
+		_ = parser.parse()
 	}// end init
 
 		// MARK: - Override
