@@ -68,7 +68,11 @@ enum PlayerStatusKey: String {
 let playerStatusFormat: String = "http://watch.live.nicovideo.jp/api/getplayerstatus?v="
 
 public final class PlayerStatus: NSObject , XMLParserDelegate {
-		// MARK:   Outlets
+		// MARK: class method
+	public static func urlForProgram (program programNumber: String) -> URL {
+		return URL(string: playerStatusFormat + programNumber)!
+	}// end programURL
+
 		// MARK: - Properties
 	public private(set) var number: String!
 	public private(set) var title: String!
