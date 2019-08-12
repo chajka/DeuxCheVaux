@@ -92,6 +92,11 @@ private enum RoomKeys: String {
 private let Timeout: Double = 2.0
 
 public final class ProgramInfo: NSObject {
+		// MARK: class method
+	public static func urlForProgram (program programNumber: String) -> URL {
+		return URL(string: ProgramInfoFormat + programNumber + ProgramInfoSuffix)!
+	}// end programURL
+
 		// MARK:   Outlets
 		// MARK: - Properties
 	public private(set) var social: Social!
@@ -107,13 +112,10 @@ public final class ProgramInfo: NSObject {
 	public private(set) var servers: Array<MessageServer> = Array()
 
 		// MARK: - Member variables
-	let userSession: Array<HTTPCookie>
-
 		// MARK: - Constructor/Destructor
-	public init (programNumber: String, cookies: [HTTPCookie]) throws {
-		userSession = cookies
+	public init(data: Data) throws {
 		super.init()
-		let result: ProgramInfoError = getProgramInfomation(programNumber: programNumber)
+		let result: ProgramInfoError = decodeData(data: data)
 		if result != .NoError { throw result }
 	}// end init
 
@@ -121,79 +123,52 @@ public final class ProgramInfo: NSObject {
 		// MARK: - Actions
 		// MARK: - Public methods
 		// MARK: - Private methods
-	private func getProgramInfomation(programNumber: String) -> ProgramInfoError {
-		let programInfoURLString = ProgramInfoFormat + programNumber + ProgramInfoSuffix
-		if let programInfoURL: URL = URL(string: programInfoURLString) {
-			let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
-			var request: URLRequest = URLRequest(url: programInfoURL)
-			request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: userSession)
-			let session: URLSession = URLSession(configuration: URLSessionConfiguration.default)
-			var infoErr: ProgramInfoError = .NoError
-			var descriptionHTML: String?
-			var descriptionString: String?
-			let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat, resp, err) in
-				guard let weakSelf = self, let recievedData: Data = dat, let response: HTTPURLResponse = resp as? HTTPURLResponse else {
-					infoErr = .SelfReleased
-					semaphore.signal()
-					return
-				}// end guard else
-				if recievedData.count > 0 && Int(response.statusCode / 100) == 2 {
-					do {
-						let decoder: JSONDecoder = JSONDecoder()
-						let result: ProgramInfoJSON = try decoder.decode(ProgramInfoJSON.self, from: recievedData)
-						if let programInfo: ProtramInformation = result.data {
-							infoErr = ProgramInfoError.NoError
-							let social: SocialGroup = programInfo.socialGroup
-							if let type: SocialType = SocialType(rawValue: social.type) {
-								weakSelf.social = Social(name: social.name, identifier: social.id, level: social.communityLevel, type: type)
-							}// end optional binding for social type is much to social type
-							weakSelf.status = programInfo.status
-							weakSelf.isMemberOnly = programInfo.isMemberOnly
-							weakSelf.categories = programInfo.categories
-							weakSelf.baseTime = Date(timeIntervalSince1970: programInfo.vposBaseAt)
-							weakSelf.startTime = Date(timeIntervalSince1970: programInfo.beginAt)
-							weakSelf.endTime = Date(timeIntervalSince1970: programInfo.endAt)
-							descriptionString = programInfo.description
-							descriptionHTML = "<html><body>" + programInfo.description + "</body></html>"
-							weakSelf.broadcaster = BroadcasterInfo(name: programInfo.broadcaster.name, identifier: programInfo.broadcaster.id)
-							for room: Room in programInfo.rooms {
-								if let webSocket: URL = URL(string: room.webSocketUri), let xml: URL = URL(string: room.xmlSocketUri) {
-									if let xmlHost: String = xml.host, let port: Int = xml.port {
-										let xmlSocket: XMLSocket = XMLSocket(address: xmlHost, port: port)
-										let server: MessageServer = MessageServer(XMLSocet: xmlSocket, WebSocket: webSocket, thread: room.threadId, name: room.name, identifier: room.id)
-										weakSelf.servers.append(server)
-									}// end optional biniding check for get xml socket server addreess and port
-								}// end optional binding check for make url for web socket and xml socket
-							}// end foreach rooms
-						}// end if optional check for data
-					} catch {
-						infoErr = ProgramInfoError.JSONParseError
-					}// end try - catch JSONSerialization exception
-				} else {
-					infoErr = ProgramInfoError.URLResponseError
-				}// end
-				semaphore.signal()
-			}// end completion handler
-			task.resume()
-			let timeoutResult: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
-			if timeoutResult == .success, let descHTML: String = descriptionHTML, let descStr: String = descriptionString {
-				if let descriptiionData: Data = descHTML.data(using: String.Encoding.utf8) {
+	private func decodeData (data: Data) -> ProgramInfoError {
+		do {
+			let decoder: JSONDecoder = JSONDecoder()
+			let result: ProgramInfoJSON = try decoder.decode(ProgramInfoJSON.self, from: data)
+			if let programInfo: ProtramInformation = result.data {
+				let social: SocialGroup = programInfo.socialGroup
+				if let type: SocialType = SocialType(rawValue: social.type) {
+					self.social = Social(name: social.name, identifier: social.id, level: social.communityLevel, type: type)
+				}// end optional binding for social type is much to social type
+				status = programInfo.status
+				isMemberOnly = programInfo.isMemberOnly
+				categories = programInfo.categories
+				baseTime = Date(timeIntervalSince1970: programInfo.vposBaseAt)
+				startTime = Date(timeIntervalSince1970: programInfo.beginAt)
+				endTime = Date(timeIntervalSince1970: programInfo.endAt)
+				let descriptionString: String = programInfo.description
+				let descriptionHTML: String = "<html><body>" + programInfo.description + "</body></html>"
+				if let descriptiionData: Data = descriptionHTML.data(using: String.Encoding.utf8) {
 					do {
 						let readingOptions: Dictionary<NSAttributedString.DocumentReadingOptionKey, Any> = [.documentType: NSAttributedString.DocumentType.html, .textEncodingName: "utf-8"]
 						programDesctiption = try NSAttributedString(data: descriptiionData, options: readingOptions, documentAttributes: nil)
 					} catch let error {
 						print(error.localizedDescription)
-						programDesctiption = NSAttributedString(string: descStr)
+						programDesctiption = NSAttributedString(string: descriptionString)
 					}// end do try - catch make attributed string
 				} else {
-					programDesctiption = NSAttributedString(string: descStr)
+					programDesctiption = NSAttributedString(string: descriptionString)
 				}// end optional binding check for string convert to data
-			}
-			if infoErr != .NoError { return infoErr }
- 		}// end if URL can allocated
+				broadcaster = BroadcasterInfo(name: programInfo.broadcaster.name, identifier: programInfo.broadcaster.id)
+				for room: Room in programInfo.rooms {
+					if let webSocket: URL = URL(string: room.webSocketUri), let xml: URL = URL(string: room.xmlSocketUri) {
+						if let xmlHost: String = xml.host, let port: Int = xml.port {
+							let xmlSocket: XMLSocket = XMLSocket(address: xmlHost, port: port)
+							let server: MessageServer = MessageServer(XMLSocet: xmlSocket, WebSocket: webSocket, thread: room.threadId, name: room.name, identifier: room.id)
+							servers.append(server)
+						}// end optional biniding check for get xml socket server addreess and port
+					}// end optional binding check for make url for web socket and xml socket
+				}// end foreach rooms
+			}// end if optional check for data
+		} catch let error {
+			print(error.localizedDescription)
+			return ProgramInfoError.JSONParseError
+		}// end try - catch JSONSerialization exception
 
 		return ProgramInfoError.NoError
-	}// end getProgramInfomation
+	}// end decodeData
 
 		// MARK: - Delegates
 }// end class
