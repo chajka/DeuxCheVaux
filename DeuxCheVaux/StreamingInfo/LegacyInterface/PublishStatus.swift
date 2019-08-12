@@ -9,14 +9,11 @@
 import Cocoa
 
 private enum PublishStatusKey: String {
+	case programNumber = "id"
 	case token = "token"
 	case vote = "allow_vote"
 	case rtmpurl = "url"
 	case stream = "stream"
-
-	static func ~= (lhs: PublishStatusKey, rhs: String) -> Bool {
-		return lhs.rawValue == rhs ? true : false
-	}// end func ~=
 }// end enum PlayerStatusKey
 
 private let publishStatusFormat: String = "http://watch.live.nicovideo.jp/api/getpublishstatus?v="
@@ -61,20 +58,20 @@ public final class PublishStatus: NSObject ,XMLParserDelegate {
 	}// end func getPublishStatus
 
 	public func parser(_ parser: XMLParser, didEndElement elementName: String, namespaceURI: String?, qualifiedName qName: String?) {
-		switch elementName {
-		case .programNumber:
-			number = String(stringBuffer)
-		case .token:
-			token = String(stringBuffer)
-		case .vote:
-			canVote = stringBuffer == "1" ? true : false
-		case .rtmpurl:
-			rtmpURL = String(stringBuffer)
-		case .stream:
-			streamKey = String(stringBuffer)
-		default:
-			break
-		}
+		if let element: PublishStatusKey = PublishStatusKey(rawValue: elementName) {
+			switch element {
+			case .programNumber:
+				number = String(stringBuffer)
+			case .token:
+				token = String(stringBuffer)
+			case .vote:
+				canVote = stringBuffer == "1" ? true : false
+			case .rtmpurl:
+				rtmpURL = String(stringBuffer)
+			case .stream:
+				streamKey = String(stringBuffer)
+			}// end switch case by element namee
+		}// end optional binding check for element name match to PublishStatusKey
 	}// end func parser didEndElement
 
 	public func parser(_ parser: XMLParser, didStartElement elementName: String, namespaceURI: String?, qualifiedName qName: String?, attributes attributeDict: [String : String] = [: ]) {
