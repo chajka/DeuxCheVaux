@@ -19,6 +19,11 @@ private enum PublishStatusKey: String {
 private let publishStatusFormat: String = "http://watch.live.nicovideo.jp/api/getpublishstatus?v="
 
 public final class PublishStatus: NSObject ,XMLParserDelegate {
+		// MARK: class method
+	public static func urlForProgram (program programNumber: String) -> URL {
+		return URL(string: publishStatusFormat + programNumber)!
+	}// end programURL
+
 	public var number: String!
 	public var token: String!
 	public var canVote: Bool!
