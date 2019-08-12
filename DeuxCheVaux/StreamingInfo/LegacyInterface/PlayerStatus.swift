@@ -17,14 +17,14 @@ public struct XMLSocket {
 	}// end func ==
 }// end struct XMLSocket
 
-public struct MessageServer {
-	public var XMLSocet: XMLSocket
-	public var WebSocket: URL?
-	public var thread: String
-	public var name: String?
-	public var identifier: Int?
+public struct MessageServer: Equatable {
+	var XMLSocet: XMLSocket
+	var WebSocket: URL?
+	var thread: String
+	var name: String?
+	var identifier: Int?
 
-	static func == (lhs: MessageServer, rhs: MessageServer) -> Bool {
+	static public func == (lhs: MessageServer, rhs: MessageServer) -> Bool {
 		return (lhs.XMLSocet == rhs.XMLSocet) && (lhs.WebSocket == rhs.WebSocket) && (lhs.thread == rhs.thread)
 	}// end func ==
 }// end struct MessageServer
