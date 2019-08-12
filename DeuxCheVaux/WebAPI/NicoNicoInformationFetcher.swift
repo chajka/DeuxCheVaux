@@ -67,6 +67,25 @@ public final class NicoNicoInformationFetcher: NSObject {
 		return thumbnail
 	}// end thumbnail
 
+	public func communityThumbnail (_ url: URL, whenNoImage insteadImage: NSImage) -> NSImage {
+		let request: URLRequest = makeRequest(url: url, method: .get)
+		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
+		var thumbnail: NSImage = insteadImage
+		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
+			guard let data: Data = dat, let image: NSImage = NSImage(data: data) else {
+				semaphore.signal()
+				return
+			}// end guard
+			thumbnail = image
+			semaphore.signal()
+		}// end closure
+		task.resume()
+		let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
+		if timeout == .timedOut { thumbnail = insteadImage }
+
+		return thumbnail
+	}// end communityThumbnail
+
 		// MARK: - Internal methods
 		// MARK: - Private methods
 	private func seigaNickName (fromSeigaAPI identifier: String) -> String? {
