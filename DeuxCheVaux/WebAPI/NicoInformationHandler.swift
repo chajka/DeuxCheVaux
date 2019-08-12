@@ -18,7 +18,7 @@ fileprivate let NicknameAPIFormat: String = "http://seiga.nicovideo.jp/api/user/
 fileprivate let VitaAPIFormat: String = "http://api.ce.nicovideo.jp/api/v1/user.info?user_id="
 fileprivate let ThumbnailAPIFormat: String = "https://secure-dcdn.cdn.nimg.jp/nicoaccount/usericon/%@/%@.jpg"
 
-public final class NicoNicoInformationFetcher: NSObject {
+public final class NicoInformationHandler: NSObject {
 		// MARK:   Outlets
 		// MARK: - Properties
 		// MARK: - Member variables
