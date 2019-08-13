@@ -9,72 +9,61 @@
 import Cocoa
 
 private enum PublishStatusKey: String {
+	case programNumber = "id"
 	case token = "token"
 	case vote = "allow_vote"
 	case rtmpurl = "url"
 	case stream = "stream"
-
-	static func ~= (lhs: PublishStatusKey, rhs: String) -> Bool {
-		return lhs.rawValue == rhs ? true : false
-	}// end func ~=
 }// end enum PlayerStatusKey
 
 private let publishStatusFormat: String = "http://watch.live.nicovideo.jp/api/getpublishstatus?v="
 
 public final class PublishStatus: NSObject ,XMLParserDelegate {
+		// MARK: class method
+	public static func urlForProgram (program programNumber: String) -> URL {
+		return URL(string: publishStatusFormat + programNumber)!
+	}// end programURL
+
+		// MARK: - Properties
 	public var number: String!
 	public var token: String!
 	public var canVote: Bool!
 	public var rtmpURL: String!
 	public var streamKey: String!
 
-	private var userSession: Array<HTTPCookie> = Array()
-
+		// MARK: - Member variables
 	private var stringBuffer: String = String()
 
-	public init(program: String, cookies: Array<HTTPCookie>) {
-		userSession = cookies
+		// MARK: - Constructor/Destructor
+	public init(xmlData data: Data) {
 		super.init()
-		getPublishStatus(programNumber: program)
+		let parser: XMLParser = XMLParser(data: data)
+		parser.delegate = self
+		_ = parser.parse()
 	}// end init
 
-	func getPublishStatus(programNumber: String) -> Void {
-		let publishStatusURLString: String = publishStatusFormat + programNumber
-		if let publishStatusURL: URL = URL(string: publishStatusURLString) {
-			let session: URLSession = URLSession(configuration: URLSessionConfiguration.default)
-			var request = URLRequest(url: publishStatusURL)
-			var parser: XMLParser?
-			var recievieDone: Bool = false
-			request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: userSession)
-			let task: URLSessionDataTask = session.dataTask(with: request) { (dat, req, err) in
-				guard let data = dat else { return }
-				parser = XMLParser(data: data)
-				recievieDone = true
-			}// end closure
-			task.resume()
-			while !recievieDone { Thread.sleep(forTimeInterval: 0.1) }
-			if let publishStatusParser: XMLParser = parser {
-				publishStatusParser.delegate = self
-				publishStatusParser.parse()
-			}// end if parser can allocate
-		}// end if url is not empty
-	}// end func getPublishStatus
-
+		// MARK: - Override
+		// MARK: - Actions
+		// MARK: - Public methods
+		// MARK: - Internal methods
+		// MARK: - Private methods
+		// MARK: - Delegates
+			// MARK: XMLParser Delegatte
 	public func parser(_ parser: XMLParser, didEndElement elementName: String, namespaceURI: String?, qualifiedName qName: String?) {
-		switch elementName {
-		case .programNumber:
-			number = String(stringBuffer)
-		case .token:
-			token = String(stringBuffer)
-		case .vote:
-			canVote = stringBuffer == "1" ? true : false
-		case .rtmpurl:
-			rtmpURL = String(stringBuffer)
-		case .stream:
-			streamKey = String(stringBuffer)
-		default:
-			break
-		}
+		if let element: PublishStatusKey = PublishStatusKey(rawValue: elementName) {
+			switch element {
+			case .programNumber:
+				number = String(stringBuffer)
+			case .token:
+				token = String(stringBuffer)
+			case .vote:
+				canVote = stringBuffer == "1" ? true : false
+			case .rtmpurl:
+				rtmpURL = String(stringBuffer)
+			case .stream:
+				streamKey = String(stringBuffer)
+			}// end switch case by element namee
+		}// end optional binding check for element name match to PublishStatusKey
 	}// end func parser didEndElement
 
 	public func parser(_ parser: XMLParser, didStartElement elementName: String, namespaceURI: String?, qualifiedName qName: String?, attributes attributeDict: [String : String] = [: ]) {

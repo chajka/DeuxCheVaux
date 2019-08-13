@@ -301,10 +301,9 @@ public enum CommentPostError: Error {
 	case InvalidColor(String)
 }// end public enum CommentPostError
 
-private let UserAgentKey: String = "User-Agent"
-private let UserAgent: String = "Charleston/0.6 (DeuxCheVaux 0.3.4.0)"
-private let ContentTypeKey: String = "Content-type"
-private let ContentTypeJSON: String = "application/json"
+internal let UserAgentKey: String = "User-Agent"
+internal let ContentTypeKey: String = "Content-type"
+internal let ContentTypeJSON: String = "application/json"
 
 private let ApiBase: String = "https://live2.nicovideo.jp/watch/"
 private let UserNamaAPIBase: String = "https://live2.nicovideo.jp/unama/watch/"
@@ -839,19 +838,21 @@ public final class OwnerCommandHandler: NSObject {
 	}// eend updateProgramState
 
 		// MARK: - Internal methods
-	internal func makeRequest (url requestURL: URL, method requestMethod: HTTPMethod, contentsType type: String? = nil) -> URLRequest {
+		// MARK: - Private methods
+	private func makeRequest (url requestURL: URL, method requestMethod: HTTPMethod, contentsType type: String? = nil) -> URLRequest {
+		let deuxCheVaux: DeuxCheVaux = DeuxCheVaux.shared
+		let userAgent: String = deuxCheVaux.userAgent
 		var request: URLRequest = URLRequest(url: requestURL, cachePolicy: URLRequest.CachePolicy.reloadIgnoringLocalAndRemoteCacheData, timeoutInterval: Timeout)
 		request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
-		request.addValue(UserAgent, forHTTPHeaderField: UserAgentKey)
+		request.addValue(userAgent, forHTTPHeaderField: UserAgentKey)
 		if let contentsType: String = type {
 			request.addValue(contentsType, forHTTPHeaderField: ContentTypeKey)
 		}// end optional binding check for contents type
 		request.method = requestMethod
-		
+
 		return request
 	}// end makeRequest
-	
-		// MARK: - Private methods
+
 	private func checkMetaInformation (_ meta: MetaInformation) -> ResultStatus {
 		var status: ResultStatus
 		var errorCode: String? = nil
