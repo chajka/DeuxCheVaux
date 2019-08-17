@@ -41,7 +41,7 @@ public final class DeuxCheVaux: NSObject {
 		frameworkName = FramewrokName
 		framewrokVersionMajor = 0.3
 		framewrokVersionMinor = 5
-		framerokVersionFix = 0
+		framerokVersionFix = 1
 	}// end private init
 
 		// MARK: - Override

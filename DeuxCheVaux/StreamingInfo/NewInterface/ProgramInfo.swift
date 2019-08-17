@@ -62,7 +62,7 @@ public enum ProgramInfoError: Error {
 public enum ProgramStatus: String, Codable {
 	case test = "test"
 	case onAir = "onAir"
-	case ended = "ended"
+	case ended = "end"
 }// end enum ProgramStatus
 
 public struct Social {
