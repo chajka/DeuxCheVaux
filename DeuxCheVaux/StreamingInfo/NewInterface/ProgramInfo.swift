@@ -23,7 +23,8 @@ public struct SocialGroup: Codable {
 	let type: String
 	let id: String
 	let name: String
-	let communityLevel: Int
+	let communityLevel: Int?
+	let ownerName: String?
 }// end struct SocialGroup
 
 public struct Broadcaster: Codable {
@@ -67,9 +68,11 @@ public enum ProgramStatus: String, Codable {
 
 public struct Social {
 	public let name: String
-	public let identifier: String
-	public let level: Int
+	public let identifier: String?
+	public let id: String?
+	public let level: Int?
 	public let type: SocialType
+	public let ownerName: String?
 }// end struct Social
 
 public struct BroadcasterInfo {
@@ -128,9 +131,8 @@ public final class ProgramInfo: NSObject {
 			let decoder: JSONDecoder = JSONDecoder()
 			let result: ProgramInfoJSON = try decoder.decode(ProgramInfoJSON.self, from: data)
 			if let programInfo: ProtramInformation = result.data {
-				let social: SocialGroup = programInfo.socialGroup
-				if let type: SocialType = SocialType(rawValue: social.type) {
-					self.social = Social(name: social.name, identifier: social.id, level: social.communityLevel, type: type)
+				if let social: SocialGroup = result.data?.socialGroup, let type: SocialType = SocialType(rawValue: social.type) {
+					self.social = Social(name: social.name, identifier: social.id, id: social.id, level: social.communityLevel, type: type, ownerName: social.ownerName)
 				}// end optional binding for social type is much to social type
 				status = programInfo.status
 				isMemberOnly = programInfo.isMemberOnly
