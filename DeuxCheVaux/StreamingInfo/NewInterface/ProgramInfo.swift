@@ -23,7 +23,8 @@ public struct SocialGroup: Codable {
 	let type: String
 	let id: String
 	let name: String
-	let communityLevel: Int
+	let communityLevel: Int?
+	let ownerName: String?
 }// end struct SocialGroup
 
 public struct Broadcaster: Codable {
