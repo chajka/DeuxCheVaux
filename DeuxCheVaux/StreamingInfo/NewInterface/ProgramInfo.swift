@@ -68,9 +68,11 @@ public enum ProgramStatus: String, Codable {
 
 public struct Social {
 	public let name: String
-	public let identifier: String
-	public let level: Int
+	public let identifier: String?
+	public let id: String?
+	public let level: Int?
 	public let type: SocialType
+	public let ownerName: String?
 }// end struct Social
 
 public struct BroadcasterInfo {
