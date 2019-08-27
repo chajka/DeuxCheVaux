@@ -16,7 +16,7 @@ private enum PublishStatusKey: String {
 	case stream = "stream"
 }// end enum PlayerStatusKey
 
-private let publishStatusFormat: String = "http://watch.live.nicovideo.jp/api/getpublishstatus?v="
+private let publishStatusFormat: String = "https://watch.live.nicovideo.jp/api/getpublishstatus?v="
 
 public final class PublishStatus: NSObject ,XMLParserDelegate {
 		// MARK: class method

@@ -9,7 +9,7 @@
 import Cocoa
 
 public protocol XMLSocketCommentVectorDelegate {
-	func commentVector(commentVector vector: XMLSocketCommentVector, didRecieveComment comment: XMLElement) -> Void
+	func commentVector (commentVector vector: XMLSocketCommentVector, didRecieveComment comment: XMLElement) -> Void
 }// end protocol CommentSocketDelegate
 
 public typealias heartbeatCallback = (_ commentCount: Int, _ watcherCount: Int, _ ticket: String) -> Void
@@ -19,8 +19,8 @@ public let defaultHistroryCount: Int = 400
 
 private let BufferSize: Int = 8192
 private let threadFormat: String = "<thread thread=\"%@\" res_from=\"-%d\" version=\"20061206\" scores=\"1\"/>\0"
-private let heartbeatFormat: String = "http://watch.live.nicovideo.jp/api/heartbeat?v="
-private let postkeyFormat: String = "http://watch.live.nicovideo.jp/api/getpostkey?v="
+private let heartbeatFormat: String = "https://watch.live.nicovideo.jp/api/heartbeat?v="
+private let postkeyFormat: String = "https://watch.live.nicovideo.jp/api/getpostkey?v="
 
 private enum XML {
 	enum Name: String {
@@ -91,11 +91,11 @@ extension POSTKey.Lang: StringEnum { }
 extension POSTKey.Seat: StringEnum { }
 
 public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
-	public private(set) var runLoop: RunLoop?
+		// MARK: - Properties
+	public private(set) weak var runLoop: RunLoop?
 	public private(set) var roomLabel: String? = nil
 
-	private let queue: DispatchQueue = DispatchQueue.global(qos: .default)
-
+		// MARK: - Member variables
 	private var writeable: Bool {
 		willSet (value) {
 			if value == true {
@@ -120,15 +120,14 @@ public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
 	private let isPremium: Bool
 	private let cookies: Array<HTTPCookie>
 
-	private var finishRunLoop: Bool = true
-
 	private var inputStream: InputStream?
 	private var outputStream: OutputStream?
 	private var inputRemnant: Data = Data()
 
 	public var delegate: XMLSocketCommentVectorDelegate!
 
-	public init(playerStatus: PlayerStatus, serverOffset: Int, history: Int = defaultHistroryCount, cookies: Array<HTTPCookie>, inRunLoop runLoop: RunLoop? = nil) {
+		// MARK: - Constructor/Destructor
+	public init (playerStatus: PlayerStatus, serverOffset: Int, history: Int = defaultHistroryCount, cookies: Array<HTTPCookie>) {
 		let messageServer = playerStatus.messageServers[serverOffset]
 		server = messageServer.XMLSocet.address
 		port = messageServer.XMLSocet.port
@@ -146,11 +145,12 @@ public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
 			roomLabel = messageServer.name
 		}
 		self.cookies = cookies
-		self.runLoop = runLoop
+		let deuxCheVaux: DeuxCheVaux = DeuxCheVaux.shared
+		self.runLoop = deuxCheVaux.runLoop
 		writeable = false
 	}// end init
 
-	public init (_ messageServer: MessageServer, broadcastStatus playerStatus: PlayerStatus, history: Int = defaultHistroryCount, cookies: Array<HTTPCookie>, inRunLoop runLoop: RunLoop? = nil) {
+	public init (_ messageServer: MessageServer, broadcastStatus playerStatus: PlayerStatus, history: Int = defaultHistroryCount, cookies: Array<HTTPCookie>) {
 		server = messageServer.XMLSocet.address
 		port = messageServer.XMLSocet.port
 		thread = messageServer.thread
@@ -167,29 +167,21 @@ public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
 			roomLabel = messageServer.name
 		}
 		self.cookies = cookies
-		self.runLoop = runLoop
+		let deuxCheVaux: DeuxCheVaux = DeuxCheVaux.shared
+		self.runLoop = deuxCheVaux.runLoop
 		writeable = false
 	}// end init
 
 	deinit {
-		if finishRunLoop != true { _ = close() }
+		_ = close()
 	}// end deinit
 
-	public func open() -> Bool {
+		// MARK: - Override
+		// MARK: - Actions
+		// MARK: - Public methods
+	public func open () -> Bool {
 		Stream.getStreamsToHost(withName: server, port: port, inputStream: &inputStream, outputStream: &outputStream)
 		guard let readStream = inputStream, let writeStream = outputStream else { return false }
-
-		if runLoop == nil {
-			queue.async { [weak self] in
-				guard let weakSelf = self else { return }
-				weakSelf.runLoop = RunLoop.current
-				weakSelf.finishRunLoop = false
-				while (!weakSelf.finishRunLoop) {
-					RunLoop.current.run(mode: RunLoop.Mode.default, before: Date.distantFuture)
-				}// end keep runloop
-			}// end block async
-		}// end if did not pass run loop, make it
-		while (runLoop == nil) { Thread.sleep(forTimeInterval: 0.001) }
 
 		guard let runLoop = runLoop else { return false }
 		for stream in [readStream, writeStream] {
@@ -201,24 +193,20 @@ public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
 		return true
 	}// end func open
 
-	public func close() -> Bool {
-		if finishRunLoop == true { return false }
-
+	public func close () -> Bool {
 		guard let readStream = inputStream, let writeStream = outputStream else { return false }
 		guard let runLoop = runLoop else { return false }
 		for stream in [readStream, writeStream] {
 			stream.remove(from: runLoop, forMode: RunLoop.Mode.default)
 			stream.close()
 		}// end foreach streams
-
 		inputStream = nil
 		outputStream = nil
-		stopRunLoop()
 
 		return true
 	}// end function close
 
-	public func comment(comment: String, command: Array<String>) -> Void {
+	public func comment (comment: String, command: Array<String>) -> Void {
 		let chatXMLElement: XMLElement = XMLElement(name: XML.Name.Chat.rawValue, stringValue: comment)
 		var attributes: Dictionary<String, String> = Dictionary()
 		attributes[XML.Attr.Thread] = thread
@@ -245,7 +233,7 @@ public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
 		}// end closure for heartbeat
 	}// end function comment
 
-	public func heartbeat(_ callback: @escaping heartbeatCallback) -> Void {
+	public func heartbeat (_ callback: @escaping heartbeatCallback) -> Void {
 		guard let heartbeatURL = URL(string: (heartbeatFormat + program)) else { return }
 		let config = URLSessionConfiguration.default
 		let session = URLSession(configuration: config)
@@ -292,8 +280,9 @@ public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
 		return
 	}// end function heartbeat
 
-	private func write(_ message: String) -> Void {
-		if (finishRunLoop) { return }
+		// MARK: - Internal methods
+		// MARK: - Private methods
+	private func write (_ message: String) -> Void {
 		guard let writeStream: OutputStream = outputStream, let stringDataToWrite: Data = message.data(using: String.Encoding.utf8) else { return }
 		let data: UnsafeMutablePointer<UInt8> = UnsafeMutablePointer<UInt8>.allocate(capacity: stringDataToWrite.count)
 		stringDataToWrite.copyBytes(to: data, count: stringDataToWrite.count)
@@ -303,7 +292,7 @@ public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
 		Thread.sleep(forTimeInterval: 3)
 	}// end function write
 
-	public func stream(_ aStream: Stream, handle eventCode: Stream.Event) {
+	public func stream (_ aStream: Stream, handle eventCode: Stream.Event) {
 		switch aStream {
 		case outputStream!:
 			handleWriteStreamEvent(eventCode: eventCode)
@@ -314,7 +303,7 @@ public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
 		}// end switch
 	}// end function stream: handleEventCode
 
-	private func handleWriteStreamEvent(eventCode: Stream.Event) -> Void {
+	private func handleWriteStreamEvent (eventCode: Stream.Event) -> Void {
 		guard let _ = outputStream else { return }
 		switch eventCode {
 		case .hasSpaceAvailable:
@@ -329,7 +318,7 @@ public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
 		}// end switch
 	}// end function handleWriteSreamEvent
 
-	private func handleReadStreamEvent(eventCode: Stream.Event) -> Void {
+	private func handleReadStreamEvent (eventCode: Stream.Event) -> Void {
 		var buffer = [UInt8](repeating: 0, count: BufferSize)
 		guard let readStream = inputStream else { return }
 		switch eventCode {
@@ -364,6 +353,7 @@ public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
 						let element: XMLElement = try XMLElement(xmlString: comment)
 						commentSocketDelegate.commentVector(commentVector: self, didRecieveComment: element)
 					} catch {
+						if comment.contains("\0") { print("found \\0") }
 						print("comment socket recieve not a xml format string or broken string \(comment)")
 					}// end try - catch parse xml element
 				}// end foreach
@@ -373,7 +363,7 @@ public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
 		}// end switch by event code
 	}// end function handleReadStreamEvent
 
-	private func postkey(commentCount: Int, ticket: String, callback: @escaping PostKeyCallBack) -> Void {
+	private func postkey (commentCount: Int, ticket: String, callback: @escaping PostKeyCallBack) -> Void {
 		let (postkeyURL, params) =  makePostKeyURL(commentCount: commentCount, ticket: ticket)
 		let config = URLSessionConfiguration.default
 		let session = URLSession(configuration: config)
@@ -400,7 +390,7 @@ public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
 		task.resume()
 	}// end func postkey
 
-	private func makePostKeyURL(commentCount: Int, ticket: String) -> (URL, String) {
+	private func makePostKeyURL (commentCount: Int, ticket: String) -> (URL, String) {
 		let therad: String = [POSTKey.Key.Thread.rawValue, thread].joined(separator: "=")
 		let block: String = [POSTKey.Key.Block.rawValue, String(Int((commentCount + 1) / 100))].joined(separator: "=")
 		let useLocale: String = [POSTKey.Key.UseLocale.rawValue, POSTKey.UseLocale.UseLocale.rawValue].joined(separator: "=")
@@ -425,13 +415,4 @@ public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
 
 		return (postkeysURL, params)
 	}// end function makePostKeyURL
-
-	private func stopRunLoop() -> Void {
-		finishRunLoop = true
-		let _: Timer = Timer(timeInterval: 0, target: self, selector: #selector(noop(timer: )), userInfo: nil, repeats: false)
-	}// end function stopRunLoop
-
-	@objc private func noop(timer: Timer) -> Void {
-		// dummy noop function for terminate private run loop
-	}// end function noop
 }// end class XMLSocketCommentVector
