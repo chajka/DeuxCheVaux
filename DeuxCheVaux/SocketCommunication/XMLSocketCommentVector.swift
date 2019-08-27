@@ -91,9 +91,11 @@ extension POSTKey.Lang: StringEnum { }
 extension POSTKey.Seat: StringEnum { }
 
 public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
+		// MARK: - Properties
 	public private(set) weak var runLoop: RunLoop?
 	public private(set) var roomLabel: String? = nil
 
+		// MARK: - Member variables
 	private var writeable: Bool {
 		willSet (value) {
 			if value == true {
@@ -125,6 +127,7 @@ public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
 	public var delegate: XMLSocketCommentVectorDelegate!
 
 	public init(playerStatus: PlayerStatus, serverOffset: Int, history: Int = defaultHistroryCount, cookies: Array<HTTPCookie>, inRunLoop runLoop: RunLoop? = nil) {
+		// MARK: - Constructor/Destructor
 		let messageServer = playerStatus.messageServers[serverOffset]
 		server = messageServer.XMLSocet.address
 		port = messageServer.XMLSocet.port
@@ -173,6 +176,9 @@ public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
 		_ = close()
 	}// end deinit
 
+		// MARK: - Override
+		// MARK: - Actions
+		// MARK: - Public methods
 	public func open () -> Bool {
 		Stream.getStreamsToHost(withName: server, port: port, inputStream: &inputStream, outputStream: &outputStream)
 		guard let readStream = inputStream, let writeStream = outputStream else { return false }
@@ -275,6 +281,8 @@ public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
 		return
 	}// end function heartbeat
 
+		// MARK: - Internal methods
+		// MARK: - Private methods
 	private func write (_ message: String) -> Void {
 		guard let writeStream: OutputStream = outputStream, let stringDataToWrite: Data = message.data(using: String.Encoding.utf8) else { return }
 		let data: UnsafeMutablePointer<UInt8> = UnsafeMutablePointer<UInt8>.allocate(capacity: stringDataToWrite.count)
