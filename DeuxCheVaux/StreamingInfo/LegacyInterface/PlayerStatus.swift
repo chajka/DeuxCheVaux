@@ -75,6 +75,7 @@ public final class PlayerStatus: NSObject , XMLParserDelegate {
 	}// end programURL
 
 		// MARK: - Properties
+	public private(set) var code: String?
 	public private(set) var number: String!
 	public private(set) var title: String!
 	public private(set) var desc: String!
@@ -201,6 +202,8 @@ public final class PlayerStatus: NSObject , XMLParserDelegate {
 				messageServers.append(ms)
 			case .messageServerList:
 				messageServers.removeFirst()
+			case .code:
+				code = stringBuffer
 			}// end switch case by element name
 		}// end if optional binding check for element name is member of PlayerStatusKey
 	}// end func parser didEndElement
