@@ -91,10 +91,8 @@ extension POSTKey.Lang: StringEnum { }
 extension POSTKey.Seat: StringEnum { }
 
 public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
-	public private(set) var runLoop: RunLoop?
+	public private(set) weak var runLoop: RunLoop?
 	public private(set) var roomLabel: String? = nil
-
-	private let queue: DispatchQueue = DispatchQueue.global(qos: .default)
 
 	private var writeable: Bool {
 		willSet (value) {
@@ -120,8 +118,6 @@ public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
 	private let isPremium: Bool
 	private let cookies: Array<HTTPCookie>
 
-	private var finishRunLoop: Bool = true
-
 	private var inputStream: InputStream?
 	private var outputStream: OutputStream?
 	private var inputRemnant: Data = Data()
@@ -146,7 +142,8 @@ public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
 			roomLabel = messageServer.name
 		}
 		self.cookies = cookies
-		self.runLoop = runLoop
+		let deuxCheVaux: DeuxCheVaux = DeuxCheVaux.shared
+		self.runLoop = deuxCheVaux.runLoop
 		writeable = false
 	}// end init
 
@@ -167,29 +164,18 @@ public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
 			roomLabel = messageServer.name
 		}
 		self.cookies = cookies
-		self.runLoop = runLoop
+		let deuxCheVaux: DeuxCheVaux = DeuxCheVaux.shared
+		self.runLoop = deuxCheVaux.runLoop
 		writeable = false
 	}// end init
 
 	deinit {
-		if finishRunLoop != true { _ = close() }
+		_ = close()
 	}// end deinit
 
-	public func open() -> Bool {
+	public func open () -> Bool {
 		Stream.getStreamsToHost(withName: server, port: port, inputStream: &inputStream, outputStream: &outputStream)
 		guard let readStream = inputStream, let writeStream = outputStream else { return false }
-
-		if runLoop == nil {
-			queue.async { [weak self] in
-				guard let weakSelf = self else { return }
-				weakSelf.runLoop = RunLoop.current
-				weakSelf.finishRunLoop = false
-				while (!weakSelf.finishRunLoop) {
-					RunLoop.current.run(mode: RunLoop.Mode.default, before: Date.distantFuture)
-				}// end keep runloop
-			}// end block async
-		}// end if did not pass run loop, make it
-		while (runLoop == nil) { Thread.sleep(forTimeInterval: 0.001) }
 
 		guard let runLoop = runLoop else { return false }
 		for stream in [readStream, writeStream] {
@@ -201,9 +187,7 @@ public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
 		return true
 	}// end func open
 
-	public func close() -> Bool {
-		if finishRunLoop == true { return false }
-
+	public func close () -> Bool {
 		guard let readStream = inputStream, let writeStream = outputStream else { return false }
 		guard let runLoop = runLoop else { return false }
 		for stream in [readStream, writeStream] {
@@ -213,7 +197,6 @@ public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
 
 		inputStream = nil
 		outputStream = nil
-		stopRunLoop()
 
 		return true
 	}// end function close
@@ -292,8 +275,7 @@ public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
 		return
 	}// end function heartbeat
 
-	private func write(_ message: String) -> Void {
-		if (finishRunLoop) { return }
+	private func write (_ message: String) -> Void {
 		guard let writeStream: OutputStream = outputStream, let stringDataToWrite: Data = message.data(using: String.Encoding.utf8) else { return }
 		let data: UnsafeMutablePointer<UInt8> = UnsafeMutablePointer<UInt8>.allocate(capacity: stringDataToWrite.count)
 		stringDataToWrite.copyBytes(to: data, count: stringDataToWrite.count)
@@ -425,13 +407,4 @@ public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
 
 		return (postkeysURL, params)
 	}// end function makePostKeyURL
-
-	private func stopRunLoop() -> Void {
-		finishRunLoop = true
-		let _: Timer = Timer(timeInterval: 0, target: self, selector: #selector(noop(timer: )), userInfo: nil, repeats: false)
-	}// end function stopRunLoop
-
-	@objc private func noop(timer: Timer) -> Void {
-		// dummy noop function for terminate private run loop
-	}// end function noop
 }// end class XMLSocketCommentVector
