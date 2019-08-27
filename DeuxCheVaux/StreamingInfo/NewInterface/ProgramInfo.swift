@@ -23,7 +23,7 @@ public struct SocialGroup: Codable {
 	let type: String
 	let id: String
 	let name: String
-	let communityLevel: Int?
+	let communityLevel: Int
 	let ownerName: String?
 }// end struct SocialGroup
 
@@ -70,7 +70,7 @@ public struct Social {
 	public let name: String
 	public let identifier: String?
 	public let id: String?
-	public let level: Int?
+	public let level: Int
 	public let type: SocialType
 	public let ownerName: String?
 }// end struct Social
