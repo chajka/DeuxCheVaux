@@ -14,8 +14,8 @@ fileprivate let Timeout: Double = 2.0
 fileprivate let NicknameNodeName: String = "nickname"
 fileprivate let CouldNotParse = "Could not parse"
 
-fileprivate let NicknameAPIFormat: String = "http://seiga.nicovideo.jp/api/user/info?id="
-fileprivate let VitaAPIFormat: String = "http://api.ce.nicovideo.jp/api/v1/user.info?user_id="
+fileprivate let NicknameAPIFormat: String = "https://seiga.nicovideo.jp/api/user/info?id="
+fileprivate let VitaAPIFormat: String = "https://api.ce.nicovideo.jp/api/v1/user.info?user_id="
 fileprivate let ThumbnailAPIFormat: String = "https://secure-dcdn.cdn.nimg.jp/nicoaccount/usericon/%@/%@.jpg"
 
 public final class NicoInformationHandler: NSObject {
