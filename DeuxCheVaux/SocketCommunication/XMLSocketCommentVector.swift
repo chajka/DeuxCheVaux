@@ -19,8 +19,8 @@ public let defaultHistroryCount: Int = 400
 
 private let BufferSize: Int = 8192
 private let threadFormat: String = "<thread thread=\"%@\" res_from=\"-%d\" version=\"20061206\" scores=\"1\"/>\0"
-private let heartbeatFormat: String = "http://watch.live.nicovideo.jp/api/heartbeat?v="
-private let postkeyFormat: String = "http://watch.live.nicovideo.jp/api/getpostkey?v="
+private let heartbeatFormat: String = "https://watch.live.nicovideo.jp/api/heartbeat?v="
+private let postkeyFormat: String = "https://watch.live.nicovideo.jp/api/getpostkey?v="
 
 private enum XML {
 	enum Name: String {

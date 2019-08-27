@@ -63,9 +63,10 @@ enum PlayerStatusKey: String {
 	case msPort = "port"
 	case msThread = "thread"
 	case messageServerList = "ms_list"
+	case code = "code"
 }// end enum PlayerStatusKey
 
-let playerStatusFormat: String = "http://watch.live.nicovideo.jp/api/getplayerstatus?v="
+let playerStatusFormat: String = "https://watch.live.nicovideo.jp/api/getplayerstatus?v="
 
 public final class PlayerStatus: NSObject , XMLParserDelegate {
 		// MARK: class method
