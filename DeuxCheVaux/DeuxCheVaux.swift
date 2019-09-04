@@ -48,7 +48,7 @@ public final class DeuxCheVaux: NSObject {
 		frameworkName = FramewrokName
 		framewrokVersionMajor = 0.3
 		framewrokVersionMinor = 5
-		framerokVersionFix = 4
+		framerokVersionFix = 5
 		super.init()
 		startRunLoop()
 	}// end private init
