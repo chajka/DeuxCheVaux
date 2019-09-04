@@ -101,6 +101,7 @@ public final class ProgramInfo: NSObject {
 
 		// MARK:   Outlets
 		// MARK: - Properties
+	public private(set) var title: String!
 	public private(set) var social: Social!
 	public private(set) var status: ProgramStatus!
 	public private(set) var isMemberOnly: Bool!
@@ -130,6 +131,7 @@ public final class ProgramInfo: NSObject {
 			let decoder: JSONDecoder = JSONDecoder()
 			let result: ProgramInfoJSON = try decoder.decode(ProgramInfoJSON.self, from: data)
 			if let programInfo: ProtramInformation = result.data {
+				title = programInfo.title
 				if let social: SocialGroup = result.data?.socialGroup {
 					self.social = Social(name: social.name, identifier: social.id, level: social.communityLevel, type: programInfo.socialGroup.type, ownerName: social.ownerName)
 				}// end optional binding for social type is much to social type
