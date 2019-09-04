@@ -29,7 +29,7 @@ public struct MessageServer: Equatable {
 	}// end func ==
 }// end struct MessageServer
 
-public enum SocialType: String {
+public enum SocialType: String, Codable {
 	case community = "community"
 	case channel = "channel"
 	case official = "official"

@@ -17,6 +17,7 @@ fileprivate let CouldNotParse = "Could not parse"
 fileprivate let NicknameAPIFormat: String = "https://seiga.nicovideo.jp/api/user/info?id="
 fileprivate let VitaAPIFormat: String = "https://api.ce.nicovideo.jp/api/v1/user.info?user_id="
 fileprivate let ThumbnailAPIFormat: String = "https://secure-dcdn.cdn.nimg.jp/nicoaccount/usericon/%@/%@.jpg"
+fileprivate let ChannelThumbnailApi: String = "https://secure-dcdn.cdn.nimg.jp/comch/channel-icon/128x128/%@.jpg"
 
 public final class NicoInformationHandler: NSObject {
 		// MARK:   Outlets
@@ -85,6 +86,27 @@ public final class NicoInformationHandler: NSObject {
 
 		return thumbnail
 	}// end communityThumbnail
+
+	public func channelThumbnail (channel: String, whenNoImage insteadImage: NSImage) -> NSImage {
+		let urlString: String = String(format: ChannelThumbnailApi, channel)
+		guard let url: URL = URL(string: urlString) else { return insteadImage }
+		let request: URLRequest = makeRequest(url: url, method: .get)
+		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
+		var thumbnail: NSImage = insteadImage
+		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
+			guard let data: Data = dat, let image: NSImage = NSImage(data: data) else {
+				semaphore.signal()
+				return
+			}// end guard
+			thumbnail = image
+			semaphore.signal()
+		}// end closure
+		task.resume()
+		let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
+		if timeout == .timedOut { thumbnail = insteadImage }
+
+		return thumbnail
+	}// end channelThumbnail
 
 	public func rawData (forURL url: URL, httpMethod method: HTTPMethod, HTTOBody body: Data? = nil, contentsType type: String? = nil) -> Data? {
 		var rawData: Data? = nil

@@ -357,7 +357,7 @@ public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
 						print("comment socket recieve not a xml format string or broken string \(comment)")
 					}// end try - catch parse xml element
 				}// end foreach
-		}// end switch result of read stream
+			}// end switch result of read stream
 		default:
 			print("event is not has bytes available \(eventCode)")
 		}// end switch by event code
