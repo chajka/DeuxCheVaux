@@ -21,10 +21,10 @@ public final class DeuxCheVaux: NSObject {
 	public var applicationVersionMajor: Float
 	public var applicationVersionMinor: Int
 	public var applicationVersionFix: Int
-	public var frameworkName: String
-	public var framewrokVersionMajor: Float
-	public var framewrokVersionMinor: Int
-	public var framerokVersionFix: Int
+	public let frameworkName: String
+	public let framewrokVersionMajor: Float
+	public let framewrokVersionMinor: Int
+	public let framerokVersionFix: Int
 	public var userAgent: String {
 		get {
 			let applicationNameVersion = "\(applicationName)/\(applicationVersionMajor).\(applicationVersionMinor).\(applicationVersionFix)"
