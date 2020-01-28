@@ -8,7 +8,10 @@
 
 import Cocoa
 
-internal let FramewrokName: String = "DeuxCheVaux"
+fileprivate let FramewrokName: String = "DeuxCheVaux"
+fileprivate let FramewrokVersionMajor: Float = 0.3
+fileprivate let FramewrokVersionMinor: Int = 5
+fileprivate let FramerokVersionFix: Int = 6
 
 fileprivate let QueueLabel: String = "tv.from.chajka.DeuxCheVaux"
 
