@@ -8,7 +8,10 @@
 
 import Cocoa
 
-internal let FramewrokName: String = "DeuxCheVaux"
+fileprivate let FramewrokName: String = "DeuxCheVaux"
+fileprivate let FramewrokVersionMajor: Float = 0.3
+fileprivate let FramewrokVersionMinor: Int = 5
+fileprivate let FramerokVersionFix: Int = 6
 
 fileprivate let QueueLabel: String = "tv.from.chajka.DeuxCheVaux"
 
@@ -46,9 +49,9 @@ public final class DeuxCheVaux: NSObject {
 		applicationVersionMinor = 0
 		applicationVersionFix = 0
 		frameworkName = FramewrokName
-		framewrokVersionMajor = 0.3
-		framewrokVersionMinor = 5
-		framerokVersionFix = 5
+		framewrokVersionMajor = FramewrokVersionMajor
+		framewrokVersionMinor = FramewrokVersionMinor
+		framerokVersionFix = FramerokVersionFix
 		super.init()
 		startRunLoop()
 	}// end private init
