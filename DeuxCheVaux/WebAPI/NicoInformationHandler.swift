@@ -11,13 +11,28 @@ import Cocoa
 fileprivate let RequestTimeOut: TimeInterval = 2.0
 fileprivate let DataTimeOut: TimeInterval = 2.0
 fileprivate let Timeout: Double = 2.0
+fileprivate let UnknownNickname = "Unknown User"
 fileprivate let NicknameNodeName: String = "nickname"
 fileprivate let CouldNotParse = "Could not parse"
 
-fileprivate let NicknameAPIFormat: String = "https://seiga.nicovideo.jp/api/user/info?id="
-fileprivate let VitaAPIFormat: String = "https://api.ce.nicovideo.jp/api/v1/user.info?user_id="
+fileprivate let NicknameAPIFormat: String = "https://api.live2.nicovideo.jp/api/v1/user/nickname?userId="
 fileprivate let ThumbnailAPIFormat: String = "https://secure-dcdn.cdn.nimg.jp/nicoaccount/usericon/%@/%@.jpg"
 fileprivate let ChannelThumbnailApi: String = "https://secure-dcdn.cdn.nimg.jp/comch/channel-icon/128x128/%@.jpg"
+
+fileprivate struct data: Codable {
+	let id: String
+	let nickname: String
+}// end struct data
+
+fileprivate struct error: Codable {
+	let code: Int
+	let messae: String?
+}// end struct error
+
+fileprivate struct Nickname: Codable {
+	let data: data?
+	let err: error?
+}// end struct Nickname
 
 public final class NicoInformationHandler: NSObject {
 		// MARK:   Outlets
@@ -40,10 +55,11 @@ public final class NicoInformationHandler: NSObject {
 		// MARK: - Actions
 		// MARK: - Public methods
 	public func fetchNickName (forIdentifier userIdentifieer: String) -> String? {
-		if let nickname = seigaNickName(fromSeigaAPI: userIdentifieer) {
+		if let nickname = fetchNickname(from: userIdentifieer) {
 			return nickname
 		}// end if
-		return vitaNickname(fromVitaAPI: userIdentifieer)
+
+		return UnknownNickname
 	}// end fetchNickName
 
 	public func thumbnail (identifieer userIdentifer: String, whenNoImage insteadImage: NSImage) -> NSImage {
@@ -133,62 +149,33 @@ public final class NicoInformationHandler: NSObject {
 
 		// MARK: - Internal methods
 		// MARK: - Private methods
-	private func seigaNickName (fromSeigaAPI identifier: String) -> String? {
+	private func fetchNickname (from identifier: String) -> String? {
 		guard let url = URL(string: NicknameAPIFormat + identifier) else { return nil }
 		let request: URLRequest = makeRequest(url: url, method: .get)
 		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
 		var nickname: String? = nil
-		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
+		let task: URLSessionTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
 			guard let data: Data = dat else {
 				semaphore.signal()
 				return
 			}// end guard
 			do {
-				let seiga: XMLDocument = try XMLDocument(data: data, options: .documentTidyXML)
-				guard let children: Array<XMLNode> = seiga.children?.first?.children?.first?.children else { throw NSError(domain: CouldNotParse, code: 0, userInfo: nil)}
-				for child: XMLNode in children {
-					if child.name == NicknameNodeName { nickname = child.stringValue }
-				}// end foreach children
+				let nicknameJSON: Nickname = try JSONDecoder().decode(Nickname.self, from: data)
+				if let nick: data = nicknameJSON.data {
+					nickname = nick.nickname
+				}// end optional binding
 			} catch let error {
 				print(error.localizedDescription)
-			}// end do try - catch
+			}// end try - catch error of decode json data
 			semaphore.signal()
-		}// end closure
+		}// end url request closure
 		task.resume()
 		let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
 		if timeout == .timedOut { nickname = nil }
 
 		return nickname
-	}// end fetchNickname from seiga api
+	}// end fetchNickname from NicoNico API (New at 3/4/2020)
 
-	private func vitaNickname (fromVitaAPI identifier: String) -> String? {
-		guard let url = URL(string: VitaAPIFormat + identifier) else { return nil }
-		let request: URLRequest = makeRequest(url: url, method: .get)
-		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
-		var nickname: String? = nil
-		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
-			guard let data: Data = dat else {
-				semaphore.signal()
-				return
-			}// end guard
-			do {
-				let vita: XMLDocument = try XMLDocument(data: data, options: .documentTidyXML)
-				guard let children: Array<XMLNode> = vita.children?.first?.children?.first?.children else { throw NSError(domain: CouldNotParse, code: 0, userInfo: nil)}
-				for child: XMLNode in children {
-					if child.name == NicknameNodeName { nickname = child.stringValue }
-				}// end foreach children
-			} catch let error {
-				print(error.localizedDescription)
-			}// end do try - catch
-			semaphore.signal()
-		}// end closure
-		task.resume()
-		let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
-		if timeout == .timedOut { nickname = nil }
-		
-		return nickname
-	}// end fetchNickname from VITA api
-	
 	private func makeRequest (url requestURL: URL, method requestMethod: HTTPMethod, contentsType type: String? = nil) -> URLRequest {
 		let deuxCheVaux: DeuxCheVaux = DeuxCheVaux.shared
 		let userAgent: String = deuxCheVaux.userAgent
