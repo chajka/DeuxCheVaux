@@ -19,6 +19,21 @@ fileprivate let NicknameAPIFormat: String = "https://seiga.nicovideo.jp/api/user
 fileprivate let ThumbnailAPIFormat: String = "https://secure-dcdn.cdn.nimg.jp/nicoaccount/usericon/%@/%@.jpg"
 fileprivate let ChannelThumbnailApi: String = "https://secure-dcdn.cdn.nimg.jp/comch/channel-icon/128x128/%@.jpg"
 
+fileprivate struct data: Codable {
+	let id: String
+	let nickname: String
+}// end struct data
+
+fileprivate struct error: Codable {
+	let code: Int
+	let messae: String?
+}// end struct error
+
+fileprivate struct Nickname: Codable {
+	let data: data?
+	let err: error?
+}// end struct Nickname
+
 public final class NicoInformationHandler: NSObject {
 		// MARK:   Outlets
 		// MARK: - Properties
