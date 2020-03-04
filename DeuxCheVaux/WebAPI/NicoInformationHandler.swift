@@ -15,7 +15,7 @@ fileprivate let UnknownNickname = "Unknown User"
 fileprivate let NicknameNodeName: String = "nickname"
 fileprivate let CouldNotParse = "Could not parse"
 
-fileprivate let NicknameAPIFormat: String = "https://seiga.nicovideo.jp/api/user/info?id="
+fileprivate let NicknameAPIFormat: String = "https://api.live2.nicovideo.jp/api/v1/user/nickname?userId="
 fileprivate let ThumbnailAPIFormat: String = "https://secure-dcdn.cdn.nimg.jp/nicoaccount/usericon/%@/%@.jpg"
 fileprivate let ChannelThumbnailApi: String = "https://secure-dcdn.cdn.nimg.jp/comch/channel-icon/128x128/%@.jpg"
 
@@ -55,7 +55,7 @@ public final class NicoInformationHandler: NSObject {
 		// MARK: - Actions
 		// MARK: - Public methods
 	public func fetchNickName (forIdentifier userIdentifieer: String) -> String? {
-		if let nickname = seigaNickName(fromSeigaAPI: userIdentifieer) {
+		if let nickname = fetchNickname(from: userIdentifieer) {
 			return nickname
 		}// end if
 
