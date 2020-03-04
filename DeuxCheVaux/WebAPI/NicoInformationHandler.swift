@@ -11,11 +11,11 @@ import Cocoa
 fileprivate let RequestTimeOut: TimeInterval = 2.0
 fileprivate let DataTimeOut: TimeInterval = 2.0
 fileprivate let Timeout: Double = 2.0
+fileprivate let UnknownNickname = "Unknown User"
 fileprivate let NicknameNodeName: String = "nickname"
 fileprivate let CouldNotParse = "Could not parse"
 
 fileprivate let NicknameAPIFormat: String = "https://seiga.nicovideo.jp/api/user/info?id="
-fileprivate let VitaAPIFormat: String = "https://api.ce.nicovideo.jp/api/v1/user.info?user_id="
 fileprivate let ThumbnailAPIFormat: String = "https://secure-dcdn.cdn.nimg.jp/nicoaccount/usericon/%@/%@.jpg"
 fileprivate let ChannelThumbnailApi: String = "https://secure-dcdn.cdn.nimg.jp/comch/channel-icon/128x128/%@.jpg"
 
@@ -43,7 +43,8 @@ public final class NicoInformationHandler: NSObject {
 		if let nickname = seigaNickName(fromSeigaAPI: userIdentifieer) {
 			return nickname
 		}// end if
-		return vitaNickname(fromVitaAPI: userIdentifieer)
+
+		return UnknownNickname
 	}// end fetchNickName
 
 	public func thumbnail (identifieer userIdentifer: String, whenNoImage insteadImage: NSImage) -> NSImage {
@@ -161,34 +162,6 @@ public final class NicoInformationHandler: NSObject {
 		return nickname
 	}// end fetchNickname from seiga api
 
-	private func vitaNickname (fromVitaAPI identifier: String) -> String? {
-		guard let url = URL(string: VitaAPIFormat + identifier) else { return nil }
-		let request: URLRequest = makeRequest(url: url, method: .get)
-		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
-		var nickname: String? = nil
-		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
-			guard let data: Data = dat else {
-				semaphore.signal()
-				return
-			}// end guard
-			do {
-				let vita: XMLDocument = try XMLDocument(data: data, options: .documentTidyXML)
-				guard let children: Array<XMLNode> = vita.children?.first?.children?.first?.children else { throw NSError(domain: CouldNotParse, code: 0, userInfo: nil)}
-				for child: XMLNode in children {
-					if child.name == NicknameNodeName { nickname = child.stringValue }
-				}// end foreach children
-			} catch let error {
-				print(error.localizedDescription)
-			}// end do try - catch
-			semaphore.signal()
-		}// end closure
-		task.resume()
-		let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
-		if timeout == .timedOut { nickname = nil }
-		
-		return nickname
-	}// end fetchNickname from VITA api
-	
 	private func makeRequest (url requestURL: URL, method requestMethod: HTTPMethod, contentsType type: String? = nil) -> URLRequest {
 		let deuxCheVaux: DeuxCheVaux = DeuxCheVaux.shared
 		let userAgent: String = deuxCheVaux.userAgent
