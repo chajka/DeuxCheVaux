@@ -177,6 +177,33 @@ public final class NicoInformationHandler: NSObject {
 		return nickname
 	}// end fetchNickname from seiga api
 
+	private func fetchNickname (from identifier: String) -> String? {
+		guard let url = URL(string: NicknameAPIFormat + identifier) else { return nil }
+		let request: URLRequest = makeRequest(url: url, method: .get)
+		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
+		var nickname: String? = nil
+		let task: URLSessionTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
+			guard let data: Data = dat else {
+				semaphore.signal()
+				return
+			}// end guard
+			do {
+				let nicknameJSON: Nickname = try JSONDecoder().decode(Nickname.self, from: data)
+				if let nick: data = nicknameJSON.data {
+					nickname = nick.nickname
+				}// end optional binding
+			} catch let error {
+				print(error.localizedDescription)
+			}// end try - catch error of decode json data
+			semaphore.signal()
+		}// end url request closure
+		task.resume()
+		let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
+		if timeout == .timedOut { nickname = nil }
+
+		return nickname
+	}// end fetchNickname from NicoNico API (New at 3/4/2020)
+
 	private func makeRequest (url requestURL: URL, method requestMethod: HTTPMethod, contentsType type: String? = nil) -> URLRequest {
 		let deuxCheVaux: DeuxCheVaux = DeuxCheVaux.shared
 		let userAgent: String = deuxCheVaux.userAgent
