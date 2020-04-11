@@ -35,11 +35,12 @@ public final class PublishStatus: NSObject ,XMLParserDelegate {
 	private var stringBuffer: String = String()
 
 		// MARK: - Constructor/Destructor
-	public init(xmlData data: Data) {
+	public init(xmlData data: Data) throws {
 		super.init()
 		let parser: XMLParser = XMLParser(data: data)
 		parser.delegate = self
 		_ = parser.parse()
+		if checkSuccessParse() == false { throw StatusError.XMLParseError }
 	}// end init
 
 		// MARK: - Override
