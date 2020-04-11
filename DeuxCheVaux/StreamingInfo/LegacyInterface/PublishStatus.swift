@@ -47,6 +47,16 @@ public final class PublishStatus: NSObject ,XMLParserDelegate {
 		// MARK: - Public methods
 		// MARK: - Internal methods
 		// MARK: - Private methods
+	private func checkSuccessParse () -> Bool {
+		guard let _ = number else { return false }
+		guard let _ = token else { return false }
+		guard let _ = canVote else { return false }
+		guard let _ = rtmpURL else { return false }
+		guard let _ = streamKey else { return false }
+
+		return true
+	}// end check success parse
+
 		// MARK: - Delegates
 			// MARK: XMLParser Delegatte
 	public func parser(_ parser: XMLParser, didEndElement elementName: String, namespaceURI: String?, qualifiedName qName: String?) {
