@@ -11,9 +11,13 @@ import Cocoa
 fileprivate let FramewrokName: String = "DeuxCheVaux"
 fileprivate let FramewrokVersionMajor: Float = 0.3
 fileprivate let FramewrokVersionMinor: Int = 6
-fileprivate let FramerokVersionFix: Int = 0
+fileprivate let FramerokVersionFix: Int = 1
 
 fileprivate let QueueLabel: String = "tv.from.chajka.DeuxCheVaux"
+
+public enum StatusError: Error {
+	case XMLParseError
+}// end StatusError
 
 public final class DeuxCheVaux: NSObject {
 		// MARK:   Class Variable

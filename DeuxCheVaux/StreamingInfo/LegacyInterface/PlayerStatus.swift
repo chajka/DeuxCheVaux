@@ -105,17 +105,40 @@ public final class PlayerStatus: NSObject , XMLParserDelegate {
 	private var thread: String!
 
 		// MARK: - Constructor/Destructor
-	public init(xmlData data: Data) {
+	public init(xmlData data: Data) throws {
 		super.init()
 		let parser: XMLParser = XMLParser(data: data)
 		parser.delegate = self
 		_ = parser.parse()
+		if checkSuccessParse() == false { throw StatusError.XMLParseError }
 	}// end init
 
 		// MARK: - Override
 		// MARK: - Actions
 		// MARK: - Public methods
 		// MARK: - Private methods
+	private func checkSuccessParse () -> Bool {
+		guard let _ = number else { return false }
+		guard let _ = title else { return false }
+		guard let _ = desc else { return false }
+		guard let _ = socialType else { return false }
+		guard let _ = community else { return false }
+		guard let _ = isOwner else { return false }
+		guard let _ = ownerIdentifier else { return false }
+		guard let _ = ownerName else { return false }
+		guard let _ = baseTime else { return false }
+		guard let _ = startTime else { return false }
+		guard let _ = endTime else { return false }
+		guard let _ = communityThumbnaiURL else { return false }
+		guard let _ = listenerIdentifier else { return false }
+		guard let _ = listenerName else { return false }
+		guard let _ = listenerIsPremium else { return false }
+		guard let _ = listenerLanguage else { return false }
+		guard let _ = listenerIsVIP else { return false }
+
+		return true
+	}// end check success parse
+
 		// MARK: - Delegates
 			// MARK: NSXMLParserDelegate
 	public func parser(_ parser: XMLParser, didEndElement elementName: String, namespaceURI: String?, qualifiedName qName: String?) {
