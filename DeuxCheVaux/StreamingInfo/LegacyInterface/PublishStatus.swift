@@ -35,11 +35,12 @@ public final class PublishStatus: NSObject ,XMLParserDelegate {
 	private var stringBuffer: String = String()
 
 		// MARK: - Constructor/Destructor
-	public init(xmlData data: Data) {
+	public init(xmlData data: Data) throws {
 		super.init()
 		let parser: XMLParser = XMLParser(data: data)
 		parser.delegate = self
 		_ = parser.parse()
+		if checkSuccessParse() == false { throw StatusError.XMLParseError }
 	}// end init
 
 		// MARK: - Override
@@ -47,6 +48,16 @@ public final class PublishStatus: NSObject ,XMLParserDelegate {
 		// MARK: - Public methods
 		// MARK: - Internal methods
 		// MARK: - Private methods
+	private func checkSuccessParse () -> Bool {
+		guard let _ = number else { return false }
+		guard let _ = token else { return false }
+		guard let _ = canVote else { return false }
+		guard let _ = rtmpURL else { return false }
+		guard let _ = streamKey else { return false }
+
+		return true
+	}// end check success parse
+
 		// MARK: - Delegates
 			// MARK: XMLParser Delegatte
 	public func parser(_ parser: XMLParser, didEndElement elementName: String, namespaceURI: String?, qualifiedName qName: String?) {
