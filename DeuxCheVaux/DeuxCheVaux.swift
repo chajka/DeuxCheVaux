@@ -15,6 +15,10 @@ fileprivate let FramerokVersionFix: Int = 0
 
 fileprivate let QueueLabel: String = "tv.from.chajka.DeuxCheVaux"
 
+public enum StatusError: Error {
+	case XMLParseError
+}// end StatusError
+
 public final class DeuxCheVaux: NSObject {
 		// MARK:   Class Variable
 	public static let shared: DeuxCheVaux = DeuxCheVaux()
