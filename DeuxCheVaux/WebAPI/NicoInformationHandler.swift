@@ -40,12 +40,6 @@ public final class NicoInformationHandler: NSObject {
 
 		// MARK: - Constructor/Destructor
 	public init (_ cookie: Array<HTTPCookie>) {
-		let sessionConfiguration = URLSessionConfiguration.default
-		sessionConfiguration.timeoutIntervalForRequest = RequestTimeOut
-		sessionConfiguration.timeoutIntervalForResource = DataTimeOut
-		sessionConfiguration.httpCookieAcceptPolicy = HTTPCookie.AcceptPolicy.onlyFromMainDocumentDomain
-		session = URLSession(configuration: sessionConfiguration)
-		self.cookies = cookie
 	}// end init
 
 		// MARK: - Override

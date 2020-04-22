@@ -49,8 +49,12 @@ public class HTTPCommunicatable: NSObject {
 
 		// MARK: - Constructor/Destructor
 	public init (_ cookies: Array<HTTPCookie>) {
+		let sessionConfiguration = URLSessionConfiguration.default
+		sessionConfiguration.timeoutIntervalForRequest = RequestTimeOut
+		sessionConfiguration.timeoutIntervalForResource = DataTimeOut
+		sessionConfiguration.httpCookieAcceptPolicy = HTTPCookie.AcceptPolicy.onlyFromMainDocumentDomain
 		self.cookies = cookies
-		session = URLSession(configuration: URLSessionConfiguration.default)
+		session = URLSession(configuration: sessionConfiguration)
 	}// end init
 
 		// MARK: - Override
