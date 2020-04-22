@@ -37,7 +37,7 @@ private struct MovieInformation: Codable {
 fileprivate let ContentsTimeout: Double = 2.0
 fileprivate let ContentsAPI: String = "https://live2.nicovideo.jp/unama/tool/v1/contents/"
 
-public final class SmileVideoInformation: NSObject {
+public final class SmileVideoInformation: HTTPCommunicatable {
 		// MARK:   Properties
 	public let videoNumber: String
 	public private(set) var title: String!
@@ -49,19 +49,14 @@ public final class SmileVideoInformation: NSObject {
 	public private(set) var tags: Array<String>
 
 		// MARK: - Member variables
-	private let cookies: Array<HTTPCookie>
-	private let session: URLSession
-	private var request: URLRequest!
 	private var stringBuffer: String
 
 		// MARK: - Constructor/Destructor
 	public init (videoNumber video: String, cookies cookie: Array<HTTPCookie>) {
 		videoNumber = video
-		cookies = cookie
-		session = URLSession(configuration: URLSessionConfiguration.default)
 		tags = Array()
 		stringBuffer = String()
-		super.init()
+		super.init(cookie)
 	}// end init
 
 		// MARK: - Override
@@ -76,10 +71,8 @@ public final class SmileVideoInformation: NSObject {
 		// MARK: - Private methods
 	private func checkContents () -> Bool {
 		if let contentsAPIURL: URL = URL(string: ContentsAPI) {
-			let contentsAPIforcurrentVideo = contentsAPIURL.appendingPathComponent(videoNumber)
-			request = URLRequest(url: contentsAPIforcurrentVideo, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 0.1)
-			request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
-			request.method = .get
+			let contentsAPIforcurrentVideo: URL = contentsAPIURL.appendingPathComponent(videoNumber)
+			let request: URLRequest = makeRequest(url: contentsAPIforcurrentVideo, method: .get)
 			let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
 			let task: URLSessionDataTask = session.dataTask(with: request) { [unowned self] (dat, resp, err) in
 				guard let data: Data = dat else { return }

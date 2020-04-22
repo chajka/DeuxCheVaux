@@ -242,7 +242,6 @@ extension StreamControl.key: StringEnum { }
 extension StreamControl.value: StringEnum { }
 extension CommentKeys: StringEnum { }
 
-fileprivate let Timeout: Double = 2.0
 fileprivate let DefaultVolume: Float = 0.5
 fileprivate let Success: String = "OK"
 internal let SmileVideoPrefix: String = "sm"
@@ -324,49 +323,20 @@ private let QuoteContents: String = "/quotation/contents"
 private let perm: String = "/perm "
 private let clear: String = "/clear"
 
-public enum HTTPMethod: String {
-	case get = "GET"
-	case post = "POST"
-	case put = "PUT"
-	case delete = "DELETE"
-	case patch = "PATCH"
-}// end enum httpMehod
-
-public extension URLRequest {
-	var method: HTTPMethod? {
-		get {
-			if let method: String = self.httpMethod {
-				return HTTPMethod(rawValue: method)
-			}// end get
-			return nil
-		}// end get
-		set {
-			if let httpMehtod: HTTPMethod = newValue {
-				self.httpMethod = httpMehtod.rawValue
-			} else {
-				self.httpMethod = HTTPMethod.get.rawValue
-			}// end optional binding check for new value is member of enum HTTPMethod
-		}// end set
-	}// end computed property extension of URLRequest
-}// end of extension of URLRequest
-
-public final class OwnerCommandHandler: NSObject {
+public final class OwnerCommandHandler: HTTPCommunicatable {
 		// MARK: - Properties
 		// MARK: - Member variables
 	private let program: String
 	private let apiBaseString: String
 	private let videoPrefixSet: Set<String>
 	private let capableVolumeRange: Range<Float> = Range(uncheckedBounds: (lower: 0.0, upper: 1.0))
-	private let cookies: Array<HTTPCookie>
-	private let session: URLSession
 
 		// MARK: - Constructor/Destructor
 	public init (program: String, cookies: Array<HTTPCookie>) {
 		self.program = program
-		self.cookies = cookies
 		videoPrefixSet = Set(arrayLiteral: SmileVideoPrefix, NicoMoviewPrefix, SmileOfficialPrefix)
 		apiBaseString = ApiBase + self.program
-		session = URLSession(configuration: URLSessionConfiguration.default)
+		super.init(cookies)
 	}// end init
 
 		// MARK: - Override
@@ -839,20 +809,6 @@ public final class OwnerCommandHandler: NSObject {
 
 		// MARK: - Internal methods
 		// MARK: - Private methods
-	private func makeRequest (url requestURL: URL, method requestMethod: HTTPMethod, contentsType type: String? = nil) -> URLRequest {
-		let deuxCheVaux: DeuxCheVaux = DeuxCheVaux.shared
-		let userAgent: String = deuxCheVaux.userAgent
-		var request: URLRequest = URLRequest(url: requestURL, cachePolicy: URLRequest.CachePolicy.reloadIgnoringLocalAndRemoteCacheData, timeoutInterval: Timeout)
-		request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
-		request.addValue(userAgent, forHTTPHeaderField: UserAgentKey)
-		if let contentsType: String = type {
-			request.addValue(contentsType, forHTTPHeaderField: ContentTypeKey)
-		}// end optional binding check for contents type
-		request.method = requestMethod
-
-		return request
-	}// end makeRequest
-
 	private func checkMetaInformation (_ meta: MetaInformation) -> ResultStatus {
 		var status: ResultStatus
 		var errorCode: String? = nil
