@@ -812,20 +812,6 @@ public final class OwnerCommandHandler: NSObject {
 
 		// MARK: - Internal methods
 		// MARK: - Private methods
-	private func makeRequest (url requestURL: URL, method requestMethod: HTTPMethod, contentsType type: String? = nil) -> URLRequest {
-		let deuxCheVaux: DeuxCheVaux = DeuxCheVaux.shared
-		let userAgent: String = deuxCheVaux.userAgent
-		var request: URLRequest = URLRequest(url: requestURL, cachePolicy: URLRequest.CachePolicy.reloadIgnoringLocalAndRemoteCacheData, timeoutInterval: Timeout)
-		request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
-		request.addValue(userAgent, forHTTPHeaderField: UserAgentKey)
-		if let contentsType: String = type {
-			request.addValue(contentsType, forHTTPHeaderField: ContentTypeKey)
-		}// end optional binding check for contents type
-		request.method = requestMethod
-
-		return request
-	}// end makeRequest
-
 	private func checkMetaInformation (_ meta: MetaInformation) -> ResultStatus {
 		var status: ResultStatus
 		var errorCode: String? = nil
