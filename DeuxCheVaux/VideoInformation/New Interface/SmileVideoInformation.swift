@@ -71,10 +71,8 @@ public final class SmileVideoInformation: HTTPCommunicatable {
 		// MARK: - Private methods
 	private func checkContents () -> Bool {
 		if let contentsAPIURL: URL = URL(string: ContentsAPI) {
-			request = URLRequest(url: contentsAPIforcurrentVideo, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 0.1)
-			request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
-			request.method = .get
 			let contentsAPIforcurrentVideo: URL = contentsAPIURL.appendingPathComponent(videoNumber)
+			let request: URLRequest = makeRequest(url: contentsAPIforcurrentVideo, method: .get)
 			let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
 			let task: URLSessionDataTask = session.dataTask(with: request) { [unowned self] (dat, resp, err) in
 				guard let data: Data = dat else { return }
