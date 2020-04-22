@@ -323,32 +323,6 @@ private let QuoteContents: String = "/quotation/contents"
 private let perm: String = "/perm "
 private let clear: String = "/clear"
 
-public enum HTTPMethod: String {
-	case get = "GET"
-	case post = "POST"
-	case put = "PUT"
-	case delete = "DELETE"
-	case patch = "PATCH"
-}// end enum httpMehod
-
-public extension URLRequest {
-	var method: HTTPMethod? {
-		get {
-			if let method: String = self.httpMethod {
-				return HTTPMethod(rawValue: method)
-			}// end get
-			return nil
-		}// end get
-		set {
-			if let httpMehtod: HTTPMethod = newValue {
-				self.httpMethod = httpMehtod.rawValue
-			} else {
-				self.httpMethod = HTTPMethod.get.rawValue
-			}// end optional binding check for new value is member of enum HTTPMethod
-		}// end set
-	}// end computed property extension of URLRequest
-}// end of extension of URLRequest
-
 public final class OwnerCommandHandler: NSObject {
 		// MARK: - Properties
 		// MARK: - Member variables
