@@ -9,6 +9,8 @@
 import Cocoa
 
 internal let Timeout: Double = 2.0
+fileprivate let RequestTimeOut: TimeInterval = 2.0
+fileprivate let DataTimeOut: TimeInterval = 2.0
 
 fileprivate let UserSessionName: String = "user_session"
 private let NicoSeesionHeaderKey: String = "X-niconico-session"

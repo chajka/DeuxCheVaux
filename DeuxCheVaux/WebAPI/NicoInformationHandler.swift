@@ -8,8 +8,6 @@
 
 import Cocoa
 
-fileprivate let RequestTimeOut: TimeInterval = 2.0
-fileprivate let DataTimeOut: TimeInterval = 2.0
 fileprivate let UnknownNickname = "Unknown User"
 fileprivate let NicknameNodeName: String = "nickname"
 fileprivate let CouldNotParse = "Could not parse"
