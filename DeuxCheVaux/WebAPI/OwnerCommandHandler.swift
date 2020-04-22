@@ -40,6 +40,12 @@ public enum NGType: String, Codable {
 	case command = "command"
 }// end enum NGType
 
+public struct NGData: Codable {
+	let id: Int
+	let type: NGType
+	let body: String
+}// end struct NGData
+
 	// MARK: miixing / quote specific structure
 public enum MixingMode: Int {
 	case main = 1
