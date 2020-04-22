@@ -31,7 +31,7 @@ fileprivate struct Nickname: Codable {
 	let err: error?
 }// end struct Nickname
 
-public final class NicoInformationHandler: NSObject {
+public final class NicoInformationHandler: HTTPCommunicatable {
 		// MARK:   Outlets
 		// MARK: - Properties
 		// MARK: - Member variables

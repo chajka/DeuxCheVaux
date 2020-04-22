@@ -20,7 +20,7 @@ private enum VideoInfoTag: String {
 
 private let InfoQueryAPI: String = "https://ext.nicovideo.jp/api/getthumbinfo/"
 
-public final class VideoInformation: NSObject, XMLParserDelegate {
+public final class VideoInformation: HTTPCommunicatable, XMLParserDelegate {
 		// MARK:   Properties
 	public let videoNumber: String
 	public private(set) var title: String!

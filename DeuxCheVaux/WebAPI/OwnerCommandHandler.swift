@@ -323,7 +323,7 @@ private let QuoteContents: String = "/quotation/contents"
 private let perm: String = "/perm "
 private let clear: String = "/clear"
 
-public final class OwnerCommandHandler: NSObject {
+public final class OwnerCommandHandler: HTTPCommunicatable {
 		// MARK: - Properties
 		// MARK: - Member variables
 	private let program: String

@@ -37,7 +37,7 @@ private struct MovieInformation: Codable {
 fileprivate let ContentsTimeout: Double = 2.0
 fileprivate let ContentsAPI: String = "https://live2.nicovideo.jp/unama/tool/v1/contents/"
 
-public final class SmileVideoInformation: NSObject {
+public final class SmileVideoInformation: HTTPCommunicatable {
 		// MARK:   Properties
 	public let videoNumber: String
 	public private(set) var title: String!
