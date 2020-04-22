@@ -35,7 +35,6 @@ public final class NicoInformationHandler: HTTPCommunicatable {
 		// MARK:   Outlets
 		// MARK: - Properties
 		// MARK: - Member variables
-
 		// MARK: - Constructor/Destructor
 	public override init (_ cookie: Array<HTTPCookie>) {
 		super.init(cookie)
