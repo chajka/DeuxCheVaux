@@ -49,16 +49,14 @@ public final class SmileVideoInformation: NSObject {
 	public private(set) var tags: Array<String>
 
 		// MARK: - Member variables
-	private let cookies: Array<HTTPCookie>
 	private var stringBuffer: String
 
 		// MARK: - Constructor/Destructor
 	public init (videoNumber video: String, cookies cookie: Array<HTTPCookie>) {
 		videoNumber = video
-		cookies = cookie
 		tags = Array()
 		stringBuffer = String()
-		super.init()
+		super.init(cookie)
 	}// end init
 
 		// MARK: - Override

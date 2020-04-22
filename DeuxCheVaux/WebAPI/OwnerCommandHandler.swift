@@ -330,14 +330,13 @@ public final class OwnerCommandHandler: NSObject {
 	private let apiBaseString: String
 	private let videoPrefixSet: Set<String>
 	private let capableVolumeRange: Range<Float> = Range(uncheckedBounds: (lower: 0.0, upper: 1.0))
-	private let cookies: Array<HTTPCookie>
 
 		// MARK: - Constructor/Destructor
 	public init (program: String, cookies: Array<HTTPCookie>) {
 		self.program = program
-		self.cookies = cookies
 		videoPrefixSet = Set(arrayLiteral: SmileVideoPrefix, NicoMoviewPrefix, SmileOfficialPrefix)
 		apiBaseString = ApiBase + self.program
+		super.init(cookies)
 	}// end init
 
 		// MARK: - Override

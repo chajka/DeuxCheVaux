@@ -35,10 +35,10 @@ public final class NicoInformationHandler: NSObject {
 		// MARK:   Outlets
 		// MARK: - Properties
 		// MARK: - Member variables
-	private let cookies: Array<HTTPCookie>
 
 		// MARK: - Constructor/Destructor
-	public init (_ cookie: Array<HTTPCookie>) {
+	public override init (_ cookie: Array<HTTPCookie>) {
+		super.init(cookie)
 	}// end init
 
 		// MARK: - Override
