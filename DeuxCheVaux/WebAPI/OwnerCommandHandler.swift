@@ -33,6 +33,13 @@ internal struct ProgramState: Codable {
 	var state: NextProgramStatus
 }// end struct ProgramState
 
+	// MARK: owner specific NG settings
+public enum NGType: String, Codable {
+	case word = "word"
+	case user = "user"
+	case command = "command"
+}// end enum NGType
+
 	// MARK: miixing / quote specific structure
 public enum MixingMode: Int {
 	case main = 1
