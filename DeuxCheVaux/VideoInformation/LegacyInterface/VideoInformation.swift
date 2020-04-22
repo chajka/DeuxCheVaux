@@ -19,7 +19,6 @@ private enum VideoInfoTag: String {
 }// end enum VideoInfoTag
 
 private let InfoQueryAPI: String = "https://ext.nicovideo.jp/api/getthumbinfo/"
-private let Timeout: Double = 2.0
 
 public final class VideoInformation: NSObject, XMLParserDelegate {
 		// MARK:   Properties

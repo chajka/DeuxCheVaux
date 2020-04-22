@@ -242,7 +242,6 @@ extension StreamControl.key: StringEnum { }
 extension StreamControl.value: StringEnum { }
 extension CommentKeys: StringEnum { }
 
-fileprivate let Timeout: Double = 2.0
 fileprivate let DefaultVolume: Float = 0.5
 fileprivate let Success: String = "OK"
 internal let SmileVideoPrefix: String = "sm"
