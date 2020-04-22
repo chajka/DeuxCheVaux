@@ -50,15 +50,12 @@ public final class SmileVideoInformation: NSObject {
 
 		// MARK: - Member variables
 	private let cookies: Array<HTTPCookie>
-	private let session: URLSession
-	private var request: URLRequest!
 	private var stringBuffer: String
 
 		// MARK: - Constructor/Destructor
 	public init (videoNumber video: String, cookies cookie: Array<HTTPCookie>) {
 		videoNumber = video
 		cookies = cookie
-		session = URLSession(configuration: URLSessionConfiguration.default)
 		tags = Array()
 		stringBuffer = String()
 		super.init()

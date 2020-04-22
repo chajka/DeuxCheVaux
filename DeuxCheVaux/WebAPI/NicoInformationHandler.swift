@@ -35,7 +35,6 @@ public final class NicoInformationHandler: NSObject {
 		// MARK:   Outlets
 		// MARK: - Properties
 		// MARK: - Member variables
-	private var session: URLSession
 	private let cookies: Array<HTTPCookie>
 
 		// MARK: - Constructor/Destructor

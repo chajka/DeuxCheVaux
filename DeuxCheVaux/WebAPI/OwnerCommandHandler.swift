@@ -331,7 +331,6 @@ public final class OwnerCommandHandler: NSObject {
 	private let videoPrefixSet: Set<String>
 	private let capableVolumeRange: Range<Float> = Range(uncheckedBounds: (lower: 0.0, upper: 1.0))
 	private let cookies: Array<HTTPCookie>
-	private let session: URLSession
 
 		// MARK: - Constructor/Destructor
 	public init (program: String, cookies: Array<HTTPCookie>) {
@@ -339,7 +338,6 @@ public final class OwnerCommandHandler: NSObject {
 		self.cookies = cookies
 		videoPrefixSet = Set(arrayLiteral: SmileVideoPrefix, NicoMoviewPrefix, SmileOfficialPrefix)
 		apiBaseString = ApiBase + self.program
-		session = URLSession(configuration: URLSessionConfiguration.default)
 	}// end init
 
 		// MARK: - Override
