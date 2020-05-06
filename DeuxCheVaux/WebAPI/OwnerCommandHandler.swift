@@ -967,7 +967,6 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 		if let code: String = meta.errorCode { errorCode = code }
 		var errorMessage: String? = nil
 		if let message: String = meta.errorMessage { errorMessage = message }
-		let statusCode: Int = meta.status / 100
 		switch statusCode {
 		case 2:
 			status = .success
@@ -977,6 +976,8 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 			status = .serverError(meta.status, errorCode, errorMessage)
 		default:
 			status = .unknownError
+		let statusCode: Int = meta.status / (Base ^ 2)	// drop last 2 digit
+
 		}// end switch case by first digit of status code
 
 		return status
