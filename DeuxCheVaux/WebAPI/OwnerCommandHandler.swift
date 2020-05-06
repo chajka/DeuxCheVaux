@@ -23,15 +23,52 @@ public enum ResultStatus: Equatable {
 	case unknownError
 }// end enum ResultStatus
 
+private enum StatusValue: Int {
+	case noError = 2
+	case clientError = 4
+	case serverError = 5
+}// end enum StatusValue
+
 internal struct MetaInformation: Codable {
 	let status: Int
 	let errorCode: String?
 	let errorMessage: String?
 }// end struct MetaInformation
 
+internal struct MetaResult: Codable {
+	let meta: MetaInformation
+}// end struct MetaResult
+
 internal struct ProgramState: Codable {
 	var state: NextProgramStatus
 }// end struct ProgramState
+
+	// MARK: owner specific NG settings
+public enum NGType: String, Codable {
+	case word = "word"
+	case user = "user"
+	case command = "command"
+}// end enum NGType
+
+public struct NGRequest: Codable {
+	let type: NGType
+	let body: String
+}// end struct NGRequest
+
+public struct NGData: Codable {
+	let id: Int
+	let type: NGType
+	let body: String
+}// end struct NGData
+
+internal struct NGWrodList: Codable {
+	let meta: MetaInformation
+	let data: Array<NGData>
+}// end struct NGWordList
+
+internal struct NGWordIdentifiers: Codable {
+	let id: Array<Int>
+}// end struct
 
 	// MARK: miixing / quote specific structure
 public enum MixingMode: Int {
@@ -127,10 +164,6 @@ internal struct UpdateLayout: Codable {
 internal struct UpdateContents: Codable {
 	let contents: Array<Content>
 }// end struct UpdateContents
-
-internal struct MetaResult: Codable {
-	let meta: MetaInformation
-}// end struct QuoteResult
 
 internal struct MovieInfo: Codable {
 	let id: String
@@ -242,7 +275,6 @@ extension StreamControl.key: StringEnum { }
 extension StreamControl.value: StringEnum { }
 extension CommentKeys: StringEnum { }
 
-fileprivate let Timeout: Double = 2.0
 fileprivate let DefaultVolume: Float = 0.5
 fileprivate let Success: String = "OK"
 internal let SmileVideoPrefix: String = "sm"
@@ -307,6 +339,7 @@ internal let ContentTypeJSON: String = "application/json"
 
 private let ApiBase: String = "https://live2.nicovideo.jp/watch/"
 private let UserNamaAPIBase: String = "https://live2.nicovideo.jp/unama/watch/"
+private let UserNamaAPITool: String = "https://live2.nicovideo.jp/unama/tool/v2/programs"
 private let QuateAPIBase: String = "https://lapi.spi.nicovideo.jp/v1/tools/live/contents/"
 private let QuatableAPIBase: String = "https://lapi.spi.nicovideo.jp/v1/tools/live/quote/services/video/contents/"
 
@@ -317,6 +350,7 @@ private let statistics: String = "/statistics"
 private let contents: String = "/contents"
 private let Questionary: String = "/enquete"
 private let QuestionaryResult: String = "/enquete/result"
+private let NGWordSetting: String = "/ssng"
 private let QuoteSuffix: String = "/quotation"
 private let QuoteLayout: String = "/quotation/layout"
 private let QuoteContents: String = "/quotation/contents"
@@ -324,49 +358,20 @@ private let QuoteContents: String = "/quotation/contents"
 private let perm: String = "/perm "
 private let clear: String = "/clear"
 
-public enum HTTPMethod: String {
-	case get = "GET"
-	case post = "POST"
-	case put = "PUT"
-	case delete = "DELETE"
-	case patch = "PATCH"
-}// end enum httpMehod
-
-public extension URLRequest {
-	var method: HTTPMethod? {
-		get {
-			if let method: String = self.httpMethod {
-				return HTTPMethod(rawValue: method)
-			}// end get
-			return nil
-		}// end get
-		set {
-			if let httpMehtod: HTTPMethod = newValue {
-				self.httpMethod = httpMehtod.rawValue
-			} else {
-				self.httpMethod = HTTPMethod.get.rawValue
-			}// end optional binding check for new value is member of enum HTTPMethod
-		}// end set
-	}// end computed property extension of URLRequest
-}// end of extension of URLRequest
-
-public final class OwnerCommandHandler: NSObject {
+public final class OwnerCommandHandler: HTTPCommunicatable {
 		// MARK: - Properties
 		// MARK: - Member variables
 	private let program: String
 	private let apiBaseString: String
 	private let videoPrefixSet: Set<String>
 	private let capableVolumeRange: Range<Float> = Range(uncheckedBounds: (lower: 0.0, upper: 1.0))
-	private let cookies: Array<HTTPCookie>
-	private let session: URLSession
 
 		// MARK: - Constructor/Destructor
 	public init (program: String, cookies: Array<HTTPCookie>) {
 		self.program = program
-		self.cookies = cookies
 		videoPrefixSet = Set(arrayLiteral: SmileVideoPrefix, NicoMoviewPrefix, SmileOfficialPrefix)
 		apiBaseString = ApiBase + self.program
-		session = URLSession(configuration: URLSessionConfiguration.default)
+		super.init(cookies)
 	}// end init
 
 		// MARK: - Override
@@ -387,9 +392,9 @@ public final class OwnerCommandHandler: NSObject {
 			let encoder: JSONEncoder = JSONEncoder()
 			request.httpBody = try encoder.encode(commentToPost)
 			let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, resp: URLResponse?, err: Error?) in
+				defer { semaphore.signal() } // must increment semaphore when exit from closure
 				guard let weakSelf = self, let data: Data = dat else {
 					status = .recieveDetaNilError
-					semaphore.signal()
 					return
 				}// end guard
 				do {
@@ -400,7 +405,6 @@ public final class OwnerCommandHandler: NSObject {
 					status = .decodeResultError
 					print(error.localizedDescription)
 				}// end do try - catch decode recieved data
-				semaphore.signal()
 			}// end closure of request completion handler
 			task.resume()
 			let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
@@ -421,9 +425,9 @@ public final class OwnerCommandHandler: NSObject {
 		let request: URLRequest = makeRequest(url: url, method: .delete)
 		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
 		let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, resp: URLResponse?, err: Error?) in
+			defer { semaphore.signal() } // must increment semaphore when exit from closure
 			guard let weakSelf = self, let data: Data = dat else {
 				status = .recieveDetaNilError
-				semaphore.signal()
 				return
 			}// end guard
 			do {
@@ -434,7 +438,6 @@ public final class OwnerCommandHandler: NSObject {
 				status = .decodeResultError
 				print(error.localizedDescription)
 			}// end do try - catch decode recieved data
-			semaphore.signal()
 		}// end closure of request completion handler
 		task.resume()
 		let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
@@ -461,16 +464,15 @@ public final class OwnerCommandHandler: NSObject {
 			let data: Data = try encoder.encode(enquetee)
 			request.httpBody = data
 			let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, req: URLResponse?, err: Error?) in
+				defer { semaphore.signal() } // must increment semaphore when exit from closure
 				guard let weakSelf = self, let data: Data = dat else {
 					status = .recieveDetaNilError
-					semaphore.signal()
 					return
 				}// end guard
 				do {
 					let decoder: JSONDecoder = JSONDecoder()
 					let result: EnqueteResult = try decoder.decode(EnqueteResult.self, from: data)
 					status = weakSelf.checkMetaInformation(result.meta)
-					semaphore.signal()
 				} catch let error {
 					status = .decodeResultError
 					print(error.localizedDescription)
@@ -498,8 +500,8 @@ public final class OwnerCommandHandler: NSObject {
 		let decoder: JSONDecoder = JSONDecoder()
 		var answers: Array<EnqueteItem>?
 		let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, req: URLResponse?, err: Error?) in
+			defer { semaphore.signal() } // must increment semaphore when exit from closure
 			guard let weakSelf = self, let data: Data = dat else {
-				semaphore.signal()
 				return
 			}// end guard
 			do {
@@ -509,7 +511,6 @@ public final class OwnerCommandHandler: NSObject {
 			} catch let error {
 				print(error.localizedDescription)
 			}// end do try - catch decode result
-			semaphore.signal()
 		}// end closurre
 		task.resume()
 		let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
@@ -528,9 +529,9 @@ public final class OwnerCommandHandler: NSObject {
 		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
 		let decoder: JSONDecoder = JSONDecoder()
 		let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, req: URLResponse?, err: Error?) in
+			defer { semaphore.signal() } // must increment semaphore when exit from closure
 			guard let weakSelf = self, let data: Data = dat else {
 				status = .recieveDetaNilError
-				semaphore.signal()
 				return
 			}// end guard
 			do {
@@ -550,6 +551,132 @@ public final class OwnerCommandHandler: NSObject {
 		return status
 	}// end endQuestionary
 
+		// MARK: NG Word Handling
+	public func addNGWord (_ word: String, type: NGType) -> Bool {
+		guard let baseURL = URL(string: UserNamaAPITool) else { return false }
+		let url = baseURL.appendingPathComponent(program, isDirectory: false).appendingPathComponent(NGWordSetting)
+		let encoder: JSONEncoder = JSONEncoder()
+		let wordToAppend: NGRequest = NGRequest(type: type, body: word)
+		let wordList: Array<NGRequest> = Array(arrayLiteral: wordToAppend)
+		guard let wordToAppendJson: Data = try? encoder.encode(wordList) else { return false }
+		var success: Bool = false
+
+		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
+		var request: URLRequest = makeRequest(url: url, method: .post)
+		request.addValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
+		request.httpBody = wordToAppendJson
+		let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, resp: URLResponse?, err: Error?) in
+			defer { semaphore.signal() } // must increment semaphore when exit from closure
+			guard let weakSelf = self, let data: Data = dat else { return }
+			do {
+				let decoder: JSONDecoder = JSONDecoder()
+				let result: MetaResult = try decoder.decode(MetaResult.self, from: data)
+				if .success == weakSelf.checkMetaInformation(result.meta) {
+					success = true
+				}// end if check meta information
+			} catch let error {
+				print(error.localizedDescription)
+			}// end do try - catch decode result JSON structure
+		}// end closure for request set NG Word owner command
+		task.resume()
+		_ = semaphore.wait(timeout: DispatchTime.now() + Timeout)	// no need action from timeout or success
+
+		return success
+	}// end addNGWord
+
+	public func addNGWords (words: Array<(word: String, type: NGType)>) -> Bool {
+		guard let baseURL = URL(string: UserNamaAPITool) else { return false }
+		let url = baseURL.appendingPathComponent(program, isDirectory: false).appendingPathComponent(NGWordSetting)
+		let encoder: JSONEncoder = JSONEncoder()
+		var wordsList: Array<NGRequest> = Array()
+		for word: (word: String, type: NGType) in words {
+			let enry: NGRequest = NGRequest(type: word.type, body: word.word)
+			wordsList.append(enry)
+		}// end foreach make Array of NGRequest
+		guard let wordsToAppenJson: Data = try? encoder.encode(wordsList) else { return false }
+		var success: Bool = false
+
+		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
+		var request: URLRequest = makeRequest(url: url, method: .post)
+		request.addValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
+		request.httpBody = wordsToAppenJson
+		let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, req: URLResponse?, err: Error?) in
+			defer { semaphore.signal() } // must increment semaphore when exit from closure
+			guard let weakSelf = self, let data: Data = dat else { return }
+			do {
+				let decoder: JSONDecoder = JSONDecoder()
+				let result: MetaResult = try decoder.decode(MetaResult.self, from: data)
+				if .success == weakSelf.checkMetaInformation(result.meta) {
+					success = true
+				}// end if check meta information result
+			} catch let error {
+				print(error.localizedDescription)
+			}// end do try - catch decode result JSON strult
+		}// end closure for request set NG Words owner command
+		task.resume()
+		_ = semaphore.wait(timeout: DispatchTime.now() + Timeout)
+
+		return success
+	}// end addNGWords
+
+	public func allNGWords () -> Array<NGData> {
+		guard let baseURL = URL(string: UserNamaAPITool) else { return Array() }
+		let url = baseURL.appendingPathComponent(program, isDirectory: false).appendingPathComponent(NGWordSetting)
+		var wordsList: Array<NGData> = Array()
+
+		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
+		let request: URLRequest = makeRequest(url: url, method: .get)
+		let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, resp: URLResponse?, err: Error?) in
+			defer { semaphore.signal() } // must increment semaphore when exit from closure
+			guard let weakSelf = self, let data: Data = dat else { return }
+			do {
+				let decoder: JSONDecoder = JSONDecoder()
+				let list: NGWrodList = try decoder.decode(NGWrodList.self, from: data)
+				guard .success == weakSelf.checkMetaInformation(list.meta) else { return }
+				for foundWord: NGData in list.data {
+					wordsList.append(foundWord)
+				}// end foreach found word
+			} catch let error {
+				print(error.localizedDescription)
+			}// end do try - catch
+		}// end closure
+		task.resume()
+		_ = semaphore.wait(timeout: DispatchTime.now() + Timeout)
+
+		return wordsList
+	}// end allNGWords
+
+	public func removeNGWords (identifiers: Array<Int>) -> Bool {
+		guard identifiers.count > 0, let baseURL = URL(string: UserNamaAPITool) else { return false }
+		let url = baseURL.appendingPathComponent(program, isDirectory: false).appendingPathComponent(NGWordSetting)
+		let encoder: JSONEncoder = JSONEncoder()
+		let removeNGWords: NGWordIdentifiers = NGWordIdentifiers(id: identifiers)
+		guard let identifiersForRemove: Data = try? encoder.encode(removeNGWords) else { return false }
+		var success = false
+
+		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
+		var request: URLRequest = makeRequest(url: url, method: .delete)
+		request.addValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
+		request.httpBody = identifiersForRemove
+		let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, resp: URLResponse?, err: Error?) in
+			defer { semaphore.signal() } // must increment semaphore when exit from closure
+			guard let weakSelf = self, let data: Data = dat else { return }
+			do {
+				let decoder = JSONDecoder()
+				let result: MetaResult = try decoder.decode(MetaResult.self, from: data)
+				if .success == weakSelf.checkMetaInformation(result.meta) {
+					success = true
+				}// end if result status is success
+			} catch let error {
+				print(error.localizedDescription)
+			}// end do try - catch decode result JSON structure
+		}// end closure for request remove NG words by array of identifiers
+		task.resume()
+		_ = semaphore.wait(timeout: DispatchTime.now() + Timeout)
+
+		return success
+	}// end removeNGWords
+
 		// MARK: quote
 	public func checkQuotable (_ video: String) -> (quotable: Bool, status: ResultStatus) {
 		guard let url: URL = URL(string: QuatableAPIBase + video) else { return (false, .apiAddressError) }
@@ -559,9 +686,9 @@ public final class OwnerCommandHandler: NSObject {
 		var quotable: Bool = false
 		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
 		let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, resp: URLResponse?, err: Error?) in
+			defer { semaphore.signal() } // must increment semaphore when exit from closure
 			guard let weakSelf = self, let data: Data = dat else {
 				status = .recieveDetaNilError
-				semaphore.signal()
 				return
 			}// end guard check data is not nil
 			do {
@@ -574,7 +701,6 @@ public final class OwnerCommandHandler: NSObject {
 			} catch let error {
 				print(error.localizedDescription)
 			}// end do try - catch decode recieved json
-			semaphore.signal()
 		}// end closure for url request result data handler
 		task.resume()
 		let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
@@ -609,9 +735,9 @@ public final class OwnerCommandHandler: NSObject {
 			request.httpBody = quotationJSON
 			let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
 			let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, req:  URLResponse?, err:  Error?) in
+				defer { semaphore.signal() } // must increment semaphore when exit from closure
 				guard let weakSelf = self, let data: Data = dat else {
 					status = .recieveDetaNilError
-					semaphore.signal()
 					return
 				}// end guard is not satisfied
 				do {
@@ -622,7 +748,6 @@ public final class OwnerCommandHandler: NSObject {
 					status = .decodeResultError
 					print(error.localizedDescription)
 				}// end do try - catch decode reesult data to meta information
-				semaphore.signal()
 			}// end closure completion handler
 			task.resume()
 			let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
@@ -654,8 +779,8 @@ public final class OwnerCommandHandler: NSObject {
 			request.httpBody = layoutJSON
 			let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
 			let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, req:  URLResponse?, err:  Error?) in
+				defer { semaphore.signal() } // must increment semaphore when exit from closure
 				guard let weakSelf = self, let data: Data = dat else {
-					semaphore.signal()
 					return
 				}// end guard is not satisfied
 				do {
@@ -666,7 +791,6 @@ public final class OwnerCommandHandler: NSObject {
 					status = .decodeResultError
 					print(error.localizedDescription)
 				}// end do try - catch decode reesult data to meta information
-				semaphore.signal()
 			}// end closure completion handler
 			task.resume()
 			let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
@@ -688,9 +812,9 @@ public final class OwnerCommandHandler: NSObject {
 		var status: ResultStatus = .unknownError
 		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
 		let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, req:  URLResponse?, err:  Error?) in
+			defer { semaphore.signal() } // must increment semaphore when exit from closure
 			guard let weakSelf = self, let data: Data = dat else {
 				status = .recieveDetaNilError
-				semaphore.signal()
 				return
 			}// end guard is not satisfied
 			do {
@@ -701,7 +825,6 @@ public final class OwnerCommandHandler: NSObject {
 				status = .decodeResultError
 				print(error.localizedDescription)
 			}// end do try - catch decode reesult data to meta information
-			semaphore.signal()
 		}// end closure completion handler
 		task.resume()
 		let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
@@ -720,9 +843,9 @@ public final class OwnerCommandHandler: NSObject {
 		var extendableMinutes: Array<String> = Array()
 		let request: URLRequest = makeRequest(url: url, method: .get)
 		let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, rest: URLResponse?, err: Error?) in
+			defer { semaphore.signal() } // must increment semaphore when exit from closure
 			guard let weakSelf = self, let data: Data = dat else {
 				status = .recieveDetaNilError
-				semaphore.signal()
 				return
 			}// end guard
 			do {
@@ -734,7 +857,6 @@ public final class OwnerCommandHandler: NSObject {
 						extendableMinutes.append(String(method.minutes))
 					}// end foreach methods
 				}// end optional binding for
-				semaphore.signal()
 			} catch let error {
 				status = .decodeResultError
 				print(error.localizedDescription)
@@ -761,9 +883,9 @@ public final class OwnerCommandHandler: NSObject {
 			request.httpBody = extendTimeData
 			let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
 			let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, resp: URLResponse?, err: Error?) in
+				defer { semaphore.signal() } // must increment semaphore when exit from closure
 				guard let weakSelf = self, let data: Data = dat else {
 					status = .recieveDetaNilError
-					semaphore.signal()
 					return
 				}// end guard
 				do {
@@ -777,7 +899,6 @@ public final class OwnerCommandHandler: NSObject {
 					print(error)
 					status = .decodeResultError
 				}// end do try - catch decode json data to result
-				semaphore.signal()
 			}// end closure of request completion handler
 			task.resume()
 			let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
@@ -805,9 +926,9 @@ public final class OwnerCommandHandler: NSObject {
 			request.httpBody = extendTimeData
 			let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
 			let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, resp: URLResponse?, err: Error?) in
+				defer { semaphore.signal() } // must increment semaphore when exit from closure
 				guard let weakSelf = self, let data: Data = dat else {
 					status = .recieveDetaNilError
-					semaphore.signal()
 					return
 				}// end guard
 				do {
@@ -822,7 +943,6 @@ public final class OwnerCommandHandler: NSObject {
 					print(error)
 					status = .decodeResultError
 				}// end do try - catch decode json data to result
-				semaphore.signal()
 			}// end closure of request completion handler
 			task.resume()
 			let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
@@ -839,36 +959,25 @@ public final class OwnerCommandHandler: NSObject {
 
 		// MARK: - Internal methods
 		// MARK: - Private methods
-	private func makeRequest (url requestURL: URL, method requestMethod: HTTPMethod, contentsType type: String? = nil) -> URLRequest {
-		let deuxCheVaux: DeuxCheVaux = DeuxCheVaux.shared
-		let userAgent: String = deuxCheVaux.userAgent
-		var request: URLRequest = URLRequest(url: requestURL, cachePolicy: URLRequest.CachePolicy.reloadIgnoringLocalAndRemoteCacheData, timeoutInterval: Timeout)
-		request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
-		request.addValue(userAgent, forHTTPHeaderField: UserAgentKey)
-		if let contentsType: String = type {
-			request.addValue(contentsType, forHTTPHeaderField: ContentTypeKey)
-		}// end optional binding check for contents type
-		request.method = requestMethod
-
-		return request
-	}// end makeRequest
-
 	private func checkMetaInformation (_ meta: MetaInformation) -> ResultStatus {
+		let Base: Int = 10
+
 		var status: ResultStatus
 		var errorCode: String? = nil
 		if let code: String = meta.errorCode { errorCode = code }
 		var errorMessage: String? = nil
 		if let message: String = meta.errorMessage { errorMessage = message }
-		let statusCode: Int = meta.status / 100
+		let statusCode: StatusValue? = StatusValue(rawValue: meta.status / (Base ^ 2))	// drop last 2 digit
+
 		switch statusCode {
-		case 2:
-			status = .success
-		case 4:
-			status = .clientError(meta.status, errorCode, errorMessage)
-		case 5:
-			status = .serverError(meta.status, errorCode, errorMessage)
-		default:
-			status = .unknownError
+			case .noError:
+				status = .success
+			case .clientError:
+				status = .clientError(meta.status, errorCode, errorMessage)
+			case .serverError:
+				status = .serverError(meta.status, errorCode, errorMessage)
+			default:
+				status = .unknownError
 		}// end switch case by first digit of status code
 
 		return status

@@ -91,8 +91,6 @@ private enum RoomKeys: String {
 	}// end func ~=
 }// end enum RoomKey
 
-private let Timeout: Double = 2.0
-
 public final class ProgramInfo: NSObject {
 		// MARK: class method
 	public static func urlForProgram (program programNumber: String) -> URL {

@@ -19,9 +19,8 @@ private enum VideoInfoTag: String {
 }// end enum VideoInfoTag
 
 private let InfoQueryAPI: String = "https://ext.nicovideo.jp/api/getthumbinfo/"
-private let Timeout: Double = 2.0
 
-public final class VideoInformation: NSObject, XMLParserDelegate {
+public final class VideoInformation: HTTPCommunicatable, XMLParserDelegate {
 		// MARK:   Properties
 	public let videoNumber: String
 	public private(set) var title: String!
@@ -34,16 +33,15 @@ public final class VideoInformation: NSObject, XMLParserDelegate {
 
 		// MARK: - Member variables
 	private var parser: XMLParser!
-	private let session: URLSession
 	private var request: URLRequest!
 	private var stringBuffer: String
 
 		// MARK: - Constructor/Destructor
 	public init (videoNumber video: String) {
 		self.videoNumber = video
-		session = URLSession(configuration: URLSessionConfiguration.default)
 		tags = Array()
 		stringBuffer = String()
+		super.init(Array())
 	}// end init
 
 		// MARK: - Override

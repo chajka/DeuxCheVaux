@@ -8,9 +8,6 @@
 
 import Cocoa
 
-fileprivate let RequestTimeOut: TimeInterval = 2.0
-fileprivate let DataTimeOut: TimeInterval = 2.0
-fileprivate let Timeout: Double = 2.0
 fileprivate let UnknownNickname = "Unknown User"
 fileprivate let NicknameNodeName: String = "nickname"
 fileprivate let CouldNotParse = "Could not parse"
@@ -34,21 +31,13 @@ fileprivate struct Nickname: Codable {
 	let err: error?
 }// end struct Nickname
 
-public final class NicoInformationHandler: NSObject {
+public final class NicoInformationHandler: HTTPCommunicatable {
 		// MARK:   Outlets
 		// MARK: - Properties
 		// MARK: - Member variables
-	private var session: URLSession
-	private let cookies: Array<HTTPCookie>
-
 		// MARK: - Constructor/Destructor
-	public init (_ cookie: Array<HTTPCookie>) {
-		let sessionConfiguration = URLSessionConfiguration.default
-		sessionConfiguration.timeoutIntervalForRequest = RequestTimeOut
-		sessionConfiguration.timeoutIntervalForResource = DataTimeOut
-		sessionConfiguration.httpCookieAcceptPolicy = HTTPCookie.AcceptPolicy.onlyFromMainDocumentDomain
-		session = URLSession(configuration: sessionConfiguration)
-		self.cookies = cookie
+	public override init (_ cookie: Array<HTTPCookie>) {
+		super.init(cookie)
 	}// end init
 
 		// MARK: - Override
@@ -175,20 +164,6 @@ public final class NicoInformationHandler: NSObject {
 
 		return nickname
 	}// end fetchNickname from NicoNico API (New at 3/4/2020)
-
-	private func makeRequest (url requestURL: URL, method requestMethod: HTTPMethod, contentsType type: String? = nil) -> URLRequest {
-		let deuxCheVaux: DeuxCheVaux = DeuxCheVaux.shared
-		let userAgent: String = deuxCheVaux.userAgent
-		var request: URLRequest = URLRequest(url: requestURL, cachePolicy: URLRequest.CachePolicy.reloadIgnoringLocalAndRemoteCacheData, timeoutInterval: Timeout)
-		request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
-		request.addValue(userAgent, forHTTPHeaderField: UserAgentKey)
-		if let contentsType: String = type {
-			request.addValue(contentsType, forHTTPHeaderField: ContentTypeKey)
-		}// end optional binding check for contents type
-		request.method = requestMethod
- 
-		return request
-	}// end makeRequest
 
 		// MARK: - Delegates
 }// end NicoNicoInformationFetcher
