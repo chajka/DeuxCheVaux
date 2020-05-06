@@ -967,17 +967,17 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 		if let code: String = meta.errorCode { errorCode = code }
 		var errorMessage: String? = nil
 		if let message: String = meta.errorMessage { errorMessage = message }
-		switch statusCode {
-		case 2:
-			status = .success
-		case 4:
-			status = .clientError(meta.status, errorCode, errorMessage)
-		case 5:
-			status = .serverError(meta.status, errorCode, errorMessage)
-		default:
-			status = .unknownError
 		let statusCode: Int = meta.status / (Base ^ 2)	// drop last 2 digit
 
+		switch StatusValue(rawValue: statusCode) {
+			case .noError:
+				status = .success
+			case .clientError:
+				status = .clientError(meta.status, errorCode, errorMessage)
+			case .serverError:
+				status = .serverError(meta.status, errorCode, errorMessage)
+			default:
+				status = .unknownError
 		}// end switch case by first digit of status code
 
 		return status
