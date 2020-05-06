@@ -67,6 +67,10 @@ public final class DeuxCheVaux: NSObject {
 		}// end if make null device output streame is success or not.
 		super.init()
 		startRunLoop()
+		if let nullDevice: OutputStream = nullDevice, let runLoop = runLoop {
+			nullDevice.open()
+			nullDevice.schedule(in: runLoop, forMode: RunLoop.Mode.common)
+		}// end if output stream of null device is there
 	}// end private init
 
 	deinit {
