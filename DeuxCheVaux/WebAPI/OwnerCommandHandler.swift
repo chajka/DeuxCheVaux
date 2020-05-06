@@ -609,6 +609,37 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 		return wordsList
 	}// end allNGWords
 
+	public func removeNGWords (identifiers: Array<Int>) -> Bool {
+		guard identifiers.count > 0, let baseURL = URL(string: UserNamaAPITool) else { return false }
+		let url = baseURL.appendingPathComponent(program, isDirectory: false).appendingPathComponent(NGWordSetting)
+		let encoder: JSONEncoder = JSONEncoder()
+		let removeNGWords: NGWordIdentifiers = NGWordIdentifiers(id: identifiers)
+		guard let identifiersForRemove: Data = try? encoder.encode(removeNGWords) else { return false }
+		var success = false
+
+		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
+		var request: URLRequest = makeRequest(url: url, method: .delete)
+		request.addValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
+		request.httpBody = identifiersForRemove
+		let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, resp: URLResponse?, err: Error?) in
+			defer { semaphore.signal() } // must increment semaphore when exit from closure
+			guard let weakSelf = self, let data: Data = dat else { return }
+			do {
+				let decoder = JSONDecoder()
+				let result: MetaResult = try decoder.decode(MetaResult.self, from: data)
+				if .success == weakSelf.checkMetaInformation(result.meta) {
+					success = true
+				}// end if result status is success
+			} catch let error {
+				print(error.localizedDescription)
+			}// end do try - catch decode result JSON structure
+		}// end closure for request remove NG words by array of identifiers
+		task.resume()
+		_ = semaphore.wait(timeout: DispatchTime.now() + Timeout)
+
+		return success
+	}// end removeNGWords
+
 		// MARK: quote
 	public func checkQuotable (_ video: String) -> (quotable: Bool, status: ResultStatus) {
 		guard let url: URL = URL(string: QuatableAPIBase + video) else { return (false, .apiAddressError) }
