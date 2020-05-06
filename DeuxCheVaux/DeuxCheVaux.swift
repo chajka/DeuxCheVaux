@@ -74,6 +74,10 @@ public final class DeuxCheVaux: NSObject {
 	}// end private init
 
 	deinit {
+		if let nullDevice: OutputStream = nullDevice, let runLoop = runLoop {
+			nullDevice.remove(from: runLoop, forMode: RunLoop.Mode.common)
+			nullDevice.close()
+		}// end if output stream of null device is there
 		stopRunLoop()
 	}// end deinit
 
