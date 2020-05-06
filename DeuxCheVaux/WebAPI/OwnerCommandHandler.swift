@@ -23,6 +23,12 @@ public enum ResultStatus: Equatable {
 	case unknownError
 }// end enum ResultStatus
 
+private enum StatusValue: Int {
+	case noError = 2
+	case clientError = 4
+	case serverError = 5
+}// end enum StatusValue
+
 internal struct MetaInformation: Codable {
 	let status: Int
 	let errorCode: String?
@@ -386,9 +392,9 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 			let encoder: JSONEncoder = JSONEncoder()
 			request.httpBody = try encoder.encode(commentToPost)
 			let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, resp: URLResponse?, err: Error?) in
+				defer { semaphore.signal() } // must increment semaphore when exit from closure
 				guard let weakSelf = self, let data: Data = dat else {
 					status = .recieveDetaNilError
-					semaphore.signal()
 					return
 				}// end guard
 				do {
@@ -399,7 +405,6 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 					status = .decodeResultError
 					print(error.localizedDescription)
 				}// end do try - catch decode recieved data
-				semaphore.signal()
 			}// end closure of request completion handler
 			task.resume()
 			let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
@@ -420,9 +425,9 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 		let request: URLRequest = makeRequest(url: url, method: .delete)
 		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
 		let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, resp: URLResponse?, err: Error?) in
+			defer { semaphore.signal() } // must increment semaphore when exit from closure
 			guard let weakSelf = self, let data: Data = dat else {
 				status = .recieveDetaNilError
-				semaphore.signal()
 				return
 			}// end guard
 			do {
@@ -433,7 +438,6 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 				status = .decodeResultError
 				print(error.localizedDescription)
 			}// end do try - catch decode recieved data
-			semaphore.signal()
 		}// end closure of request completion handler
 		task.resume()
 		let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
@@ -460,16 +464,15 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 			let data: Data = try encoder.encode(enquetee)
 			request.httpBody = data
 			let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, req: URLResponse?, err: Error?) in
+				defer { semaphore.signal() } // must increment semaphore when exit from closure
 				guard let weakSelf = self, let data: Data = dat else {
 					status = .recieveDetaNilError
-					semaphore.signal()
 					return
 				}// end guard
 				do {
 					let decoder: JSONDecoder = JSONDecoder()
 					let result: EnqueteResult = try decoder.decode(EnqueteResult.self, from: data)
 					status = weakSelf.checkMetaInformation(result.meta)
-					semaphore.signal()
 				} catch let error {
 					status = .decodeResultError
 					print(error.localizedDescription)
@@ -497,8 +500,8 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 		let decoder: JSONDecoder = JSONDecoder()
 		var answers: Array<EnqueteItem>?
 		let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, req: URLResponse?, err: Error?) in
+			defer { semaphore.signal() } // must increment semaphore when exit from closure
 			guard let weakSelf = self, let data: Data = dat else {
-				semaphore.signal()
 				return
 			}// end guard
 			do {
@@ -508,7 +511,6 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 			} catch let error {
 				print(error.localizedDescription)
 			}// end do try - catch decode result
-			semaphore.signal()
 		}// end closurre
 		task.resume()
 		let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
@@ -527,9 +529,9 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
 		let decoder: JSONDecoder = JSONDecoder()
 		let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, req: URLResponse?, err: Error?) in
+			defer { semaphore.signal() } // must increment semaphore when exit from closure
 			guard let weakSelf = self, let data: Data = dat else {
 				status = .recieveDetaNilError
-				semaphore.signal()
 				return
 			}// end guard
 			do {
@@ -684,9 +686,9 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 		var quotable: Bool = false
 		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
 		let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, resp: URLResponse?, err: Error?) in
+			defer { semaphore.signal() } // must increment semaphore when exit from closure
 			guard let weakSelf = self, let data: Data = dat else {
 				status = .recieveDetaNilError
-				semaphore.signal()
 				return
 			}// end guard check data is not nil
 			do {
@@ -699,7 +701,6 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 			} catch let error {
 				print(error.localizedDescription)
 			}// end do try - catch decode recieved json
-			semaphore.signal()
 		}// end closure for url request result data handler
 		task.resume()
 		let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
@@ -734,9 +735,9 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 			request.httpBody = quotationJSON
 			let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
 			let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, req:  URLResponse?, err:  Error?) in
+				defer { semaphore.signal() } // must increment semaphore when exit from closure
 				guard let weakSelf = self, let data: Data = dat else {
 					status = .recieveDetaNilError
-					semaphore.signal()
 					return
 				}// end guard is not satisfied
 				do {
@@ -747,7 +748,6 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 					status = .decodeResultError
 					print(error.localizedDescription)
 				}// end do try - catch decode reesult data to meta information
-				semaphore.signal()
 			}// end closure completion handler
 			task.resume()
 			let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
@@ -779,8 +779,8 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 			request.httpBody = layoutJSON
 			let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
 			let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, req:  URLResponse?, err:  Error?) in
+				defer { semaphore.signal() } // must increment semaphore when exit from closure
 				guard let weakSelf = self, let data: Data = dat else {
-					semaphore.signal()
 					return
 				}// end guard is not satisfied
 				do {
@@ -791,7 +791,6 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 					status = .decodeResultError
 					print(error.localizedDescription)
 				}// end do try - catch decode reesult data to meta information
-				semaphore.signal()
 			}// end closure completion handler
 			task.resume()
 			let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
@@ -813,9 +812,9 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 		var status: ResultStatus = .unknownError
 		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
 		let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, req:  URLResponse?, err:  Error?) in
+			defer { semaphore.signal() } // must increment semaphore when exit from closure
 			guard let weakSelf = self, let data: Data = dat else {
 				status = .recieveDetaNilError
-				semaphore.signal()
 				return
 			}// end guard is not satisfied
 			do {
@@ -826,7 +825,6 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 				status = .decodeResultError
 				print(error.localizedDescription)
 			}// end do try - catch decode reesult data to meta information
-			semaphore.signal()
 		}// end closure completion handler
 		task.resume()
 		let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
@@ -845,9 +843,9 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 		var extendableMinutes: Array<String> = Array()
 		let request: URLRequest = makeRequest(url: url, method: .get)
 		let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, rest: URLResponse?, err: Error?) in
+			defer { semaphore.signal() } // must increment semaphore when exit from closure
 			guard let weakSelf = self, let data: Data = dat else {
 				status = .recieveDetaNilError
-				semaphore.signal()
 				return
 			}// end guard
 			do {
@@ -859,7 +857,6 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 						extendableMinutes.append(String(method.minutes))
 					}// end foreach methods
 				}// end optional binding for
-				semaphore.signal()
 			} catch let error {
 				status = .decodeResultError
 				print(error.localizedDescription)
@@ -886,9 +883,9 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 			request.httpBody = extendTimeData
 			let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
 			let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, resp: URLResponse?, err: Error?) in
+				defer { semaphore.signal() } // must increment semaphore when exit from closure
 				guard let weakSelf = self, let data: Data = dat else {
 					status = .recieveDetaNilError
-					semaphore.signal()
 					return
 				}// end guard
 				do {
@@ -902,7 +899,6 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 					print(error)
 					status = .decodeResultError
 				}// end do try - catch decode json data to result
-				semaphore.signal()
 			}// end closure of request completion handler
 			task.resume()
 			let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
@@ -930,9 +926,9 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 			request.httpBody = extendTimeData
 			let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
 			let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, resp: URLResponse?, err: Error?) in
+				defer { semaphore.signal() } // must increment semaphore when exit from closure
 				guard let weakSelf = self, let data: Data = dat else {
 					status = .recieveDetaNilError
-					semaphore.signal()
 					return
 				}// end guard
 				do {
@@ -947,7 +943,6 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 					print(error)
 					status = .decodeResultError
 				}// end do try - catch decode json data to result
-				semaphore.signal()
 			}// end closure of request completion handler
 			task.resume()
 			let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
@@ -965,21 +960,24 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 		// MARK: - Internal methods
 		// MARK: - Private methods
 	private func checkMetaInformation (_ meta: MetaInformation) -> ResultStatus {
+		let Base: Int = 10
+
 		var status: ResultStatus
 		var errorCode: String? = nil
 		if let code: String = meta.errorCode { errorCode = code }
 		var errorMessage: String? = nil
 		if let message: String = meta.errorMessage { errorMessage = message }
-		let statusCode: Int = meta.status / 100
+		let statusCode: StatusValue? = StatusValue(rawValue: meta.status / (Base ^ 2))	// drop last 2 digit
+
 		switch statusCode {
-		case 2:
-			status = .success
-		case 4:
-			status = .clientError(meta.status, errorCode, errorMessage)
-		case 5:
-			status = .serverError(meta.status, errorCode, errorMessage)
-		default:
-			status = .unknownError
+			case .noError:
+				status = .success
+			case .clientError:
+				status = .clientError(meta.status, errorCode, errorMessage)
+			case .serverError:
+				status = .serverError(meta.status, errorCode, errorMessage)
+			default:
+				status = .unknownError
 		}// end switch case by first digit of status code
 
 		return status
