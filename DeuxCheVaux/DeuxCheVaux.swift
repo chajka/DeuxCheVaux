@@ -19,6 +19,8 @@ public enum StatusError: Error {
 	case XMLParseError
 }// end StatusError
 
+fileprivate let nullDevicePath: String = "/dev/null"
+
 public final class DeuxCheVaux: NSObject {
 		// MARK:   Class Variable
 	public static let shared: DeuxCheVaux = DeuxCheVaux()
@@ -45,6 +47,7 @@ public final class DeuxCheVaux: NSObject {
 		// MARK: - Member variables
 	private var queue: DispatchQueue?
 	private var finishRunLoop: Bool = true
+	private let nullDevice: OutputStream?
 
 		// MARK: - Constructor/Destructor
 	private override init() {
@@ -56,11 +59,25 @@ public final class DeuxCheVaux: NSObject {
 		framewrokVersionMajor = FramewrokVersionMajor
 		framewrokVersionMinor = FramewrokVersionMinor
 		framerokVersionFix = FramerokVersionFix
+		let url: URL = URL(fileURLWithPath: nullDevicePath)
+		if let outputStream: OutputStream = OutputStream(url: url, append: true) {
+			self.nullDevice = outputStream
+		} else {
+			self.nullDevice = nil
+		}// end if make null device output streame is success or not.
 		super.init()
 		startRunLoop()
+		if let nullDevice: OutputStream = nullDevice, let runLoop = runLoop {
+			nullDevice.open()
+			nullDevice.schedule(in: runLoop, forMode: RunLoop.Mode.common)
+		}// end if output stream of null device is there
 	}// end private init
 
 	deinit {
+		if let nullDevice: OutputStream = nullDevice, let runLoop = runLoop {
+			nullDevice.remove(from: runLoop, forMode: RunLoop.Mode.common)
+			nullDevice.close()
+		}// end if output stream of null device is there
 		stopRunLoop()
 	}// end deinit
 
