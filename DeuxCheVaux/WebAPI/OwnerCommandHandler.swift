@@ -60,6 +60,10 @@ internal struct NGWrodList: Codable {
 	let data: Array<NGData>
 }// end struct NGWordList
 
+internal struct NGWordIdentifiers: Codable {
+	let id: Array<Int>
+}// end struct
+
 	// MARK: miixing / quote specific structure
 public enum MixingMode: Int {
 	case main = 1
