@@ -47,6 +47,7 @@ public final class DeuxCheVaux: NSObject {
 		// MARK: - Member variables
 	private var queue: DispatchQueue?
 	private var finishRunLoop: Bool = true
+	private let nullDevice: OutputStream?
 
 		// MARK: - Constructor/Destructor
 	private override init() {
