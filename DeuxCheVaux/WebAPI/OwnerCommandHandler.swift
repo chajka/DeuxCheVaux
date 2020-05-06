@@ -23,6 +23,12 @@ public enum ResultStatus: Equatable {
 	case unknownError
 }// end enum ResultStatus
 
+private enum StatusValue: Int {
+	case noError = 2
+	case clientError = 4
+	case serverError = 5
+}// end enum StatusValue
+
 internal struct MetaInformation: Codable {
 	let status: Int
 	let errorCode: String?
