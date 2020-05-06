@@ -29,6 +29,10 @@ internal struct MetaInformation: Codable {
 	let errorMessage: String?
 }// end struct MetaInformation
 
+internal struct MetaResult: Codable {
+	let meta: MetaInformation
+}// end struct MetaResult
+
 internal struct ProgramState: Codable {
 	var state: NextProgramStatus
 }// end struct ProgramState
@@ -140,10 +144,6 @@ internal struct UpdateLayout: Codable {
 internal struct UpdateContents: Codable {
 	let contents: Array<Content>
 }// end struct UpdateContents
-
-internal struct MetaResult: Codable {
-	let meta: MetaInformation
-}// end struct QuoteResult
 
 internal struct MovieInfo: Codable {
 	let id: String
