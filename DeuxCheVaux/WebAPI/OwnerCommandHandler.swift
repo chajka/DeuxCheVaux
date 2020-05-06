@@ -44,6 +44,11 @@ public enum NGType: String, Codable {
 	case command = "command"
 }// end enum NGType
 
+public struct NGRequest: Codable {
+	let type: NGType
+	let body: String
+}// end struct NGRequest
+
 public struct NGData: Codable {
 	let id: Int
 	let type: NGType
