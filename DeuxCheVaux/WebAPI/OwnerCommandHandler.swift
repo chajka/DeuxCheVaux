@@ -55,6 +55,11 @@ public struct NGData: Codable {
 	let body: String
 }// end struct NGData
 
+internal struct NGWrodList: Codable {
+	let meta: MetaInformation
+	let data: Array<NGData>
+}// end struct NGWordList
+
 	// MARK: miixing / quote specific structure
 public enum MixingMode: Int {
 	case main = 1
