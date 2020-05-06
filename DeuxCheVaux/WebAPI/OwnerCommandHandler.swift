@@ -29,9 +29,40 @@ internal struct MetaInformation: Codable {
 	let errorMessage: String?
 }// end struct MetaInformation
 
+internal struct MetaResult: Codable {
+	let meta: MetaInformation
+}// end struct MetaResult
+
 internal struct ProgramState: Codable {
 	var state: NextProgramStatus
 }// end struct ProgramState
+
+	// MARK: owner specific NG settings
+public enum NGType: String, Codable {
+	case word = "word"
+	case user = "user"
+	case command = "command"
+}// end enum NGType
+
+public struct NGRequest: Codable {
+	let type: NGType
+	let body: String
+}// end struct NGRequest
+
+public struct NGData: Codable {
+	let id: Int
+	let type: NGType
+	let body: String
+}// end struct NGData
+
+internal struct NGWrodList: Codable {
+	let meta: MetaInformation
+	let data: Array<NGData>
+}// end struct NGWordList
+
+internal struct NGWordIdentifiers: Codable {
+	let id: Array<Int>
+}// end struct
 
 	// MARK: miixing / quote specific structure
 public enum MixingMode: Int {
@@ -127,10 +158,6 @@ internal struct UpdateLayout: Codable {
 internal struct UpdateContents: Codable {
 	let contents: Array<Content>
 }// end struct UpdateContents
-
-internal struct MetaResult: Codable {
-	let meta: MetaInformation
-}// end struct QuoteResult
 
 internal struct MovieInfo: Codable {
 	let id: String
@@ -306,6 +333,7 @@ internal let ContentTypeJSON: String = "application/json"
 
 private let ApiBase: String = "https://live2.nicovideo.jp/watch/"
 private let UserNamaAPIBase: String = "https://live2.nicovideo.jp/unama/watch/"
+private let UserNamaAPITool: String = "https://live2.nicovideo.jp/unama/tool/v2/programs"
 private let QuateAPIBase: String = "https://lapi.spi.nicovideo.jp/v1/tools/live/contents/"
 private let QuatableAPIBase: String = "https://lapi.spi.nicovideo.jp/v1/tools/live/quote/services/video/contents/"
 
@@ -316,6 +344,7 @@ private let statistics: String = "/statistics"
 private let contents: String = "/contents"
 private let Questionary: String = "/enquete"
 private let QuestionaryResult: String = "/enquete/result"
+private let NGWordSetting: String = "/ssng"
 private let QuoteSuffix: String = "/quotation"
 private let QuoteLayout: String = "/quotation/layout"
 private let QuoteContents: String = "/quotation/contents"
@@ -519,6 +548,132 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 
 		return status
 	}// end endQuestionary
+
+		// MARK: NG Word Handling
+	public func addNGWord (_ word: String, type: NGType) -> Bool {
+		guard let baseURL = URL(string: UserNamaAPITool) else { return false }
+		let url = baseURL.appendingPathComponent(program, isDirectory: false).appendingPathComponent(NGWordSetting)
+		let encoder: JSONEncoder = JSONEncoder()
+		let wordToAppend: NGRequest = NGRequest(type: type, body: word)
+		let wordList: Array<NGRequest> = Array(arrayLiteral: wordToAppend)
+		guard let wordToAppendJson: Data = try? encoder.encode(wordList) else { return false }
+		var success: Bool = false
+
+		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
+		var request: URLRequest = makeRequest(url: url, method: .post)
+		request.addValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
+		request.httpBody = wordToAppendJson
+		let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, resp: URLResponse?, err: Error?) in
+			defer { semaphore.signal() } // must increment semaphore when exit from closure
+			guard let weakSelf = self, let data: Data = dat else { return }
+			do {
+				let decoder: JSONDecoder = JSONDecoder()
+				let result: MetaResult = try decoder.decode(MetaResult.self, from: data)
+				if .success == weakSelf.checkMetaInformation(result.meta) {
+					success = true
+				}// end if check meta information
+			} catch let error {
+				print(error.localizedDescription)
+			}// end do try - catch decode result JSON structure
+		}// end closure for request set NG Word owner command
+		task.resume()
+		_ = semaphore.wait(timeout: DispatchTime.now() + Timeout)	// no need action from timeout or success
+
+		return success
+	}// end addNGWord
+
+	public func addNGWords (words: Array<(word: String, type: NGType)>) -> Bool {
+		guard let baseURL = URL(string: UserNamaAPITool) else { return false }
+		let url = baseURL.appendingPathComponent(program, isDirectory: false).appendingPathComponent(NGWordSetting)
+		let encoder: JSONEncoder = JSONEncoder()
+		var wordsList: Array<NGRequest> = Array()
+		for word: (word: String, type: NGType) in words {
+			let enry: NGRequest = NGRequest(type: word.type, body: word.word)
+			wordsList.append(enry)
+		}// end foreach make Array of NGRequest
+		guard let wordsToAppenJson: Data = try? encoder.encode(wordsList) else { return false }
+		var success: Bool = false
+
+		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
+		var request: URLRequest = makeRequest(url: url, method: .post)
+		request.addValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
+		request.httpBody = wordsToAppenJson
+		let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, req: URLResponse?, err: Error?) in
+			defer { semaphore.signal() } // must increment semaphore when exit from closure
+			guard let weakSelf = self, let data: Data = dat else { return }
+			do {
+				let decoder: JSONDecoder = JSONDecoder()
+				let result: MetaResult = try decoder.decode(MetaResult.self, from: data)
+				if .success == weakSelf.checkMetaInformation(result.meta) {
+					success = true
+				}// end if check meta information result
+			} catch let error {
+				print(error.localizedDescription)
+			}// end do try - catch decode result JSON strult
+		}// end closure for request set NG Words owner command
+		task.resume()
+		_ = semaphore.wait(timeout: DispatchTime.now() + Timeout)
+
+		return success
+	}// end addNGWords
+
+	public func allNGWords () -> Array<NGData> {
+		guard let baseURL = URL(string: UserNamaAPITool) else { return Array() }
+		let url = baseURL.appendingPathComponent(program, isDirectory: false).appendingPathComponent(NGWordSetting)
+		var wordsList: Array<NGData> = Array()
+
+		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
+		let request: URLRequest = makeRequest(url: url, method: .get)
+		let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, resp: URLResponse?, err: Error?) in
+			defer { semaphore.signal() } // must increment semaphore when exit from closure
+			guard let weakSelf = self, let data: Data = dat else { return }
+			do {
+				let decoder: JSONDecoder = JSONDecoder()
+				let list: NGWrodList = try decoder.decode(NGWrodList.self, from: data)
+				guard .success == weakSelf.checkMetaInformation(list.meta) else { return }
+				for foundWord: NGData in list.data {
+					wordsList.append(foundWord)
+				}// end foreach found word
+			} catch let error {
+				print(error.localizedDescription)
+			}// end do try - catch
+		}// end closure
+		task.resume()
+		_ = semaphore.wait(timeout: DispatchTime.now() + Timeout)
+
+		return wordsList
+	}// end allNGWords
+
+	public func removeNGWords (identifiers: Array<Int>) -> Bool {
+		guard identifiers.count > 0, let baseURL = URL(string: UserNamaAPITool) else { return false }
+		let url = baseURL.appendingPathComponent(program, isDirectory: false).appendingPathComponent(NGWordSetting)
+		let encoder: JSONEncoder = JSONEncoder()
+		let removeNGWords: NGWordIdentifiers = NGWordIdentifiers(id: identifiers)
+		guard let identifiersForRemove: Data = try? encoder.encode(removeNGWords) else { return false }
+		var success = false
+
+		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
+		var request: URLRequest = makeRequest(url: url, method: .delete)
+		request.addValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
+		request.httpBody = identifiersForRemove
+		let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, resp: URLResponse?, err: Error?) in
+			defer { semaphore.signal() } // must increment semaphore when exit from closure
+			guard let weakSelf = self, let data: Data = dat else { return }
+			do {
+				let decoder = JSONDecoder()
+				let result: MetaResult = try decoder.decode(MetaResult.self, from: data)
+				if .success == weakSelf.checkMetaInformation(result.meta) {
+					success = true
+				}// end if result status is success
+			} catch let error {
+				print(error.localizedDescription)
+			}// end do try - catch decode result JSON structure
+		}// end closure for request remove NG words by array of identifiers
+		task.resume()
+		_ = semaphore.wait(timeout: DispatchTime.now() + Timeout)
+
+		return success
+	}// end removeNGWords
 
 		// MARK: quote
 	public func checkQuotable (_ video: String) -> (quotable: Bool, status: ResultStatus) {
