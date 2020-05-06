@@ -59,6 +59,12 @@ public final class DeuxCheVaux: NSObject {
 		framewrokVersionMajor = FramewrokVersionMajor
 		framewrokVersionMinor = FramewrokVersionMinor
 		framerokVersionFix = FramerokVersionFix
+		let url: URL = URL(fileURLWithPath: nullDevicePath)
+		if let outputStream: OutputStream = OutputStream(url: url, append: true) {
+			self.nullDevice = outputStream
+		} else {
+			self.nullDevice = nil
+		}// end if make null device output streame is success or not.
 		super.init()
 		startRunLoop()
 	}// end private init
