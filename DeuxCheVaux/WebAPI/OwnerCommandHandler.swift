@@ -960,6 +960,8 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 		// MARK: - Internal methods
 		// MARK: - Private methods
 	private func checkMetaInformation (_ meta: MetaInformation) -> ResultStatus {
+		let Base: Int = 10
+
 		var status: ResultStatus
 		var errorCode: String? = nil
 		if let code: String = meta.errorCode { errorCode = code }
