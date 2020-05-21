@@ -56,9 +56,9 @@ public struct NGRequest: Codable {
 }// end struct NGRequest
 
 public struct NGData: Codable {
-	let id: Int
-	let type: NGType
-	let body: String
+	public let id: Int
+	public let type: NGType
+	public let body: String
 }// end struct NGData
 
 internal struct NGWrodList: Codable {
