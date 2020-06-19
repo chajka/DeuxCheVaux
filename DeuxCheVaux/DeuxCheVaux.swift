@@ -85,6 +85,9 @@ public final class DeuxCheVaux: NSObject {
 
 		// MARK: - Override
 		// MARK: - Public methods
+	public func setFirstLaucn () {
+		firstLaunch = true
+	}// end setFirstLaucn
 		// MARK: - Internal methods
 		// MARK: - Private methods
 	private func startRunLoop () -> Void {
