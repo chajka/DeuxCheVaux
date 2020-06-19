@@ -11,7 +11,7 @@ import Cocoa
 fileprivate let FramewrokName: String = "DeuxCheVaux"
 fileprivate let FramewrokVersionMajor: Float = 0.3
 fileprivate let FramewrokVersionMinor: Int = 7
-fileprivate let FramerokVersionFix: Int = 0
+fileprivate let FramerokVersionFix: Int = 2
 
 fileprivate let QueueLabel: String = "tv.from.chajka.DeuxCheVaux"
 
@@ -30,6 +30,7 @@ public final class DeuxCheVaux: NSObject {
 	public var applicationVersionMajor: Float
 	public var applicationVersionMinor: Int
 	public var applicationVersionFix: Int
+	public private(set) var firstLaunch: Bool
 	public let frameworkName: String
 	public let framewrokVersionMajor: Float
 	public let framewrokVersionMinor: Int
@@ -55,6 +56,7 @@ public final class DeuxCheVaux: NSObject {
 		applicationVersionMajor = 0.0
 		applicationVersionMinor = 0
 		applicationVersionFix = 0
+		firstLaunch = false
 		frameworkName = FramewrokName
 		framewrokVersionMajor = FramewrokVersionMajor
 		framewrokVersionMinor = FramewrokVersionMinor
@@ -83,6 +85,9 @@ public final class DeuxCheVaux: NSObject {
 
 		// MARK: - Override
 		// MARK: - Public methods
+	public func setFirstLaucn () {
+		firstLaunch = true
+	}// end setFirstLaucn
 		// MARK: - Internal methods
 		// MARK: - Private methods
 	private func startRunLoop () -> Void {

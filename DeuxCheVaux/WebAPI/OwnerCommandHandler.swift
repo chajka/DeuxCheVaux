@@ -56,9 +56,9 @@ public struct NGRequest: Codable {
 }// end struct NGRequest
 
 public struct NGData: Codable {
-	let id: Int
-	let type: NGType
-	let body: String
+	public let id: Int
+	public let type: NGType
+	public let body: String
 }// end struct NGData
 
 internal struct NGWrodList: Codable {
@@ -967,7 +967,7 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 		if let code: String = meta.errorCode { errorCode = code }
 		var errorMessage: String? = nil
 		if let message: String = meta.errorMessage { errorMessage = message }
-		let statusCode: StatusValue? = StatusValue(rawValue: meta.status / (Base ^ 2))	// drop last 2 digit
+		let statusCode: StatusValue? = StatusValue(rawValue: meta.status / (Base * Base))	// drop last 2 digit
 
 		switch statusCode {
 			case .noError:
