@@ -30,6 +30,7 @@ public final class DeuxCheVaux: NSObject {
 	public var applicationVersionMajor: Float
 	public var applicationVersionMinor: Int
 	public var applicationVersionFix: Int
+	public private(set) var firstLaunch: Bool
 	public let frameworkName: String
 	public let framewrokVersionMajor: Float
 	public let framewrokVersionMinor: Int
@@ -55,6 +56,7 @@ public final class DeuxCheVaux: NSObject {
 		applicationVersionMajor = 0.0
 		applicationVersionMinor = 0
 		applicationVersionFix = 0
+		firstLaunch = false
 		frameworkName = FramewrokName
 		framewrokVersionMajor = FramewrokVersionMajor
 		framewrokVersionMinor = FramewrokVersionMinor
