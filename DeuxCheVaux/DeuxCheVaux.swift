@@ -11,7 +11,7 @@ import Cocoa
 fileprivate let FramewrokName: String = "DeuxCheVaux"
 fileprivate let FramewrokVersionMajor: Float = 0.3
 fileprivate let FramewrokVersionMinor: Int = 7
-fileprivate let FramerokVersionFix: Int = 1
+fileprivate let FramerokVersionFix: Int = 2
 
 fileprivate let QueueLabel: String = "tv.from.chajka.DeuxCheVaux"
 
