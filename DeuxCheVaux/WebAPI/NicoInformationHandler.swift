@@ -17,6 +17,7 @@ fileprivate let ThumbnailAPIFormat: String = "https://secure-dcdn.cdn.nimg.jp/ni
 fileprivate let ChannelThumbnailApi: String = "https://secure-dcdn.cdn.nimg.jp/comch/channel-icon/128x128/%@.jpg"
 fileprivate let NicoNicoMyPageURL: String = "https://www.nicovideo.jp/my/top"
 
+fileprivate let IdentifierFindRegex: String = "<p class=\"accountNumber\">ID:<span>(\\d+)\\("
 
 fileprivate struct data: Codable {
 	let id: String
