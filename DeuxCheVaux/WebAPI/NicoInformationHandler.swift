@@ -66,12 +66,9 @@ public final class NicoInformationHandler: HTTPCommunicatable {
 		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
 		var thumbnail: NSImage = insteadImage
 		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
-			guard let data: Data = dat, let image: NSImage = NSImage(data: data) else {
-				semaphore.signal()
-				return
-			}// end guard
+			defer { semaphore.signal() }
+			guard let data: Data = dat, let image: NSImage = NSImage(data: data) else { return }
 			thumbnail = image
-			semaphore.signal()
 		}// end closure
 		task.resume()
 		let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
@@ -85,12 +82,9 @@ public final class NicoInformationHandler: HTTPCommunicatable {
 		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
 		var thumbnail: NSImage = insteadImage
 		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
-			guard let data: Data = dat, let image: NSImage = NSImage(data: data) else {
-				semaphore.signal()
-				return
-			}// end guard
+			defer { semaphore.signal() }
+			guard let data: Data = dat, let image: NSImage = NSImage(data: data) else { return }
 			thumbnail = image
-			semaphore.signal()
 		}// end closure
 		task.resume()
 		let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
@@ -106,12 +100,9 @@ public final class NicoInformationHandler: HTTPCommunicatable {
 		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
 		var thumbnail: NSImage = insteadImage
 		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
-			guard let data: Data = dat, let image: NSImage = NSImage(data: data) else {
-				semaphore.signal()
-				return
-			}// end guard
+			defer { semaphore.signal() }
+			guard let data: Data = dat, let image: NSImage = NSImage(data: data) else { return }
 			thumbnail = image
-			semaphore.signal()
 		}// end closure
 		task.resume()
 		let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
@@ -129,12 +120,9 @@ public final class NicoInformationHandler: HTTPCommunicatable {
 		}// end optional binding for
 		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
 		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
-			guard let data: Data = dat else {
-				semaphore.signal()
-				return
-			}// end guard else
+			defer { semaphore.signal() }
+			guard let data: Data = dat else { return }
 			rawData = data
-			semaphore.signal()
 		}// end closure
 		task.resume()
 		let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
@@ -176,10 +164,8 @@ public final class NicoInformationHandler: HTTPCommunicatable {
 		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
 		var nickname: String? = nil
 		let task: URLSessionTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
-			guard let data: Data = dat else {
-				semaphore.signal()
-				return
-			}// end guard
+			defer { semaphore.signal() }
+			guard let data: Data = dat else { return }
 			do {
 				let nicknameJSON: Nickname = try JSONDecoder().decode(Nickname.self, from: data)
 				if let nick: data = nicknameJSON.data {
@@ -188,7 +174,6 @@ public final class NicoInformationHandler: HTTPCommunicatable {
 			} catch let error {
 				print(error.localizedDescription)
 			}// end try - catch error of decode json data
-			semaphore.signal()
 		}// end url request closure
 		task.resume()
 		let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
