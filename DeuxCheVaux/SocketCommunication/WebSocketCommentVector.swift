@@ -7,7 +7,18 @@
 //
 
 import Cocoa
+import SwiftWebSocket
 
-class WebSocketCommentVector: NSObject {
-
+final class WebSocketCommentVector: NSObject {
+		// MARK: Class variables
+		// MARK: - Class methods
+		// MARK: - Properties
+		// MARK: - Member variables
+		// MARK: - Constructor/Destructor
+		// MARK: - Override
+		// MARK: - Actions
+		// MARK: - Public methods
+		// MARK: - Internal methods
+		// MARK: - Private methods
+		// MARK: - Delegates
 }// end WebSocketCommentVector
