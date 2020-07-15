@@ -15,6 +15,8 @@ fileprivate let CouldNotParse = "Could not parse"
 fileprivate let NicknameAPIFormat: String = "https://api.live2.nicovideo.jp/api/v1/user/nickname?userId="
 fileprivate let ThumbnailAPIFormat: String = "https://secure-dcdn.cdn.nimg.jp/nicoaccount/usericon/%@/%@.jpg"
 fileprivate let ChannelThumbnailApi: String = "https://secure-dcdn.cdn.nimg.jp/comch/channel-icon/128x128/%@.jpg"
+fileprivate let NicoNicoMyPageURL: String = "https://www.nicovideo.jp/my/top"
+
 
 fileprivate struct data: Codable {
 	let id: String
