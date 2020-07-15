@@ -46,6 +46,10 @@ public final class NicoInformationHandler: HTTPCommunicatable {
 		// MARK: - Override
 		// MARK: - Actions
 		// MARK: - Public methods
+	public func myUserIdentifier () -> String {
+		return fetchMyUserID()
+	}// end myUserIdentifier
+
 	public func fetchNickName (forIdentifier userIdentifieer: String) -> String? {
 		if let nickname = fetchNickname(from: userIdentifieer) {
 			return nickname
