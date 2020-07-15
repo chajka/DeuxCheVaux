@@ -141,6 +141,31 @@ public final class NicoInformationHandler: HTTPCommunicatable {
 
 		// MARK: - Internal methods
 		// MARK: - Private methods
+	private func fetchMyUserID () -> String {
+		guard let url = URL(string: NicoNicoMyPageURL) else { return "" }
+		let request: URLRequest = makeRequest(url: url, method: .get)
+		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
+		var userIdentifier: String? = nil
+		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
+			defer { semaphore.signal() }
+			guard let data: Data = dat else { return }
+			if let htmlSource: String = String(data: data, encoding: .utf8) {
+				let htmlRange: NSRange = NSRange(location: 0, length: htmlSource.count)
+				if let regex: NSRegularExpression = try? NSRegularExpression(pattern: IdentifierFindRegex, options: NSRegularExpression.Options.caseInsensitive) {
+					if let result: NSTextCheckingResult = regex.firstMatch(in: htmlSource, options: NSRegularExpression.MatchingOptions.withTransparentBounds, range: htmlRange) {
+						let range: NSRange = result.range(at: 1)
+						userIdentifier = (htmlSource as NSString).substring(with: range)
+					}// end optional binding check for founded regex
+				}// end optional binding check for compile regex
+			}// end optional binding check for fetch html source successed ?
+		}// end completion handler
+		task.resume()
+		let timeout: DispatchTimeoutResult = semaphore.wait(wallTimeout: DispatchWallTime.now() + Timeout)
+		if timeout == .timedOut { return "" }
+		if let identifier: String = userIdentifier { return identifier}
+		return ""
+	}// end fetchMyUserID
+
 	private func fetchNickname (from identifier: String) -> String? {
 		guard let url = URL(string: NicknameAPIFormat + identifier) else { return nil }
 		let request: URLRequest = makeRequest(url: url, method: .get)
