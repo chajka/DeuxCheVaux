@@ -20,6 +20,12 @@ fileprivate let NicoNicoMyPageURL: String = "https://www.nicovideo.jp/my/top"
 fileprivate let IdentifierFindRegex: String = "<p class=\"accountNumber\">ID:<span>(\\d+)\\("
 fileprivate let LanguageFindRegex: String = "<span class=\"currentType\">(.*?)</span>"
 
+fileprivate enum CurrentLanguage: String {
+	case Japanese = "\u{65E5}\u{672C}\u{8A9E}"
+	case Chinese = "\u{4E2D}\u{6587}\u{20}\u{28}\u{7E41}\u{9AD4}\u{29}"
+	case English = "English (US)"
+}
+
 fileprivate struct data: Codable {
 	let id: String
 	let nickname: String
