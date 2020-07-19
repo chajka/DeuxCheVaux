@@ -18,6 +18,7 @@ fileprivate let ChannelThumbnailApi: String = "https://secure-dcdn.cdn.nimg.jp/c
 fileprivate let NicoNicoMyPageURL: String = "https://www.nicovideo.jp/my/top"
 
 fileprivate let IdentifierFindRegex: String = "<p class=\"accountNumber\">ID:<span>(\\d+)\\("
+fileprivate let LanguageFindRegex: String = "<span class=\"currentType\">(.*?)</span>"
 
 fileprivate struct data: Codable {
 	let id: String
