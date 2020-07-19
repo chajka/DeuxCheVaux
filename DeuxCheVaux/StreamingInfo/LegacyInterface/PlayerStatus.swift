@@ -18,14 +18,14 @@ public struct XMLSocket {
 }// end struct XMLSocket
 
 public struct MessageServer: Equatable {
-	let XMLSocet: XMLSocket
-	let WebSocket: URL?
-	let thread: String
-	let name: String?
-	let identifier: Int?
+	public let XMLSocet: XMLSocket
+	public let webSocket: URL?
+	public let thread: String
+	public let name: String?
+	public let identifier: Int?
 
 	static public func == (lhs: MessageServer, rhs: MessageServer) -> Bool {
-		return (lhs.XMLSocet == rhs.XMLSocet) && (lhs.WebSocket == rhs.WebSocket) && (lhs.thread == rhs.thread)
+		return (lhs.XMLSocet == rhs.XMLSocet) && (lhs.webSocket == rhs.webSocket) && (lhs.thread == rhs.thread)
 	}// end func ==
 }// end struct MessageServer
 
@@ -221,7 +221,7 @@ public final class PlayerStatus: NSObject , XMLParserDelegate {
 			case .msThread:
 				thread = String(stringBuffer)
 				let xmlserver: XMLSocket = XMLSocket(address: server, port: port)
-				let ms: MessageServer = MessageServer(XMLSocet: xmlserver, WebSocket: nil, thread: thread, name: nil, identifier: nil)
+				let ms: MessageServer = MessageServer(XMLSocet: xmlserver, webSocket: nil, thread: thread, name: nil, identifier: nil)
 				messageServers.append(ms)
 			case .messageServerList:
 				messageServers.removeFirst()
