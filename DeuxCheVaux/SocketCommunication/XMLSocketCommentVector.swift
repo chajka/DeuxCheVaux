@@ -8,7 +8,7 @@
 
 import Cocoa
 
-public protocol XMLSocketCommentVectorDelegate {
+public protocol XMLSocketCommentVectorDelegate: class {
 	func commentVector (commentVector vector: XMLSocketCommentVector, didRecieveComment comment: XMLElement) -> Void
 }// end protocol CommentSocketDelegate
 
@@ -109,7 +109,7 @@ public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
 	private var outputStream: OutputStream?
 	private var inputRemnant: Data = Data()
 
-	public var delegate: XMLSocketCommentVectorDelegate!
+	public weak var delegate: XMLSocketCommentVectorDelegate!
 
 		// MARK: - Constructor/Destructor
 	public init (playerStatus: PlayerStatus, serverOffset: Int, history: Int = defaultHistroryCount, cookies: Array<HTTPCookie>) {
