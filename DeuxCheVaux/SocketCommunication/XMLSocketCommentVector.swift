@@ -12,14 +12,12 @@ public protocol XMLSocketCommentVectorDelegate {
 	func commentVector (commentVector vector: XMLSocketCommentVector, didRecieveComment comment: XMLElement) -> Void
 }// end protocol CommentSocketDelegate
 
-public typealias heartbeatCallback = (_ commentCount: Int, _ watcherCount: Int, _ ticket: String) -> Void
 typealias PostKeyCallBack = (_ postkey: String) -> Void
 
 public let defaultHistroryCount: Int = 400
 
 private let BufferSize: Int = 8192
 private let threadFormat: String = "<thread thread=\"%@\" res_from=\"-%d\" version=\"20061206\" scores=\"1\"/>\0"
-private let heartbeatFormat: String = "https://watch.live.nicovideo.jp/api/heartbeat?v="
 private let postkeyFormat: String = "https://watch.live.nicovideo.jp/api/getpostkey?v="
 
 private enum XML {
@@ -68,19 +66,6 @@ private enum POSTKey {
 		case en = "8"
 	}// end enum
 }// end enum POSTKey
-
-private enum HeartbeatElement: String {
-	case watch = "watchCount"
-	case comment = "commentCount"
-	case ticket = "ticket"
-
-	static func ~= (lhs: HeartbeatElement, rhs: String) -> Bool {
-		return lhs.rawValue == rhs ? true : false
-	}// end func ~=
-	static func == (lhs: HeartbeatElement, rhs: String) -> Bool {
-		return lhs.rawValue == rhs ? true : false
-	}// end func ==
-}// end enum HeartbeatElement
 
 extension XML.Name: StringEnum { }
 extension XML.Attr: StringEnum { }
