@@ -108,10 +108,8 @@ public final class DeuxCheVaux: NSObject {
 			while (!weakSelf.finishRunLoop) {
 				RunLoop.current.run(mode: RunLoop.Mode.default, before: Date.distantFuture)
 			}// end keep runloop
-			Swift.print("exit runloop")
 		}// end block async
 		semaaphore.wait()
-		print("RunLoop \(String(describing: runLoop))")
 		if let rl: RunLoop = runLoop {
 			self.runLoop = rl
 		}// end optional binding cheeck for runLoop is assigned?
