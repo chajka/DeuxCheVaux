@@ -8,8 +8,8 @@
 
 import Cocoa
 
-let ProgramInfoFormat: String = "https://live2.nicovideo.jp/watch/"
-let ProgramInfoSuffix: String = "/programinfo"
+fileprivate let ProgramInfoFormat: String = "https://live2.nicovideo.jp/watch/"
+fileprivate let ProgramInfoSuffix: String = "/programinfo"
 
 public enum UserLanguage: String, Codable {
 	case ja = "ja-jp"
