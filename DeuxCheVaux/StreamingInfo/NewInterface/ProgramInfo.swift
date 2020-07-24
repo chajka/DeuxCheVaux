@@ -11,6 +11,12 @@ import Cocoa
 let ProgramInfoFormat: String = "https://live2.nicovideo.jp/watch/"
 let ProgramInfoSuffix: String = "/programinfo"
 
+public enum UserLanguage: String, Codable {
+	case ja = "ja-jp"
+	case zh = "zh-tw"
+	case en = "en-us"
+}// end public enum UserLanguage
+
 public struct Room: Codable {
 	let webSocketUri: String
 	let xmlSocketUri: String

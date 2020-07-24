@@ -35,12 +35,6 @@ public enum SocialType: String, Codable {
 	case official = "official"
 }// end enum SocialType
 
-public enum UserLanguage: String {
-	case ja = "ja-jp"
-	case zh = "zh-tw"
-	case en = "en-us"
-}// end public enum UserLanguage
-
 enum PlayerStatusKey: String {
 	case programNumber = "id"
 	case programTitle = "title"
