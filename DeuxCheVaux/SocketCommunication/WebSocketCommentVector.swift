@@ -177,6 +177,11 @@ public final class WebSocketCommentVector: NSObject {
 		keepaliveTimer?.resume()
 	}// end open
 
+	public func close () {
+		cleanupKeepAliveTimer()
+		socket.close()
+	}// end close
+
 		// MARK: - Internal methods
 		// MARK: - Private methods
 		// MARK: - Delegates
