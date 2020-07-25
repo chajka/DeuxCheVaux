@@ -142,6 +142,27 @@ public final class WebSocketCommentVector: NSObject {
 	private var keepaliveTimer: DispatchSourceTimer? = nil
 
 		// MARK: - Constructor/Destructor
+	public init (url: URL, thread: String, program: String, uid: String, lang: UserLanguage, baseTime: Date, room: String, cookie: Array<HTTPCookie>) {
+		self.url = url
+		self.thread = thread
+		self.program = program
+		userIdentifier = uid
+		userLanguage = lang
+		cookies = cookie
+		self.baseTime = baseTime
+		runLoop = DeuxCheVaux.shared.runLoop
+		let roomPrefix: Substring = room.prefix(1)
+		let prefix = String(roomPrefix)
+		roomLabel = prefix == CommunityChannelPrefix ? Arena : room
+		var request: URLRequest = URLRequest(url: self.url)
+		request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookie)
+		let userAgent: String = DeuxCheVaux.shared.userAgent
+		request.addValue(userAgent, forHTTPHeaderField: UserAgentKey)
+		socket = WebSocket(request: request, subProtocols: [SubProtocol], rl: runLoop)
+		socket.compression.on = true
+		socket.allowSelfSignedSSL = true
+	}// end init
+
 		// MARK: - Override
 		// MARK: - Actions
 		// MARK: - Public methods
