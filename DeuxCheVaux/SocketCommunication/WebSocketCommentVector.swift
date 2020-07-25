@@ -170,6 +170,13 @@ public final class WebSocketCommentVector: NSObject {
 		// MARK: - Override
 		// MARK: - Actions
 		// MARK: - Public methods
+	public func open (history: Int) {
+		setupSocketEventHandler(history: history)
+		socket.open()
+		keepaliveTimer = setupKeepAliveTimer()
+		keepaliveTimer?.resume()
+	}// end open
+
 		// MARK: - Internal methods
 		// MARK: - Private methods
 		// MARK: - Delegates
