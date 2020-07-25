@@ -116,6 +116,10 @@ fileprivate enum ElementType: String {
 public let Arena: String = "Arena"
 internal let CommunityChannelPrefix = "c"
 
+public protocol WebSocketCommentVectorDelegate: class  {
+	func commentVector (commentVector vector: WebSocketCommentVector, didRecieveComment comment: ChatElements)
+}// end protocol WebSocketCommentVectorDelegate
+
 public final class WebSocketCommentVector: NSObject {
 		// MARK: Class variables
 		// MARK: - Class methods
