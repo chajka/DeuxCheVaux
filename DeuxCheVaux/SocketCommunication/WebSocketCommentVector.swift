@@ -301,5 +301,21 @@ public final class WebSocketCommentVector: NSObject {
 		}// end message event
 	}// end setupSocketEventHandler
 
+	private func setupKeepAliveTimer () -> DispatchSourceTimer {
+		let keepAlive: DispatchSourceTimer = DispatchSource.makeTimerSource(flags: DispatchSource.TimerFlags.strict, queue: background)
+		keepAlive.setEventHandler() { [weak self] in
+			guard let weakSelf = self else { return }
+			weakSelf.socket.ping("{\"content\":\"rs:0\"}")
+			weakSelf.socket.ping("{\"content\":\"ps:0\"}")
+			weakSelf.socket.send(text: "")
+			weakSelf.socket.ping("{\"content\":\"pf:0\"}")
+			weakSelf.socket.ping("{\"content\":\"rf:0\"}")
+		}// end event handler closure
+
+		keepAlive.schedule(deadline: DispatchTime(uptimeNanoseconds: StartAfter), repeating: Minute, leeway: DefaultLeeway)
+
+		return keepAlive
+	}// end setupKeepAliveTimer
+
 		// MARK: - Delegates
 }// end WebSocketCommentVector
