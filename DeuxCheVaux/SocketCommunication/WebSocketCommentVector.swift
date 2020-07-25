@@ -124,6 +124,11 @@ public final class WebSocketCommentVector: NSObject {
 		// MARK: Class variables
 		// MARK: - Class methods
 		// MARK: - Properties
+	public let url: URL
+	public let roomLabel: String
+	public private(set) weak var runLoop: RunLoop?
+	public weak var delegate: WebSocketCommentVectorDelegate?
+
 		// MARK: - Member variables
 		// MARK: - Constructor/Destructor
 		// MARK: - Override
