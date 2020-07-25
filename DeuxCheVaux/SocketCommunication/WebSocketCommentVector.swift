@@ -24,6 +24,8 @@ internal let heartbeatFormat: String = "https://watch.live.nicovideo.jp/api/hear
 internal let PostCommentURLPrefix: String = "https://api.cas.nicovideo.jp/v1/services/live/programs/"
 internal let PostCommentURLSuffix: String = "comments"
 
+fileprivate let MessageSeparators: CharacterSet = CharacterSet(charactersIn: "{\"} :")
+
 public typealias heartbeatCallback = (_ commentCount: Int, _ watcherCount: Int, _ ticket: String) -> Void
 
 internal enum HeartbeatElement: String {
