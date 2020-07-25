@@ -101,7 +101,6 @@ public struct ChatElements: Codable {
 	public let origin: String?
 	public let locale: UserLanguage?
 
-	public func logMessage () -> String {
 		var message: String = String()
 
 		message += "thread:\(thread), "
