@@ -71,6 +71,19 @@ struct CommentBody: Codable {
 	let vpos: String
 }// end RequestBody
 
+public struct ThreadInfo: Codable {
+	let resultcode: Int
+	let thread: UInt64
+	let last_res: Int
+	let ticket: String
+	let revision: Int
+	let server_time: TimeInterval
+}// end struct ThreadInfo
+
+struct ThreadResult: Codable {
+	let thread: ThreadInfo
+}// end struct ThreadResult
+
 public final class WebSocketCommentVector: NSObject {
 		// MARK: Class variables
 		// MARK: - Class methods
