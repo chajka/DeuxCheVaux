@@ -9,7 +9,6 @@
 import Cocoa
 import SwiftWebSocket
 
-final class WebSocketCommentVector: NSObject {
 internal let heartbeatFormat: String = "https://watch.live.nicovideo.jp/api/heartbeat?v="
 public typealias heartbeatCallback = (_ commentCount: Int, _ watcherCount: Int, _ ticket: String) -> Void
 
@@ -26,6 +25,7 @@ internal enum HeartbeatElement: String {
 	}// end func ==
 }// end enum HeartbeatElement
 
+public final class WebSocketCommentVector: NSObject {
 		// MARK: Class variables
 		// MARK: - Class methods
 		// MARK: - Properties
