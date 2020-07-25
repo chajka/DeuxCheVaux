@@ -139,7 +139,7 @@ public let Arena: String = "Arena"
 internal let CommunityChannelPrefix = "c"
 
 public protocol WebSocketCommentVectorDelegate: class  {
-	func commentVector (commentVector vector: WebSocketCommentVector, didRecieveComment comment: ChatElements)
+	func commentVector (commentVector vector: WebSocketCommentVector, didRecieveComment comment: ChatElements, lastPastComment last: Bool)
 }// end protocol WebSocketCommentVectorDelegate
 
 public final class WebSocketCommentVector: NSObject {
@@ -158,6 +158,7 @@ public final class WebSocketCommentVector: NSObject {
 	private let userIdentifier: String
 	private let userLanguage: UserLanguage
 	private let cookies: Array<HTTPCookie>
+	private var lastRes: Int!
 	private var ticket: String!
 	private let baseTime: Date
 	private let background: DispatchQueue = DispatchQueue(label: "tv.from.chajka.Charleston", qos: DispatchQoS(qosClass: DispatchQoS.QoSClass.background, relativePriority: 0), attributes: DispatchQueue.Attributes.concurrent)
@@ -302,13 +303,15 @@ public final class WebSocketCommentVector: NSObject {
 					do {
 						let info: ThreadResult = try decoder.decode(ThreadResult.self, from: json)
 						weakSelf.ticket = info.thread.ticket
+						weakSelf.lastRes = info.thread.last_res
 					} catch let error {
 						Swift.print("Error: \(error.localizedDescription),\nDroped \(message)")
 					}// end do try - catch decode json
 				case .chat:
 					do {
 						let chat: ChatResult = try decoder.decode(ChatResult.self, from: json)
-						weakSelf.delegate?.commentVector(commentVector: weakSelf, didRecieveComment: chat.chat)
+						let last: Bool = weakSelf.lastRes == chat.chat.no
+						weakSelf.delegate?.commentVector(commentVector: weakSelf, didRecieveComment: chat.chat, lastPastComment: last)
 					} catch let error {
 						Swift.print("Error: \(error.localizedDescription),\nDroped \(message)")
 					}
