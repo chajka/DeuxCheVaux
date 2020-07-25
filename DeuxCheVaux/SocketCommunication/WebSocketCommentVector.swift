@@ -130,6 +130,17 @@ public final class WebSocketCommentVector: NSObject {
 	public weak var delegate: WebSocketCommentVectorDelegate?
 
 		// MARK: - Member variables
+	private let socket: WebSocket
+	private let thread: String
+	private let program: String
+	private let userIdentifier: String
+	private let userLanguage: UserLanguage
+	private let cookies: Array<HTTPCookie>
+	private var ticket: String!
+	private let baseTime: Date
+	private let background: DispatchQueue = DispatchQueue(label: "tv.from.chajka.Charleston", qos: DispatchQoS(qosClass: DispatchQoS.QoSClass.background, relativePriority: 0), attributes: DispatchQueue.Attributes.concurrent)
+	private var keepaliveTimer: DispatchSourceTimer? = nil
+
 		// MARK: - Constructor/Destructor
 		// MARK: - Override
 		// MARK: - Actions
