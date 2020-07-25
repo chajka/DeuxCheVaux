@@ -11,7 +11,19 @@ import SwiftWebSocket
 
 fileprivate let ThreadVersion: Int = 20061206
 fileprivate let ServiceName: String = "LIVE"
+fileprivate let SubProtocol: String = "msg.nicovideo.jp#json"
+fileprivate let Ticket: String = "ticket"
+fileprivate let Watch: String = "watch"
+fileprivate let GetPostkey: String = "getpostkey"
+fileprivate let Postkey = "postkey"
+fileprivate let StartAfter: UInt64 = 1000 * 1000 * 1000
+fileprivate let Minute: DispatchTimeInterval = DispatchTimeInterval.seconds(60)
+fileprivate let HalfSecond: DispatchTimeInterval = DispatchTimeInterval.milliseconds(500)
+fileprivate let DefaultLeeway: DispatchTimeInterval = DispatchTimeInterval.milliseconds(50)
 internal let heartbeatFormat: String = "https://watch.live.nicovideo.jp/api/heartbeat?v="
+internal let PostCommentURLPrefix: String = "https://api.cas.nicovideo.jp/v1/services/live/programs/"
+internal let PostCommentURLSuffix: String = "comments"
+
 public typealias heartbeatCallback = (_ commentCount: Int, _ watcherCount: Int, _ ticket: String) -> Void
 
 internal enum HeartbeatElement: String {
