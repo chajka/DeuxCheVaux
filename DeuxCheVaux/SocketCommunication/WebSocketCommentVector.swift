@@ -49,6 +49,10 @@ public struct ThreadRequest: Codable {
 	}
 }// end struct ThreadRequest
 
+public struct CommentRequest: Codable {
+	let thread: ThreadRequest
+}// end struct CommentRequest
+
 public final class WebSocketCommentVector: NSObject {
 		// MARK: Class variables
 		// MARK: - Class methods
