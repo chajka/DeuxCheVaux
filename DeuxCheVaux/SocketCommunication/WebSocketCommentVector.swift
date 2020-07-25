@@ -139,7 +139,7 @@ public let Arena: String = "Arena"
 internal let CommunityChannelPrefix = "c"
 
 public protocol WebSocketCommentVectorDelegate: class  {
-	func commentVector (commentVector vector: WebSocketCommentVector, didRecieveComment comment: ChatElements)
+	func commentVector (commentVector vector: WebSocketCommentVector, didRecieveComment comment: ChatElements, lastPastComment last: Bool)
 }// end protocol WebSocketCommentVectorDelegate
 
 public final class WebSocketCommentVector: NSObject {
