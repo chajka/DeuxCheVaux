@@ -310,7 +310,8 @@ public final class WebSocketCommentVector: NSObject {
 				case .chat:
 					do {
 						let chat: ChatResult = try decoder.decode(ChatResult.self, from: json)
-						weakSelf.delegate?.commentVector(commentVector: weakSelf, didRecieveComment: chat.chat)
+						let last: Bool = weakSelf.lastRes == chat.chat.no
+						weakSelf.delegate?.commentVector(commentVector: weakSelf, didRecieveComment: chat.chat, lastPastComment: last)
 					} catch let error {
 						Swift.print("Error: \(error.localizedDescription),\nDroped \(message)")
 					}
