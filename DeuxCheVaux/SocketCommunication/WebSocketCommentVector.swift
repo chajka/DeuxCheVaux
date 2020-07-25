@@ -252,5 +252,54 @@ public final class WebSocketCommentVector: NSObject {
 
 		// MARK: - Internal methods
 		// MARK: - Private methods
+	private func setupSocketEventHandler (history: Int) {
+		socket.event.open = { [weak self] in
+			guard let weakSelf = self else { return }
+			let threadData: ThreadRequest = ThreadRequest(thread: weakSelf.thread, uid: weakSelf.userIdentifier, resFrom: history)
+			let commentRequest: CommentRequest = CommentRequest(thread: threadData)
+			if let json: Data = try? JSONEncoder().encode(commentRequest), let request: String = String(data: json, encoding: .utf8) {
+				weakSelf.socket.send(text: request)
+			}// end optional binding check for
+		}// end open event
+
+		socket.event.close = { (code: Int, reason: String, clean: Bool) in
+			print("code: \(code), reason: \(reason), clean: \(clean)")
+		}// end close event
+
+		socket.event.error = { (error: Error) in
+			print("error: \(error)")
+		}// end error event
+
+		socket.event.message = { [weak self] (message: Any) in
+			guard let weakSelf = self, let text: NSString = message as? NSString, let json: Data = (message as? String)?.data(using: String.Encoding.utf8) else { return }
+			let decoder: JSONDecoder = JSONDecoder()
+			let messageType: String? = text.components(separatedBy: MessageSeparators).compactMap{ $0 != "" ? $0 : nil }.first
+			if let messageType: String = messageType, let type: ElementType = ElementType(rawValue: messageType) {
+				switch type {
+				case .thread:
+					do {
+						let info: ThreadResult = try decoder.decode(ThreadResult.self, from: json)
+						weakSelf.ticket = info.thread.ticket
+					} catch let error {
+						Swift.print("Error: \(error.localizedDescription),\nDroped \(message)")
+					}// end do try - catch decode json
+				case .chat:
+					do {
+						let chat: ChatResult = try decoder.decode(ChatResult.self, from: json)
+						weakSelf.delegate?.commentVector(commentVector: weakSelf, didRecieveComment: chat.chat)
+					} catch let error {
+						Swift.print("Error: \(error.localizedDescription),\nDroped \(message)")
+					}
+				case .chat_result:
+					break
+				case .type:
+					break
+				}// end switch case by message type
+			} else {
+				Swift.print("Droped \(message)")
+			}// end optional binding check of known element or not.
+		}// end message event
+	}// end setupSocketEventHandler
+
 		// MARK: - Delegates
 }// end WebSocketCommentVector
