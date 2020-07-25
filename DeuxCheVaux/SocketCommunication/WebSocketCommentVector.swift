@@ -106,6 +106,13 @@ struct ChatResult: Codable {
 	let chat: ChatElements
 }// end struct ChatResult
 
+fileprivate enum ElementType: String {
+	case thread
+	case type
+	case chat
+	case chat_result
+}// end enum elementName
+
 public final class WebSocketCommentVector: NSObject {
 		// MARK: Class variables
 		// MARK: - Class methods
