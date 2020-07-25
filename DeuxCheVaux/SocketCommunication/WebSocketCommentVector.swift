@@ -113,6 +113,9 @@ fileprivate enum ElementType: String {
 	case chat_result
 }// end enum elementName
 
+public let Arena: String = "Arena"
+internal let CommunityChannelPrefix = "c"
+
 public final class WebSocketCommentVector: NSObject {
 		// MARK: Class variables
 		// MARK: - Class methods
