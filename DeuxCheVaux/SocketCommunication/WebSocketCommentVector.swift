@@ -158,6 +158,7 @@ public final class WebSocketCommentVector: NSObject {
 	private let userIdentifier: String
 	private let userLanguage: UserLanguage
 	private let cookies: Array<HTTPCookie>
+	private var lastRes: Int!
 	private var ticket: String!
 	private let baseTime: Date
 	private let background: DispatchQueue = DispatchQueue(label: "tv.from.chajka.Charleston", qos: DispatchQoS(qosClass: DispatchQoS.QoSClass.background, relativePriority: 0), attributes: DispatchQueue.Attributes.concurrent)
