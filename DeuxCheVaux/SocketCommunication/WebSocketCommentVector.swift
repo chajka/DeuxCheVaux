@@ -65,6 +65,12 @@ public struct CommentRequest: Codable {
 	let thread: ThreadRequest
 }// end struct CommentRequest
 
+struct CommentBody: Codable {
+	let message: String
+	let mail: String?
+	let vpos: String
+}// end RequestBody
+
 public final class WebSocketCommentVector: NSObject {
 		// MARK: Class variables
 		// MARK: - Class methods
