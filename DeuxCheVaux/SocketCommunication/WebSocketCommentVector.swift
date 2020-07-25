@@ -317,5 +317,14 @@ public final class WebSocketCommentVector: NSObject {
 		return keepAlive
 	}// end setupKeepAliveTimer
 
+	private func cleanupKeepAliveTimer () {
+		if let timer: DispatchSourceTimer = keepaliveTimer {
+			if !timer.isCancelled {
+				timer.suspend()
+				timer.cancel()
+			}// end if timer is worked
+		}// end optional binding check of keep alive timer
+	}// end cleanupKeepAliveTimer
+
 		// MARK: - Delegates
 }// end WebSocketCommentVector
