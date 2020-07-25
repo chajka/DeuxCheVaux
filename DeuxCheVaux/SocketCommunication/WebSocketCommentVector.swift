@@ -163,6 +163,10 @@ public final class WebSocketCommentVector: NSObject {
 		socket.allowSelfSignedSSL = true
 	}// end init
 
+	deinit {
+		cleanupKeepAliveTimer()
+	}// end deinit
+
 		// MARK: - Override
 		// MARK: - Actions
 		// MARK: - Public methods
