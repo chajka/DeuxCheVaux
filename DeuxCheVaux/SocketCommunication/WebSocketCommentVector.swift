@@ -182,6 +182,29 @@ public final class WebSocketCommentVector: NSObject {
 		socket.close()
 	}// end close
 
+	public func comment (comment: String, commands: Array<String>) {
+		guard let baseURL: URL = URL(string: PostCommentURLPrefix) else { return }
+		let postCommentURL = baseURL.appendingPathComponent(program, isDirectory: true).appendingPathComponent(PostCommentURLSuffix)
+		let vpos: Int = -100 * Int(baseTime.timeIntervalSinceNow)
+		let config = URLSessionConfiguration.default
+		let session = URLSession(configuration: config)
+		var request = URLRequest(url: postCommentURL)
+		if !cookies.isEmpty {
+			let cookiesForHeader = HTTPCookie.requestHeaderFields(with: cookies)
+			request.allHTTPHeaderFields = cookiesForHeader
+		}// end if have cookies
+		request.addValue(DeuxCheVaux.shared.userAgent, forHTTPHeaderField: UserAgentKey)
+		request.addValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
+		request.httpMethod = HTTPMethod.post.rawValue
+		let mail: String? = commands.count > 0 ? commands.joined(separator: " ") : nil
+		let body: CommentBody = CommentBody(message: comment, mail: mail, vpos: String(vpos))
+		if let json: Data = try? JSONEncoder().encode(body) {
+			request.httpBody = json
+			let task: URLSessionDataTask = session.dataTask(with: request)
+			task.resume()
+		}// end optional binding check for make json data
+	}// end comment
+
 		// MARK: - Internal methods
 		// MARK: - Private methods
 		// MARK: - Delegates
