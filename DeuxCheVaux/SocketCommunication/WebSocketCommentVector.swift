@@ -84,6 +84,26 @@ struct ThreadResult: Codable {
 	let thread: ThreadInfo
 }// end struct ThreadResult
 
+public struct ChatElements: Codable {
+	public let thread: UInt64
+	public let vpos: TimeInterval
+	public let no: Int
+	public let user_id: String
+	public let content: String
+	public let date: TimeInterval
+	public let date_usec: TimeInterval
+	public let premium: Int?
+	public let mail: String?
+	public let anonymity: Int?
+	public let score: Int?
+	public let origin: String?
+	public let locale: UserLanguage?
+}// end struct ChatElement
+
+struct ChatResult: Codable {
+	let chat: ChatElements
+}// end struct ChatResult
+
 public final class WebSocketCommentVector: NSObject {
 		// MARK: Class variables
 		// MARK: - Class methods
