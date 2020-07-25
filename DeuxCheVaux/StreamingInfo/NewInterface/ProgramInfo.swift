@@ -8,8 +8,14 @@
 
 import Cocoa
 
-let ProgramInfoFormat: String = "https://live2.nicovideo.jp/watch/"
-let ProgramInfoSuffix: String = "/programinfo"
+fileprivate let ProgramInfoFormat: String = "https://live2.nicovideo.jp/watch/"
+fileprivate let ProgramInfoSuffix: String = "/programinfo"
+
+public enum UserLanguage: String, Codable {
+	case ja = "ja-jp"
+	case zh = "zh-tw"
+	case en = "en-us"
+}// end public enum UserLanguage
 
 public struct Room: Codable {
 	let webSocketUri: String
@@ -161,7 +167,7 @@ public final class ProgramInfo: NSObject {
 					if let webSocket: URL = URL(string: room.webSocketUri), let xml: URL = URL(string: room.xmlSocketUri) {
 						if let xmlHost: String = xml.host, let port: Int = xml.port {
 							let xmlSocket: XMLSocket = XMLSocket(address: xmlHost, port: port)
-							let server: MessageServer = MessageServer(XMLSocet: xmlSocket, WebSocket: webSocket, thread: room.threadId, name: room.name, identifier: room.id)
+							let server: MessageServer = MessageServer(XMLSocet: xmlSocket, webSocket: webSocket, thread: room.threadId, name: room.name, identifier: room.id)
 							servers.append(server)
 						}// end optional biniding check for get xml socket server addreess and port
 					}// end optional binding check for make url for web socket and xml socket
