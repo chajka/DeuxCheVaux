@@ -100,6 +100,28 @@ public struct ChatElements: Codable {
 	public let score: Int?
 	public let origin: String?
 	public let locale: UserLanguage?
+	
+	public static var logHeader: String {
+		get {
+			var message: String = String()
+
+			message += "thread"
+			message += ",vpos"
+			message += ",no"
+			message += ",user_id"
+			message += ",content"
+			message += ",date"
+			message += ",date_usec"
+			message += ",premium"
+			message += ",mail"
+			message += ",anonymity"
+			message += ",score"
+			message += ",origin"
+			message += ",locale"
+
+			return message
+		}// end get
+	}// end computed property log header
 
 	public var logMessage: String {
 		get {
