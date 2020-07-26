@@ -100,24 +100,46 @@ public struct ChatElements: Codable {
 	public let score: Int?
 	public let origin: String?
 	public let locale: UserLanguage?
+	
+	public static var logHeader: String {
+		get {
+			var message: String = String()
+
+			message += "thread"
+			message += ",vpos"
+			message += ",no"
+			message += ",user_id"
+			message += ",content"
+			message += ",date"
+			message += ",date_usec"
+			message += ",premium"
+			message += ",mail"
+			message += ",anonymity"
+			message += ",score"
+			message += ",origin"
+			message += ",locale"
+
+			return message
+		}// end get
+	}// end computed property log header
 
 	public var logMessage: String {
 		get {
 			var message: String = String()
 
-			message += "thread:\(thread), "
-			message += "vpos:\(vpos)"
-			message += ", no: \(no)"
-			message += ", user_id: \(user_id)"
-			message += ", content: \(content)"
-			message += ", date: \(date)"
-			message += ", date_usec: \(date_usec)"
-			message += ", premium: \(String(describing: premium != nil ? premium! : 0))"
-			message += ", mail: \(mail ?? "")"
-			message += ", anonymity: \(anonymity ?? 0)"
-			message += ", score: \(score ?? 0)"
-			message += ", origin: \(origin ?? "")"
-			message += ", locale: \(locale?.rawValue ?? UserLanguage.ja.rawValue)"
+			message += "\(thread)"
+			message += ",\(vpos)"
+			message += ",\(no)"
+			message += ",\(user_id)"
+			message += ",\(content)"
+			message += ",\(date)"
+			message += ",\(date_usec)"
+			message += ",\(String(describing: premium != nil ? premium! : 0))"
+			message += ",\(mail ?? "")"
+			message += ",\(anonymity ?? 0)"
+			message += ",\(score ?? 0)"
+			message += ",\(origin ?? "")"
+			message += ",\(locale?.rawValue ?? UserLanguage.ja.rawValue)"
 
 			return message
 		}// end get
