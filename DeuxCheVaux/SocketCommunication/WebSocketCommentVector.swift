@@ -113,11 +113,11 @@ public struct ChatElements: Codable {
 			message += ", date: \(date)"
 			message += ", date_usec: \(date_usec)"
 			message += ", premium: \(String(describing: premium != nil ? premium! : 0))"
-			if let mail: String = mail { message += ", mail: \(mail)" }
-			if let anonymity: Int = anonymity { message += ", anonymity: \(anonymity)" }
-			if let score: Int = score { message += ", score: \(score)" }
-			if let origin: String = origin { message += ", origin: \(origin)" }
-			if let locale: UserLanguage = locale { message += ", locale: \(locale.rawValue)" }
+			message += ", mail: \(mail ?? "")"
+			message += ", anonymity: \(anonymity ?? 0)"
+			message += ", score: \(score ?? 0)"
+			message += ", origin: \(origin ?? "")"
+			message += ", locale: \(locale?.rawValue ?? UserLanguage.ja.rawValue)"
 
 			return message
 		}// end get
