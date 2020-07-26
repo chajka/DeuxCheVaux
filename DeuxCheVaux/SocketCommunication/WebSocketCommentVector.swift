@@ -113,7 +113,7 @@ public struct ChatElements: Codable {
 			message += ", date: \(date)"
 			message += ", date_usec: \(date_usec)"
 			message += ", premium: \(String(describing: premium != nil ? premium! : 0))"
-			if let mail: String = mail { message += ", mail: \(mail), " }
+			if let mail: String = mail { message += ", mail: \(mail)" }
 			if let anonymity: Int = anonymity { message += ", anonymity: \(anonymity)" }
 			if let score: Int = score { message += ", score: \(score)" }
 			if let origin: String = origin { message += ", origin: \(origin)" }
