@@ -92,7 +92,7 @@ public final class DeuxCheVaux: NSObject {
 		// MARK: - Private methods
 	private func startRunLoop () -> Void {
 		runLoop = nil
-        let qos: DispatchQoS = DispatchQoS(qosClass: .userInteractive, relativePriority: 0)
+        let qos: DispatchQoS = DispatchQoS(qosClass: .default, relativePriority: 0)
 		queue = DispatchQueue(label: QueueLabel, qos: qos, attributes: .concurrent, autoreleaseFrequency: .inherit, target: nil)
 		guard let runLoopQueue: DispatchQueue = self.queue else { return }
 		finishRunLoop = false
