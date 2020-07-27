@@ -106,7 +106,7 @@ public final class DeuxCheVaux: NSObject {
 			runLoop = RunLoop.current
 			semaaphore.signal()
 			while (!weakSelf.finishRunLoop) {
-				RunLoop.current.run(mode: RunLoop.Mode.common, before: Date.distantFuture)
+				RunLoop.current.run(mode: RunLoop.Mode.default, before: Date.distantFuture)
 			}// end keep runloop
 		}// end block async
 		semaaphore.wait()
