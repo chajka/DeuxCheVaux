@@ -17,9 +17,9 @@ fileprivate let ThumbnailAPIFormat: String = "https://secure-dcdn.cdn.nimg.jp/ni
 fileprivate let ChannelThumbnailApi: String = "https://secure-dcdn.cdn.nimg.jp/comch/channel-icon/128x128/%@.jpg"
 fileprivate let NicoNicoMyPageURL: String = "https://www.nicovideo.jp/my/top"
 
-fileprivate let LanguageFindRegex: String = "<span class=\"currentType\">(.*?)</span>"
 fileprivate let IdentifierFindRegexClassic: String = "<p class=\"accountNumber\">ID:<span>(\\d+)\\("
 fileprivate let IdentifierFindRegexNew: String = "user.user_id = parseInt\\(\'(\\d+)\'"
+fileprivate let LanguageFindRegex: String = "<span class=\"CountrySelector-item CountrySelector-currentItem\" data-trigger data-value=\".*?\">(.*?)</span>"
 
 fileprivate enum CurrentLanguage: String {
 	case Japanese = "\u{65E5}\u{672C}\u{8A9E}"
