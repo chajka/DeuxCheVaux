@@ -17,8 +17,9 @@ fileprivate let ThumbnailAPIFormat: String = "https://secure-dcdn.cdn.nimg.jp/ni
 fileprivate let ChannelThumbnailApi: String = "https://secure-dcdn.cdn.nimg.jp/comch/channel-icon/128x128/%@.jpg"
 fileprivate let NicoNicoMyPageURL: String = "https://www.nicovideo.jp/my/top"
 
-fileprivate let IdentifierFindRegex: String = "<p class=\"accountNumber\">ID:<span>(\\d+)\\("
-fileprivate let LanguageFindRegex: String = "<span class=\"currentType\">(.*?)</span>"
+fileprivate let IdentifierFindRegexClassic: String = "<p class=\"accountNumber\">ID:<span>(\\d+)\\("
+fileprivate let IdentifierFindRegexNew: String = "user.user_id = parseInt\\(\'(\\d+)\'"
+fileprivate let LanguageFindRegex: String = "<span class=\"CountrySelector-item CountrySelector-currentItem\" data-trigger data-value=\".*?\">(.*?)</span>"
 
 fileprivate enum CurrentLanguage: String {
 	case Japanese = "\u{65E5}\u{672C}\u{8A9E}"
@@ -151,10 +152,17 @@ public final class NicoInformationHandler: HTTPCommunicatable {
 			guard let data: Data = dat else { return }
 			if let htmlSource: String = String(data: data, encoding: .utf8) {
 				let htmlRange: NSRange = NSRange(location: 0, length: htmlSource.count)
-				if let regex: NSRegularExpression = try? NSRegularExpression(pattern: IdentifierFindRegex, options: NSRegularExpression.Options.caseInsensitive) {
+				if let regex: NSRegularExpression = try? NSRegularExpression(pattern: IdentifierFindRegexNew, options: NSRegularExpression.Options.caseInsensitive) {
 					if let result: NSTextCheckingResult = regex.firstMatch(in: htmlSource, options: NSRegularExpression.MatchingOptions.withTransparentBounds, range: htmlRange) {
 						let range: NSRange = result.range(at: 1)
 						userIdentifier = (htmlSource as NSString).substring(with: range)
+					} else {
+						if let regex: NSRegularExpression = try? NSRegularExpression(pattern: IdentifierFindRegexClassic, options: NSRegularExpression.Options.caseInsensitive) {
+							if let result: NSTextCheckingResult = regex.firstMatch(in: htmlSource, options: NSRegularExpression.MatchingOptions.withTransparentBounds, range: htmlRange) {
+								let range: NSRange = result.range(at: 1)
+								userIdentifier = (htmlSource as NSString).substring(with: range)
+							}// end optional binding check for found regex
+						}// end optional binding check for compile old style my page user id regex
 					}// end optional binding check for founded regex
 				}// end optional binding check for compile regex
 				if let regex: NSRegularExpression = try? NSRegularExpression(pattern: LanguageFindRegex, options: NSRegularExpression.Options.caseInsensitive) {
