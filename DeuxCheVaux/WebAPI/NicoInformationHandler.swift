@@ -8,6 +8,8 @@
 
 import Cocoa
 
+public typealias ThumbnailHandler = (NSImage?) -> Void
+
 fileprivate let UnknownNickname = "Unknown User"
 fileprivate let NicknameNodeName: String = "nickname"
 fileprivate let CouldNotParse = "Could not parse"
@@ -83,6 +85,20 @@ public final class NicoInformationHandler: HTTPCommunicatable {
 		if timeout == .timedOut { thumbnail = insteadImage }
 
 		return thumbnail
+	}// end thumbnail
+
+	public func thumbnail (identifieer userIdentifer: String, with handler: @escaping ThumbnailHandler) -> Void {
+		let prefix: String = String(userIdentifer.prefix(userIdentifer.count - 4))
+		let urlString: String = String(format: ThumbnailAPIFormat, prefix, userIdentifer)
+		var thumbnail: NSImage? = nil
+		guard let url: URL = URL(string: urlString) else { handler(thumbnail); return }// end guard url initialize failed
+		let request: URLRequest = makeRequest(url: url, method: .get)
+		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
+			defer { handler(thumbnail) }
+			guard let data: Data = dat, let image: NSImage = NSImage(data: data) else { return }
+			thumbnail = image
+		}// end closure
+		task.resume()
 	}// end thumbnail
 
 	public func communityThumbnail (_ url: URL, whenNoImage insteadImage: NSImage) -> NSImage {
