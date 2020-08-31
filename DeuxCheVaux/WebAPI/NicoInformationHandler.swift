@@ -181,6 +181,17 @@ public final class NicoInformationHandler: HTTPCommunicatable {
 		return thumbnail
 	}// end communityThumbnail
 
+	public func communityThumbnail (_ url: URL, with handler: @escaping ThumbnailHandler) -> Void {
+		let request: URLRequest = makeRequest(url: url, method: .get)
+		var thumbnail: NSImage? = nil
+		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
+			defer { handler(thumbnail) }
+			guard let data: Data = dat, let image: NSImage = NSImage(data: data) else { return }
+			thumbnail = image
+		}// end completion handler closure
+		task.resume()
+	}// end communityThumbnail
+
 	public func channelThumbnail (channel: String, whenNoImage insteadImage: NSImage) -> NSImage {
 		let urlString: String = String(format: ChannelThumbnailApi, channel)
 		guard let url: URL = URL(string: urlString) else { return insteadImage }
