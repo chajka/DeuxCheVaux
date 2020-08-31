@@ -12,6 +12,7 @@ public typealias IdentifierHandler = (String, UserLanguage) -> Void
 public typealias NicknameHandler = (String?) -> Void
 public typealias ThumbnailHandler = (NSImage?) -> Void
 public typealias RawDataHandler = (Data?, URLResponse?, Error?) -> Void
+public typealias CurrentProgramsHandler = (Array<Program>) -> Void
 
 fileprivate let UnknownNickname = "Unknown User"
 fileprivate let NicknameNodeName: String = "nickname"
@@ -21,6 +22,7 @@ fileprivate let NicknameAPIFormat: String = "https://api.live2.nicovideo.jp/api/
 fileprivate let ThumbnailAPIFormat: String = "https://secure-dcdn.cdn.nimg.jp/nicoaccount/usericon/%@/%@.jpg"
 fileprivate let ChannelThumbnailApi: String = "https://secure-dcdn.cdn.nimg.jp/comch/channel-icon/128x128/%@.jpg"
 fileprivate let NicoNicoMyPageURL: String = "https://www.nicovideo.jp/my/top"
+fileprivate let FollowingProgramsFormat: String = "https://live.nicovideo.jp/api/relive/notifybox.content"
 
 fileprivate let IdentifierFindRegexClassic: String = "<p class=\"accountNumber\">ID:<span>(\\d+)\\("
 fileprivate let IdentifierFindRegexNew: String = "user.user_id = parseInt\\(\'(\\d+)\'"
@@ -46,6 +48,64 @@ fileprivate struct Nickname: Codable {
 	let data: data?
 	let err: error?
 }// end struct Nickname
+
+fileprivate struct UserProgramInfo: Codable {
+	let ownerIdentifier: String
+	let title: String
+	let thumnailURL: String
+	let thumbnailLinkURL: String
+	let communityName: String
+	let elapsedTime: Int
+	let providerType: ProviderType
+
+	enum ProviderType: String, Codable {
+		case channel = "channel"
+		case community = "community"
+	}// end enum ProviderType
+
+	private enum CodingKeys: String, CodingKey {
+		case ownerIdentifier = "id"
+		case title
+		case thumnailURL = "thumbnail_url"
+		case thumbnailLinkURL = "thumbnail_link_url"
+		case communityName = "community_name"
+		case elapsedTime = "elapsed_time"
+		case providerType = "provider_type"
+	}// end enum CodingKeys
+
+	init (from decoder: Decoder) throws {
+		let container = try decoder.container(keyedBy: CodingKeys.self)
+		ownerIdentifier = try container.decode(String.self, forKey: .ownerIdentifier)
+		title = try container.decode(String.self, forKey: .title)
+		thumnailURL = try container.decode(String.self, forKey: .thumnailURL)
+		thumbnailLinkURL = try container.decode(String.self, forKey: .thumbnailLinkURL)
+		communityName = try container.decode(String.self, forKey: .communityName)
+		elapsedTime = try container.decode(Int.self, forKey: .elapsedTime)
+		providerType = ProviderType(rawValue: try container.decode(String.self, forKey: .providerType))!
+	}// end init
+}// end struct UserProgramInfo
+
+fileprivate struct UserPrograms: Codable {
+	let meta: MetaInformation
+	let data: NotifyContent
+
+	struct NotifyContent: Codable {
+		let notifyboxContent: Array<UserProgramInfo>
+		let totalPage: Int
+
+		private enum CodingKeys: String, CodingKey {
+			case notifyboxContent = "notifybox_content"
+			case totalPage = "total_page"
+		}// end enum CodingKeys
+	}// end struct NotifyContent
+}// end struct UserPrograms
+
+public struct Program {
+	let program: String
+	let title: String
+	let owner: String
+	let thumbnail: NSImage?
+}// end struct Program
 
 public final class NicoInformationHandler: HTTPCommunicatable {
 		// MARK:   Outlets
@@ -255,6 +315,25 @@ public final class NicoInformationHandler: HTTPCommunicatable {
 		}// end completion handler closure
 		task.resume()
 	}// end rawData
+
+	public func currentPrograms (with handler: @escaping CurrentProgramsHandler) -> Void {
+		let url: URL = URL(string: FollowingProgramsFormat)!
+		let request: URLRequest = makeRequest(url: url, method: .get)
+		var programs: Array<Program> = Array()
+		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
+			defer { handler(programs) }
+			guard let data: Data = dat, let info: UserPrograms = try? JSONDecoder().decode(UserPrograms.self, from: data) else { return }
+			let currentPrograms: Array<UserProgramInfo> = info.data.notifyboxContent
+			for prog: UserProgramInfo in currentPrograms {
+				let liveNumber: String = URL(string: prog.thumbnailLinkURL)?.lastPathComponent ?? ""
+				let title: String = prog.title
+				let owner: String = prog.ownerIdentifier
+				let thumb: NSImage? = NSImage(contentsOf: URL(string: prog.thumnailURL)!)
+				let program: Program = Program(program: liveNumber, title: title, owner: owner, thumbnail: thumb)
+				programs.append(program)
+			}// end foreach all program informations
+		}// end current programs completion handler closure
+	}// end currentPrograms
 
 		// MARK: - Internal methods
 		// MARK: - Private methods
