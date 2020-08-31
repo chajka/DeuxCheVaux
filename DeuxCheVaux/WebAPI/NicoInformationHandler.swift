@@ -8,6 +8,7 @@
 
 import Cocoa
 
+public typealias IdentifierHandler = (String, UserLanguage) -> Void
 public typealias ThumbnailHandler = (NSImage?) -> Void
 
 fileprivate let UnknownNickname = "Unknown User"
@@ -58,6 +59,49 @@ public final class NicoInformationHandler: HTTPCommunicatable {
 		// MARK: - Public methods
 	public func myUserIdentifier () -> (identifier: String, language: UserLanguage) {
 		return fetchMyUserID()
+	}// end myUserIdentifier
+
+	public func myUserIdentifier (with handler: @escaping IdentifierHandler) -> Void {
+		guard let url = URL(string: NicoNicoMyPageURL) else { handler("", .ja); return }
+		let request: URLRequest = makeRequest(url: url, method: .get)
+		var userIdentifier: String = ""
+		var userLanguage: UserLanguage = .ja
+		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
+			defer { handler(userIdentifier, userLanguage) }
+			guard let data: Data = dat else { return }
+			if let htmlSource: String = String(data: data, encoding: .utf8) {
+				let htmlRange: NSRange = NSRange(location: 0, length: htmlSource.count)
+				if let regex: NSRegularExpression = try? NSRegularExpression(pattern: IdentifierFindRegexNew, options: NSRegularExpression.Options.caseInsensitive) {
+					if let result: NSTextCheckingResult = regex.firstMatch(in: htmlSource, options: NSRegularExpression.MatchingOptions.withTransparentBounds, range: htmlRange) {
+						let range: NSRange = result.range(at: 1)
+						userIdentifier = (htmlSource as NSString).substring(with: range)
+					} else {
+						if let regex: NSRegularExpression = try? NSRegularExpression(pattern: IdentifierFindRegexClassic, options: NSRegularExpression.Options.caseInsensitive) {
+							if let result: NSTextCheckingResult = regex.firstMatch(in: htmlSource, options: NSRegularExpression.MatchingOptions.withTransparentBounds, range: htmlRange) {
+								let range: NSRange = result.range(at: 1)
+								userIdentifier = (htmlSource as NSString).substring(with: range)
+							}// end optional binding check for found regex
+						}// end optional binding check for compile old style my page user id regex
+					}// end optional binding check for founded regex
+				}// end optional binding check for compile regex
+				if let regex: NSRegularExpression = try? NSRegularExpression(pattern: LanguageFindRegex, options: NSRegularExpression.Options.caseInsensitive) {
+					if let result: NSTextCheckingResult = regex.firstMatch(in: htmlSource, options: NSRegularExpression.MatchingOptions.withTransparentBounds, range: htmlRange) {
+						let range: NSRange = result.range(at: 1)
+						if let currentLanguage: CurrentLanguage = CurrentLanguage(rawValue: (htmlSource as NSString).substring(with: range)) {
+							switch currentLanguage {
+								case .Japanese:
+									userLanguage = .ja
+								case .Chinese:
+									userLanguage = .zh
+								case .English:
+									userLanguage = .en
+							}// end switch case by current language
+						}// end optional binding check of String is member of CurrentLanguage enum
+					}// end optional binding check of found regex
+				}// end optional binding check for compile regex
+			}// end optional binding check for fetch html source successed ?
+		}// end completion handler closure
+		task.resume()
 	}// end myUserIdentifier
 
 	public func fetchNickName (forIdentifier userIdentifieer: String) -> String? {
