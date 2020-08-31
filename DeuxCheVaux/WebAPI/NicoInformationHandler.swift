@@ -9,6 +9,7 @@
 import Cocoa
 
 public typealias IdentifierHandler = (String, UserLanguage) -> Void
+public typealias NicknameHandler = (String?) -> Void
 public typealias ThumbnailHandler = (NSImage?) -> Void
 
 fileprivate let UnknownNickname = "Unknown User"
@@ -111,6 +112,25 @@ public final class NicoInformationHandler: HTTPCommunicatable {
 
 		return UnknownNickname
 	}// end fetchNickName
+
+	public func fetchNickname (of userIdentifier: String, with handler: @escaping NicknameHandler) -> Void {
+		guard let url = URL(string: NicknameAPIFormat + userIdentifier) else { handler(nil); return }
+		let request: URLRequest = makeRequest(url: url, method: .get)
+		var nickname: String? = nil
+		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
+			defer { handler(nickname) }
+			guard let data: Data = dat else { return }
+			do {
+				let nicknameJSON: Nickname = try JSONDecoder().decode(Nickname.self, from: data)
+				if let nick: data = nicknameJSON.data {
+					nickname = nick.nickname
+				}// end optional binding
+			} catch let error {
+				print(error.localizedDescription)
+			}// end try - catch error of decode json data
+		}// end url request closure
+		task.resume()
+	}// end fetchNickname
 
 	public func thumbnail (identifieer userIdentifer: String, whenNoImage insteadImage: NSImage) -> NSImage {
 		let prefix: String = String(userIdentifer.prefix(userIdentifer.count - 4))
