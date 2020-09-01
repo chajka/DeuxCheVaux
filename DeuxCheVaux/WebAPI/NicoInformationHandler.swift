@@ -333,6 +333,7 @@ public final class NicoInformationHandler: HTTPCommunicatable {
 				programs.append(program)
 			}// end foreach all program informations
 		}// end current programs completion handler closure
+		task.resume()
 	}// end currentPrograms
 
 		// MARK: - Internal methods
