@@ -316,6 +316,30 @@ public final class NicoInformationHandler: HTTPCommunicatable {
 		task.resume()
 	}// end rawData
 
+	public func currentPrograms () -> Array<Program> {
+		let url: URL = URL(string: FollowingProgramsFormat)!
+		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
+		let request: URLRequest = makeRequest(url: url, method: .get)
+		var programs: Array<Program> = Array()
+		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
+			defer { semaphore.signal() }
+			guard let data: Data = dat, let info: UserPrograms = try? JSONDecoder().decode(UserPrograms.self, from: data) else { return }
+			let currentPrograms: Array<UserProgramInfo> = info.data.notifyboxContent
+			for prog: UserProgramInfo in currentPrograms {
+				let liveNumber: String = URL(string: prog.thumbnailLinkURL)?.lastPathComponent ?? ""
+				let title: String = prog.title
+				let owner: String = prog.ownerIdentifier
+				let thumb: NSImage? = NSImage(contentsOf: URL(string: prog.thumnailURL)!)
+				let program: Program = Program(program: liveNumber, title: title, owner: owner, thumbnail: thumb)
+				programs.append(program)
+			}// end foreach all program informations
+		}// end current programs completion handler closure
+		task.resume()
+		let _: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
+
+		return programs
+	}// end currentPrograms
+
 	public func currentPrograms (with handler: @escaping CurrentProgramsHandler) -> Void {
 		let url: URL = URL(string: FollowingProgramsFormat)!
 		let request: URLRequest = makeRequest(url: url, method: .get)
