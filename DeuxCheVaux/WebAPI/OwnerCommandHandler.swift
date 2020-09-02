@@ -422,6 +422,39 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 		return status
 	}// end func owner comment
 
+	public func postOwnerComment (comment: String, name: String?, color: Color.premium?, isPerm: Bool? = false, link: String? = nil, with handler: @escaping ownerOperationHandler) -> Void {
+		var status: ResultStatus = .unknownError
+		guard !comment.isEmpty else { handler(status); return }
+		if comment == clear {
+			clearOwnerComment(with: handler)
+		}// end if comment is clear command
+
+		guard let url = URL(string: apiBaseString + operatorComment) else { handler(status); return }
+		let commentToPost: OperatorComment = OperatorComment(text: comment, userName: name, color: color, isPermanent: isPerm, link: link)
+		var request: URLRequest = makeRequest(url: url, method: .put, contentsType: ContentTypeJSON)
+		do {
+			let encoder: JSONEncoder = JSONEncoder()
+			request.httpBody = try encoder.encode(commentToPost)
+			let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
+				defer { handler(status) } // must increment semaphore when exit from closure
+				guard let data: Data = dat else { status = .recieveDetaNilError; return }// end guard
+				do {
+					let decoder: JSONDecoder = JSONDecoder()
+					let meta: MetaResult = try decoder.decode(MetaResult.self, from: data)
+					status = self.checkMetaInformation(meta.meta)
+				} catch let error {
+					status = .decodeResultError
+					print(error.localizedDescription)
+				}// end do try - catch decode recieved data
+			}// end closure of request completion handler
+			task.resume()
+		} catch let error {
+			status = .encodeRequestError
+			print(error.localizedDescription)
+			handler(status)
+		}// end try - catch JSONSerialization
+	}// end postOwnerComment
+
 	public func clearOwnerComment () -> ResultStatus {
 		guard let url = URL(string: apiBaseString + operatorComment) else { return .apiAddressError }
 		var status: ResultStatus = .unknownError
