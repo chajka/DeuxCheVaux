@@ -451,6 +451,7 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 		return status
 	}// end clearOwnerComment
 
+	public func clearOwnerComment (with handler: @escaping ownerOperationHandler) -> Void {
 		// MARK: questionary
 	public func questionary (title question: String, choices items: Array<String>) -> ResultStatus {
 		let capableItemSount: Set<Int> = Set(2...9)
