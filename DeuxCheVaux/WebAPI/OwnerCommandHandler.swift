@@ -423,13 +423,15 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 	}// end func owner comment
 
 	public func postOwnerComment (comment: String, name: String?, color: Color.premium?, isPerm: Bool? = false, link: String? = nil, with handler: @escaping OwnerOperationHandler) -> Void {
+		var completionHandler: OwnerOperationHandler? = handler
 		var status: ResultStatus = .unknownError
-		guard !comment.isEmpty else { handler(status); return }
+		defer { if let handler: OwnerOperationHandler = completionHandler { handler(status) } }
+		guard !comment.isEmpty else { return }
 		if comment == clear {
 			clearOwnerComment(with: handler)
 		}// end if comment is clear command
 
-		guard let url = URL(string: apiBaseString + operatorComment) else { handler(status); return }
+		guard let url = URL(string: apiBaseString + operatorComment) else { return }
 		let commentToPost: OperatorComment = OperatorComment(text: comment, userName: name, color: color, isPermanent: isPerm, link: link)
 		var request: URLRequest = makeRequest(url: url, method: .put, contentsType: ContentTypeJSON)
 		do {
@@ -447,11 +449,11 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 					print(error.localizedDescription)
 				}// end do try - catch decode recieved data
 			}// end closure of request completion handler
+			completionHandler = nil
 			task.resume()
 		} catch let error {
 			status = .encodeRequestError
 			print(error.localizedDescription)
-			handler(status)
 		}// end try - catch JSONSerialization
 	}// end postOwnerComment
 
@@ -485,12 +487,15 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 	}// end clearOwnerComment
 
 	public func clearOwnerComment (with handler: @escaping OwnerOperationHandler) -> Void {
-		guard let url = URL(string: apiBaseString + operatorComment) else { handler(.apiAddressError); return }
-		var status: ResultStatus = .unknownError
+		var completionHandler: OwnerOperationHandler? = handler
+		var status: ResultStatus = .apiAddressError
+		defer { if let handler: OwnerOperationHandler = completionHandler { handler(status) } }
+		guard let url = URL(string: apiBaseString + operatorComment) else { return }
 		let request: URLRequest = makeRequest(url: url, method: .delete)
 		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
 			defer { handler(status) }
-			guard let data: Data = dat else { status = .recieveDetaNilError; return }
+			status = .recieveDetaNilError
+			guard let data: Data = dat else { return }
 			do {
 				let decoder: JSONDecoder = JSONDecoder()
 				let meta: MetaResult = try decoder.decode(MetaResult.self, from: data)
@@ -500,6 +505,7 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 				print(error.localizedDescription)
 			}// end do try - catch decode recieved data
 		}// end clrear request completion handler
+		completionHandler = nil
 		task.resume()
 	}// end clearOwnerComment
 
