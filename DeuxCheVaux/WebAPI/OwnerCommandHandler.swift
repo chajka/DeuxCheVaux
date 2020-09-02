@@ -8,6 +8,9 @@
 
 import Cocoa
 
+	// MARK: public type definitions
+public typealias ownerOperationHandler = (ResultStatus) -> Void
+
 	// MARK: common structure
 public enum ResultStatus: Equatable {
 	case success
