@@ -9,7 +9,7 @@
 import Cocoa
 
 	// MARK: public type definitions
-public typealias ownerOperationHandler = (ResultStatus) -> Void
+public typealias OwnerOperationHandler = (ResultStatus) -> Void
 
 	// MARK: common structure
 public enum ResultStatus: Equatable {
@@ -422,7 +422,7 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 		return status
 	}// end func owner comment
 
-	public func postOwnerComment (comment: String, name: String?, color: Color.premium?, isPerm: Bool? = false, link: String? = nil, with handler: @escaping ownerOperationHandler) -> Void {
+	public func postOwnerComment (comment: String, name: String?, color: Color.premium?, isPerm: Bool? = false, link: String? = nil, with handler: @escaping OwnerOperationHandler) -> Void {
 		var status: ResultStatus = .unknownError
 		guard !comment.isEmpty else { handler(status); return }
 		if comment == clear {
@@ -484,7 +484,7 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 		return status
 	}// end clearOwnerComment
 
-	public func clearOwnerComment (with handler: @escaping ownerOperationHandler) -> Void {
+	public func clearOwnerComment (with handler: @escaping OwnerOperationHandler) -> Void {
 		guard let url = URL(string: apiBaseString + operatorComment) else { handler(.apiAddressError); return }
 		var status: ResultStatus = .unknownError
 		let request: URLRequest = makeRequest(url: url, method: .delete)
