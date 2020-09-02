@@ -452,6 +452,24 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 	}// end clearOwnerComment
 
 	public func clearOwnerComment (with handler: @escaping ownerOperationHandler) -> Void {
+		guard let url = URL(string: apiBaseString + operatorComment) else { handler(.apiAddressError); return }
+		var status: ResultStatus = .unknownError
+		let request: URLRequest = makeRequest(url: url, method: .delete)
+		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
+			defer { handler(status) }
+			guard let data: Data = dat else { status = .recieveDetaNilError; return }
+			do {
+				let decoder: JSONDecoder = JSONDecoder()
+				let meta: MetaResult = try decoder.decode(MetaResult.self, from: data)
+				status = self.checkMetaInformation(meta.meta)
+			} catch let error {
+				status = .decodeResultError
+				print(error.localizedDescription)
+			}// end do try - catch decode recieved data
+		}// end clrear request completion handler
+		task.resume()
+	}// end clearOwnerComment
+
 		// MARK: questionary
 	public func questionary (title question: String, choices items: Array<String>) -> ResultStatus {
 		let capableItemSount: Set<Int> = Set(2...9)
