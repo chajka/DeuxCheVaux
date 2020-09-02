@@ -10,6 +10,7 @@ import Cocoa
 
 	// MARK: public type definitions
 public typealias OwnerOperationHandler = (ResultStatus) -> Void
+public typealias QuestionaryResultHandler = (Array<EnqueteItem>?, ResultStatus) -> Void
 
 	// MARK: common structure
 public enum ResultStatus: Equatable {
@@ -615,6 +616,29 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 		}// end if timeout
 
 		return (answers, status)
+	}// end displayQuestionaryResult
+
+	public func displayQuestionaryResult (with handler: @escaping QuestionaryResultHandler) -> Void {
+		var completionHandler: QuestionaryResultHandler? = handler
+		var status: ResultStatus = .apiAddressError
+		var answers: Array<EnqueteItem>? = nil
+		defer { if let completionHandler: QuestionaryResultHandler = completionHandler { completionHandler(answers, status) } }
+		guard let url: URL = URL(string: UserNamaAPIBase + program + QuestionaryResult) else { return }
+		let decoder: JSONDecoder = JSONDecoder()
+		let request: URLRequest = makeRequest(url: url, method: .post)
+		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, req: URLResponse?, err: Error?) in
+			defer { handler(answers, status) } // must increment semaphore when exit from closure
+			guard let data: Data = dat else { return }// end guard
+			do {
+				let result: EnqueteResult = try decoder.decode(EnqueteResult.self, from: data)
+				status = self.checkMetaInformation(result.meta)
+				answers = result.data?.items
+			} catch let error {
+				print(error.localizedDescription)
+			}// end do try - catch decode result
+		}// end closurre
+		completionHandler = nil
+		task.resume()
 	}// end displayQuestionaryResult
 
 	public func endQuestionary () -> ResultStatus {
