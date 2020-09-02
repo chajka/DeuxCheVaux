@@ -552,6 +552,41 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 		return status
 	}// end questionary
 
+	public func questionary (title question: String, choices items: Array<String>, with handler: @escaping OwnerOperationHandler) -> Void {
+		var completionHandler: OwnerOperationHandler? = handler
+		var status: ResultStatus = .argumentError
+		let capableItemSount: Set<Int> = Set(2...9)
+		defer { if let completionHandler: OwnerOperationHandler = completionHandler { completionHandler(status) } }
+		guard capableItemSount.contains(items.count) else { return }
+		status = .apiAddressError
+		guard let url: URL = URL(string: UserNamaAPIBase + program + Questionary) else { return }
+		var request: URLRequest = makeRequest(url: url, method: .post)
+		let enquete: Enquete = Enquete(question: question, items: items)
+		do {
+			let encoder: JSONEncoder = JSONEncoder()
+			let data: Data = try encoder.encode(enquete)
+			request.httpBody = data
+			let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, req: URLResponse?, err: Error?) in
+				defer { handler(status) } // must increment semaphore when exit from closure
+				status = .recieveDetaNilError
+				guard let weakSelf = self, let data: Data = dat else { return }// end guard
+				do {
+					let decoder: JSONDecoder = JSONDecoder()
+					let result: EnqueteResult = try decoder.decode(EnqueteResult.self, from: data)
+					status = weakSelf.checkMetaInformation(result.meta)
+				} catch let error {
+					status = .decodeResultError
+					print(error.localizedDescription)
+				}// end do try - catch decode result data
+			}// end closure
+			completionHandler = nil
+			task.resume()
+		} catch let error {
+			status = .encodeRequestError
+			print(error.localizedDescription)
+		}// end do try - catch encode Enquete struct to JSON string data
+	}// end questionary
+
 	public func displayQuestionaryResult () -> (answers: Array<EnqueteItem>?, status: ResultStatus) {
 		guard let url: URL = URL(string: UserNamaAPIBase + program + QuestionaryResult) else { return (nil, .apiAddressError) }
 
