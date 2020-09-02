@@ -566,14 +566,14 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 			let encoder: JSONEncoder = JSONEncoder()
 			let data: Data = try encoder.encode(enquete)
 			request.httpBody = data
-			let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, req: URLResponse?, err: Error?) in
+			let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, req: URLResponse?, err: Error?) in
 				defer { handler(status) } // must increment semaphore when exit from closure
 				status = .recieveDetaNilError
-				guard let weakSelf = self, let data: Data = dat else { return }// end guard
+				guard let data: Data = dat else { return }// end guard
 				do {
 					let decoder: JSONDecoder = JSONDecoder()
 					let result: EnqueteResult = try decoder.decode(EnqueteResult.self, from: data)
-					status = weakSelf.checkMetaInformation(result.meta)
+					status = self.checkMetaInformation(result.meta)
 				} catch let error {
 					status = .decodeResultError
 					print(error.localizedDescription)
