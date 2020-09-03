@@ -1207,6 +1207,42 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 		return (newEndTime, status)
 	}// end extendTime
 
+	public func extendTime (minutes min: String, with handler: @escaping NewEndTimeHandler) -> Void {
+		var completionHandler: NewEndTimeHandler? = handler
+		var newEndTime: Date? = nil
+		var status: ResultStatus = .apiAddressError
+		defer { if let handler: NewEndTimeHandler = completionHandler { handler(newEndTime, status) } }
+		guard let url: URL = URL(string: apiBaseString + programExtension), let minutesToExtend: Int = Int(min) else { return }
+		let extend: ExtendTime = ExtendTime(minutes: minutesToExtend)
+		do {
+			let encoder: JSONEncoder = JSONEncoder()
+			let extendTimeData: Data = try encoder.encode(extend)
+			var request: URLRequest = makeRequest(url: url, method: .post, contentsType: ContentTypeJSON)
+			request.httpBody = extendTimeData
+			let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
+				defer { handler(newEndTime, status) } // must increment semaphore when exit from closure
+				status = .recieveDetaNilError
+				guard let data: Data = dat else { return }// end guard
+				do {
+					let decoder: JSONDecoder = JSONDecoder()
+					let extendResult: TimeExtendResult = try decoder.decode(TimeExtendResult.self, from: data)
+					status = self.checkMetaInformation(extendResult.meta)
+					if let newEnd: TimeInterval = extendResult.data?.end_time {
+						newEndTime = Date(timeIntervalSince1970: newEnd)
+					}// end optional binding check for
+				} catch let error {
+					print(error)
+					status = .decodeResultError
+				}// end do try - catch decode json data to result
+			}// end closure of request completion handler
+			completionHandler = nil
+			task.resume()
+		} catch let error {
+			print(error)
+			return
+		}// end do try - catch json encode
+	}// end extendTime
+
 	public func updateProgramState (newState state: NextProgramStatus) -> (startTime: Date, endTime: Date, status: ResultStatus) {
 		let nextState = ProgramState(state: state)
 		var startTime = Date()
