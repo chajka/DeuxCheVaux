@@ -854,6 +854,31 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 		return wordsList
 	}// end allNGWords
 
+	public func allNGWords (with handler: @escaping NGWordsHandler) -> Void {
+		var completionHandler: NGWordsHandler? = handler
+		var wordsList: Array<NGData> = Array()
+		defer { if let handler: NGWordsHandler = completionHandler { handler(wordsList) } }
+		guard let baseURL = URL(string: UserNamaAPITool) else { return }
+		let url = baseURL.appendingPathComponent(program, isDirectory: false).appendingPathComponent(NGWordSetting)
+		let request: URLRequest = makeRequest(url: url, method: .get)
+		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
+			defer { handler(wordsList) } // must increment semaphore when exit from closure
+			guard let data: Data = dat else { return }
+			do {
+				let decoder: JSONDecoder = JSONDecoder()
+				let list: NGWrodList = try decoder.decode(NGWrodList.self, from: data)
+				guard .success == self.checkMetaInformation(list.meta) else { return }
+				for foundWord: NGData in list.data {
+					wordsList.append(foundWord)
+				}// end foreach found word
+			} catch let error {
+				print(error.localizedDescription)
+			}// end do try - catch
+		}// end closure
+		completionHandler = nil
+		task.resume()
+	}// end allNGWords
+
 	public func removeNGWords (identifiers: Array<Int>) -> Bool {
 		guard identifiers.count > 0, let baseURL = URL(string: UserNamaAPITool) else { return false }
 		let url = baseURL.appendingPathComponent(program, isDirectory: false).appendingPathComponent(NGWordSetting)
