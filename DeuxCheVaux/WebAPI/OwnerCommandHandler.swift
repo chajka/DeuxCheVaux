@@ -1161,6 +1161,7 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 				print(error.localizedDescription)
 			}// end do try - catch decode recived json to struct
 		}// end closure of request completion handler
+		completionHandler = nil
 		task.resume()
 	}// end extendableTimes
 
