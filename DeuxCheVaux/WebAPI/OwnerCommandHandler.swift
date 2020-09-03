@@ -910,6 +910,35 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 		return success
 	}// end removeNGWords
 
+	public func removeNGWords (identifiers: Array<Int>, with handler: @escaping OwnerOperationBoolHandler) -> Void {
+		var completionHandler: OwnerOperationBoolHandler? = handler
+		var success: Bool = false
+		defer { if let handler: OwnerOperationBoolHandler = completionHandler { handler(success) } }
+		guard identifiers.count > 0, let baseURL = URL(string: UserNamaAPITool) else { return }
+		let url = baseURL.appendingPathComponent(program, isDirectory: false).appendingPathComponent(NGWordSetting)
+		let encoder: JSONEncoder = JSONEncoder()
+		let removeNGWords: NGWordIdentifiers = NGWordIdentifiers(id: identifiers)
+		guard let identifiersForRemove: Data = try? encoder.encode(removeNGWords) else { return }
+		var request: URLRequest = makeRequest(url: url, method: .delete)
+		request.addValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
+		request.httpBody = identifiersForRemove
+		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
+			defer { handler(success) } // must increment semaphore when exit from closure
+			guard let data: Data = dat else { return }
+			do {
+				let decoder = JSONDecoder()
+				let result: MetaResult = try decoder.decode(MetaResult.self, from: data)
+				if .success == self.checkMetaInformation(result.meta) {
+					success = true
+				}// end if result status is success
+			} catch let error {
+				print(error.localizedDescription)
+			}// end do try - catch decode result JSON structure
+		}// end closure for request remove NG words by array of identifiers
+		completionHandler = nil
+		task.resume()
+	}// end removeNGWords
+
 		// MARK: quote
 	public func checkQuotable (_ video: String) -> (quotable: Bool, status: ResultStatus) {
 		guard let url: URL = URL(string: QuatableAPIBase + video) else { return (false, .apiAddressError) }
