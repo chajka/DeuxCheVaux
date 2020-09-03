@@ -1287,6 +1287,44 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 		return (startTime, endTime, status)
 	}// eend updateProgramState
 
+	public func updateProgramState (newState state: NextProgramStatus, with handler: @escaping UpdateProgramStateHandler) -> Void {
+		var completionHandler: UpdateProgramStateHandler? = handler
+		var startTime: Date = Date()
+		var endTime: Date = startTime
+		var status: ResultStatus = .apiAddressError
+		defer { if let handler: UpdateProgramStateHandler = completionHandler { handler(startTime, endTime, status) } }
+		guard let url: URL = URL(string: apiBaseString + StartStopStream) else { return }
+		do {
+			let encoder: JSONEncoder = JSONEncoder()
+			let nextState = ProgramState(state: state)
+			let extendTimeData: Data = try encoder.encode(nextState)
+			var request: URLRequest = makeRequest(url: url, method: .put, contentsType: ContentTypeJSON)
+			request.httpBody = extendTimeData
+			let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
+				defer { handler(startTime, endTime, status) } // must increment semaphore when exit from closure
+				status = .recieveDetaNilError
+				guard let data: Data = dat else { return }// end guard
+				do {
+					let decoder: JSONDecoder = JSONDecoder()
+					let updateStatedResult: UpdateStateResult = try decoder.decode(UpdateStateResult.self, from: data)
+					status = self.checkMetaInformation(updateStatedResult.meta)
+					if let newStart: TimeInterval = updateStatedResult.data?.start_time, let newEnd: TimeInterval = updateStatedResult.data?.end_time {
+						startTime = Date(timeIntervalSince1970: newStart)
+						endTime = Date(timeIntervalSince1970: newEnd)
+					}// end optional binding
+				} catch let error {
+					print(error)
+					status = .decodeResultError
+				}// end do try - catch decode json data to result
+			}// end closure of request completion handler
+			completionHandler = nil
+			task.resume()
+		} catch let error {
+			print(error)
+			status = .encodeRequestError
+		}// end do try - catch json encode
+	}// end updateProgramState
+
 		// MARK: - Internal methods
 		// MARK: - Private methods
 	private func checkMetaInformation (_ meta: MetaInformation) -> ResultStatus {
