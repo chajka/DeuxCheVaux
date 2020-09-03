@@ -14,6 +14,7 @@ public typealias QuestionaryResultHandler = (Array<EnqueteItem>?, ResultStatus) 
 public typealias OwnerOperationBoolHandler = (Bool) -> Void
 public typealias NGWordsHandler = (Array<NGData>) -> Void
 public typealias ExtendalbesTimesHandler = (Array<String>, ResultStatus) -> Void
+public typealias NewEndTimeHandler = (Date?, ResultStatus) -> Void
 
 	// MARK: common structure
 public enum ResultStatus: Equatable {
