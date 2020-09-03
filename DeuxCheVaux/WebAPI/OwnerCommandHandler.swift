@@ -1136,6 +1136,34 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 		return (extendableMinutes, status)
 	}// end extendableTimes
 
+	public func extendableTimes (with handler: @escaping ExtendalbesTimesHandler) -> Void {
+		var completionHandler: ExtendalbesTimesHandler? = handler
+		var extendableTimes: Array<String> = Array()
+		var status: ResultStatus = .apiAddressError
+		defer { if let handler: ExtendalbesTimesHandler = completionHandler { handler(extendableTimes, status) } }
+		guard let url: URL = URL(string: apiBaseString + programExtension) else { return }
+		let request: URLRequest = makeRequest(url: url, method: .get)
+		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, rest: URLResponse?, err: Error?) in
+			defer { handler(extendableTimes, status) } // must increment semaphore when exit from closure
+			status = .recieveDetaNilError
+			guard let data: Data = dat else { return }// end guard
+			do {
+				let decoder: JSONDecoder = JSONDecoder()
+				let extendableList: TimeExtension = try decoder.decode(TimeExtension.self, from: data)
+				status = self.checkMetaInformation(extendableList.meta)
+				if let methods: Array<ExtendMehtod> = extendableList.data?.methods {
+					for method: ExtendMehtod in methods {
+						extendableTimes.append(String(method.minutes))
+					}// end foreach methods
+				}// end optional binding for
+			} catch let error {
+				status = .decodeResultError
+				print(error.localizedDescription)
+			}// end do try - catch decode recived json to struct
+		}// end closure of request completion handler
+		task.resume()
+	}// end extendableTimes
+
 	public func extendTime (minutes min: String) -> (newEndTime: Date?, status: ResultStatus) {
 		guard let url: URL = URL(string: apiBaseString + programExtension), let minutesToExtend: Int = Int(min) else { return (nil, .apiAddressError) }
 		let extend: ExtendTime = ExtendTime(minutes: minutesToExtend)
