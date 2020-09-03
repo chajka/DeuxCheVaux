@@ -729,6 +729,36 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 		return success
 	}// end addNGWord
 
+	public func addNGWord (_ word: String, type: NGType, with handler: @escaping OwnerOperationBoolHandler) -> Void {
+		var completionHandler: OwnerOperationBoolHandler? = handler
+		var success: Bool = false
+		defer { if let handler: OwnerOperationBoolHandler = completionHandler { handler(success) } }
+		guard let baseURL = URL(string: UserNamaAPITool) else { return }
+		let url = baseURL.appendingPathComponent(program, isDirectory: false).appendingPathComponent(NGWordSetting)
+		let encoder: JSONEncoder = JSONEncoder()
+		let wordToAppend: NGRequest = NGRequest(type: type, body: word)
+		let wordList: Array<NGRequest> = Array(arrayLiteral: wordToAppend)
+		guard let wordToAppendJson: Data = try? encoder.encode(wordList) else { return }
+		var request: URLRequest = makeRequest(url: url, method: .post)
+		request.addValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
+		request.httpBody = wordToAppendJson
+		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
+			defer { handler(success) } // must increment semaphore when exit from closure
+			guard let data: Data = dat else { return }
+			do {
+				let decoder: JSONDecoder = JSONDecoder()
+				let result: MetaResult = try decoder.decode(MetaResult.self, from: data)
+				if .success == self.checkMetaInformation(result.meta) {
+					success = true
+				}// end if check meta information
+			} catch let error {
+				print(error.localizedDescription)
+			}// end do try - catch decode result JSON structure
+		}// end closure for request set NG Word owner command
+		completionHandler = nil
+		task.resume()
+	}// end addNGWord
+
 	public func addNGWords (words: Array<(word: String, type: NGType)>) -> Bool {
 		guard let baseURL = URL(string: UserNamaAPITool) else { return false }
 		let url = baseURL.appendingPathComponent(program, isDirectory: false).appendingPathComponent(NGWordSetting)
