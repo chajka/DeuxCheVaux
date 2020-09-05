@@ -103,6 +103,7 @@ fileprivate struct UserPrograms: Codable {
 public struct Program {
 	public let program: String
 	public let title: String
+	public let community: String
 	public let owner: String
 	public let thumbnail: NSImage?
 }// end struct Program
@@ -328,9 +329,10 @@ public final class NicoInformationHandler: HTTPCommunicatable {
 			for prog: UserProgramInfo in currentPrograms {
 				let liveNumber: String = URL(string: prog.thumbnailLinkURL)?.lastPathComponent ?? ""
 				let title: String = prog.title
+				let community: String = prog.communityName
 				let owner: String = prog.ownerIdentifier
 				let thumb: NSImage? = NSImage(contentsOf: URL(string: prog.thumnailURL)!)
-				let program: Program = Program(program: liveNumber, title: title, owner: owner, thumbnail: thumb)
+				let program: Program = Program(program: liveNumber, title: title, community: community, owner: owner, thumbnail: thumb)
 				programs.append(program)
 			}// end foreach all program informations
 		}// end current programs completion handler closure
@@ -351,9 +353,10 @@ public final class NicoInformationHandler: HTTPCommunicatable {
 			for prog: UserProgramInfo in currentPrograms {
 				let liveNumber: String = URL(string: prog.thumbnailLinkURL)?.lastPathComponent ?? ""
 				let title: String = prog.title
+				let community: String = prog.communityName
 				let owner: String = prog.ownerIdentifier
 				let thumb: NSImage? = NSImage(contentsOf: URL(string: prog.thumnailURL)!)
-				let program: Program = Program(program: liveNumber, title: title, owner: owner, thumbnail: thumb)
+				let program: Program = Program(program: liveNumber, title: title, community: community, owner: owner, thumbnail: thumb)
 				programs.append(program)
 			}// end foreach all program informations
 		}// end current programs completion handler closure
