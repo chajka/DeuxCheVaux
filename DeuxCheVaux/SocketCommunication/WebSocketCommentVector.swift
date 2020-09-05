@@ -69,7 +69,7 @@ public struct CommentRequest: Codable {
 
 struct CommentBody: Codable {
 	let message: String
-	let mail: String?
+	let command: String?
 	let vpos: String
 }// end RequestBody
 
@@ -242,7 +242,7 @@ public final class WebSocketCommentVector: NSObject {
 		request.addValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
 		request.httpMethod = HTTPMethod.post.rawValue
 		let mail: String? = commands.count > 0 ? commands.joined(separator: " ") : nil
-		let body: CommentBody = CommentBody(message: comment, mail: mail, vpos: String(vpos))
+		let body: CommentBody = CommentBody(message: comment, command: mail, vpos: String(vpos))
 		if let json: Data = try? JSONEncoder().encode(body) {
 			request.httpBody = json
 			let task: URLSessionDataTask = session.dataTask(with: request)
