@@ -101,10 +101,10 @@ fileprivate struct UserPrograms: Codable {
 }// end struct UserPrograms
 
 public struct Program {
-	let program: String
-	let title: String
-	let owner: String
-	let thumbnail: NSImage?
+	public let program: String
+	public let title: String
+	public let owner: String
+	public let thumbnail: NSImage?
 }// end struct Program
 
 public final class NicoInformationHandler: HTTPCommunicatable {
