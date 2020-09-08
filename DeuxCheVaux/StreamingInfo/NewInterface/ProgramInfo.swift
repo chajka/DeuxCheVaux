@@ -175,19 +175,7 @@ public final class ProgramInfo: NSObject {
 				baseTime = Date(timeIntervalSince1970: programInfo.vposBaseAt)
 				startTime = Date(timeIntervalSince1970: programInfo.beginAt)
 				endTime = Date(timeIntervalSince1970: programInfo.endAt)
-				let descriptionString: String = programInfo.description
-				let descriptionHTML: String = "<html><body>" + programInfo.description + "</body></html>"
-				if let descriptiionData: Data = descriptionHTML.data(using: String.Encoding.utf8) {
-					do {
-						let readingOptions: Dictionary<NSAttributedString.DocumentReadingOptionKey, Any> = [.documentType: NSAttributedString.DocumentType.html, .textEncodingName: "utf-8"]
-						programDesctiption = try NSAttributedString(data: descriptiionData, options: readingOptions, documentAttributes: nil)
-					} catch let error {
-						print(error.localizedDescription)
-						programDesctiption = NSAttributedString(string: descriptionString)
-					}// end do try - catch make attributed string
-				} else {
-					programDesctiption = NSAttributedString(string: descriptionString)
-				}// end optional binding check for string convert to data
+				programDesc = programInfo.description
 				broadcaster = BroadcasterInfo(name: programInfo.broadcaster.name, identifier: programInfo.broadcaster.id)
 				for room: Room in programInfo.rooms {
 					if let webSocket: URL = URL(string: room.webSocketUri), let xml: URL = URL(string: room.xmlSocketUri) {
