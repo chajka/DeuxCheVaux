@@ -129,6 +129,31 @@ public final class ProgramInfo: NSObject {
 		if result != .NoError { throw result }
 	}// end init
 
+	public init (_ programInfo: ProgramInformation) {
+		title = programInfo.title
+		ownerName = programInfo.broadcaster.name
+		ownerIdentifier = programInfo.broadcaster.id
+		let social: SocialGroup = programInfo.socialGroup
+		self.social = Social(name: social.name, identifier: social.id, level: social.communityLevel, type: programInfo.socialGroup.type, ownerName: social.ownerName)
+		status = programInfo.status
+		isMemberOnly = programInfo.isMemberOnly
+		categories = programInfo.categories
+		baseTime = Date(timeIntervalSince1970: programInfo.vposBaseAt)
+		startTime = Date(timeIntervalSince1970: programInfo.beginAt)
+		endTime = Date(timeIntervalSince1970: programInfo.endAt)
+		programDesc = programInfo.description
+		broadcaster = BroadcasterInfo(name: programInfo.broadcaster.name, identifier: programInfo.broadcaster.id)
+		for room: Room in programInfo.rooms {
+			if let webSocket: URL = URL(string: room.webSocketUri), let xml: URL = URL(string: room.xmlSocketUri) {
+				if let xmlHost: String = xml.host, let port: Int = xml.port {
+					let xmlSocket: XMLSocket = XMLSocket(address: xmlHost, port: port)
+					let server: MessageServer = MessageServer(XMLSocket: xmlSocket, webSocket: webSocket, thread: room.threadId, name: room.name, identifier: room.id)
+					servers.append(server)
+				}// end optional binding check for get xml socket server addreess and port
+			}// end optional binding check for make url for web socket and xml socket
+		}// end foreach rooms
+	}// end init
+
 		// MARK: - Override
 		// MARK: - Actions
 		// MARK: - Public methods
