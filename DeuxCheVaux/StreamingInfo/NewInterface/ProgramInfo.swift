@@ -53,8 +53,8 @@ public struct ProgramInformation: Codable {
 	let broadcaster: Broadcaster
 }// end struct ProtramInformation
 
-fileprivate struct ProgramInfoJSON: Codable {
-	let meta: MetaInformation
+public struct ProgramInfoJSON: Codable {
+	public let meta: MetaInformation
 	public let data: ProgramInformation?
 }// end struct ProgramInfoJSON
 
