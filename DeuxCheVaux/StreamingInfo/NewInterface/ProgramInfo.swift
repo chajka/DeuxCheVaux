@@ -116,6 +116,7 @@ public final class ProgramInfo: NSObject {
 	public private(set) var startTime: Date!
 	public private(set) var endTime: Date!
 	public private(set) var programDesctiption: NSAttributedString!
+	public private(set) var programDesc: String!
 	public private(set) var broadcaster: BroadcasterInfo!
 	public private(set) var canNicoAd: Bool!
 	public private(set) var servers: Array<MessageServer> = Array()
