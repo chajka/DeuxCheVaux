@@ -38,7 +38,7 @@ private enum StatusValue: Int {
 	case serverError = 5
 }// end enum StatusValue
 
-internal struct MetaInformation: Codable {
+public struct MetaInformation: Codable {
 	let status: Int
 	let errorCode: String?
 	let errorMessage: String?
