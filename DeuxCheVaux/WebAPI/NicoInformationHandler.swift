@@ -8,7 +8,7 @@
 
 import Cocoa
 
-public typealias IdentifierHandler = (String, UserLanguage) -> Void
+public typealias IdentifierHandler = (String, Bool, UserLanguage) -> Void
 public typealias NicknameHandler = (String?) -> Void
 public typealias ThumbnailHandler = (NSImage?) -> Void
 public typealias RawDataHandler = (Data?, URLResponse?, Error?) -> Void
@@ -122,17 +122,18 @@ public final class NicoInformationHandler: HTTPCommunicatable {
 		// MARK: - Override
 		// MARK: - Actions
 		// MARK: - Public methods
-	public func myUserIdentifier () -> (identifier: String, language: UserLanguage) {
+	public func myUserIdentifier () -> (identifier: String, premium: Bool, language: UserLanguage) {
 		return fetchMyUserID()
 	}// end myUserIdentifier
 
 	public func myUserIdentifier (with handler: @escaping IdentifierHandler) -> Void {
-		guard let url = URL(string: NicoNicoMyPageURL) else { handler("", .ja); return }
+		guard let url = URL(string: NicoNicoMyPageURL) else { handler("", false, .ja); return }
 		let request: URLRequest = makeRequest(url: url, method: .get)
 		var userIdentifier: String = ""
+		var userIsPremium: Bool = false
 		var userLanguage: UserLanguage = .ja
 		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
-			defer { handler(userIdentifier, userLanguage) }
+			defer { handler(userIdentifier, userIsPremium, userLanguage) }
 			guard let data: Data = dat else { return }
 			if let htmlSource: String = String(data: data, encoding: .utf8) {
 				let htmlRange: NSRange = NSRange(location: 0, length: htmlSource.count)
@@ -368,11 +369,12 @@ public final class NicoInformationHandler: HTTPCommunicatable {
 
 		// MARK: - Internal methods
 		// MARK: - Private methods
-	private func fetchMyUserID () -> (identifier: String, language: UserLanguage) {
-		guard let url = URL(string: NicoNicoMyPageURL) else { return ("", .ja) }
+	private func fetchMyUserID () -> (identifier: String, premium: Bool, language: UserLanguage) {
+		guard let url = URL(string: NicoNicoMyPageURL) else { return ("", false, .ja) }
 		let request: URLRequest = makeRequest(url: url, method: .get)
 		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
 		var userIdentifier: String? = nil
+		var userIsPremium: Bool = false
 		var userLanguage: UserLanguage = .ja
 		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
 			defer { semaphore.signal() }
@@ -412,9 +414,9 @@ public final class NicoInformationHandler: HTTPCommunicatable {
 		}// end completion handler
 		task.resume()
 		let timeout: DispatchTimeoutResult = semaphore.wait(wallTimeout: DispatchWallTime.now() + Timeout)
-		if timeout == .timedOut { return ("", .ja) }
-		if let identifier: String = userIdentifier { return (identifier, userLanguage) }
-		return ("", .ja)
+		if timeout == .timedOut { return ("", false, .ja) }
+		if let identifier: String = userIdentifier { return (identifier, userIsPremium, userLanguage) }
+		return ("", false, .ja)
 	}// end fetchMyUserID
 
 	private func fetchNickname (from identifier: String) -> String? {
