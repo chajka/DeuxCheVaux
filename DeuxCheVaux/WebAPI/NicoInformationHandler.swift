@@ -24,15 +24,17 @@ fileprivate let ChannelThumbnailApi: String = "https://secure-dcdn.cdn.nimg.jp/c
 fileprivate let NicoNicoMyPageURL: String = "https://www.nicovideo.jp/my/top"
 fileprivate let FollowingProgramsFormat: String = "https://live.nicovideo.jp/api/relive/notifybox.content"
 
-fileprivate let IdentifierFindRegexClassic: String = "<p class=\"accountNumber\">ID:<span>(\\d+)\\("
-fileprivate let IdentifierFindRegexNew: String = "user.user_id = parseInt\\(\'(\\d+)\'"
-fileprivate let LanguageFindRegex: String = "<span class=\"CountrySelector-item CountrySelector-currentItem\" data-trigger data-value=\".*?\">(.*?)</span>"
+fileprivate let IdentifierFinderRegex: String = "user.user_id = parseInt\\('(\\d+)\\)', 10\\)"
+fileprivate let PremiumFinderRegex: String = "user.member_status = '(\\w+)';"
+fileprivate let LanguageFinderRegex: String = "user.ui_lang = '(.*?)';"
 
 fileprivate enum CurrentLanguage: String {
-	case Japanese = "\u{65E5}\u{672C}\u{8A9E}"
-	case Chinese = "\u{4E2D}\u{6587}\u{20}\u{28}\u{7E41}\u{9AD4}\u{29}"
-	case English = "English (US)"
-}
+	case Japanese = "ja-jp"
+	case Chinese = "zh-tw"
+	case English = "en-us"
+}// end enum CurrentLanguage
+
+fileprivate let Premium: String = "premium"
 
 fileprivate struct data: Codable {
 	let id: String
