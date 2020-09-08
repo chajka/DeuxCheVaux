@@ -47,7 +47,7 @@ enum PlayerStatusKey: String {
 	case baseTime = "base_time"
 	case startTime = "start_time"
 	case endTime = "end_time"
-	case communityThumbail = "thumb_url"
+	case communityThumbnail = "thumb_url"
 	case listenerIdentifier = "user_id"
 	case listenerName = "nickname"
 	case listenerIsPremium = "is_premium"
@@ -81,7 +81,7 @@ public final class PlayerStatus: NSObject , XMLParserDelegate {
 	public private(set) var baseTime: Date!
 	public private(set) var startTime: Date!
 	public private(set) var endTime: Date!
-	public private(set) var communityThumbnaiURL: URL!
+	public private(set) var communityThumbnailURL: URL!
 
 	public private(set) var listenerIdentifier: String!
 	public private(set) var listenerName: String!
@@ -123,7 +123,7 @@ public final class PlayerStatus: NSObject , XMLParserDelegate {
 		guard let _ = baseTime else { return false }
 		guard let _ = startTime else { return false }
 		guard let _ = endTime else { return false }
-		guard let _ = communityThumbnaiURL else { return false }
+		guard let _ = communityThumbnailURL else { return false }
 		guard let _ = listenerIdentifier else { return false }
 		guard let _ = listenerName else { return false }
 		guard let _ = listenerIsPremium else { return false }
@@ -183,8 +183,8 @@ public final class PlayerStatus: NSObject , XMLParserDelegate {
 				if let unixTime: TimeInterval = endTimeInterval {
 					endTime = Date(timeIntervalSince1970: unixTime)
 				}// end unix time string can convert unix time
-			case .communityThumbail:
-				communityThumbnaiURL = URL(string: stringBuffer)
+			case .communityThumbnail:
+				communityThumbnailURL = URL(string: stringBuffer)
 			case .listenerIdentifier:
 				listenerIdentifier = String(stringBuffer)
 			case .listenerName:
