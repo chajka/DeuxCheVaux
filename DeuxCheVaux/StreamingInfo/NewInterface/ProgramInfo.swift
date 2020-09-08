@@ -38,7 +38,7 @@ public struct Broadcaster: Codable {
 	let id: String
 }// end struct Broadcaster
 
-public struct ProtramInformation: Codable {
+public struct ProgramInformation: Codable {
 	let title: String
 	let description: String
 	let isMemberOnly: Bool
@@ -55,7 +55,7 @@ public struct ProtramInformation: Codable {
 
 fileprivate struct ProgramInfoJSON: Codable {
 	let meta: MetaInformation
-	let data: ProtramInformation?
+	public let data: ProgramInformation?
 }// end struct ProgramInfoJSON
 
 public enum ProgramInfoError: Error {
@@ -136,7 +136,7 @@ public final class ProgramInfo: NSObject {
 		do {
 			let decoder: JSONDecoder = JSONDecoder()
 			let result: ProgramInfoJSON = try decoder.decode(ProgramInfoJSON.self, from: data)
-			if let programInfo: ProtramInformation = result.data {
+			if let programInfo: ProgramInformation = result.data {
 				title = programInfo.title
 				ownerName = programInfo.broadcaster.name
 				ownerIdentifier = programInfo.broadcaster.id
