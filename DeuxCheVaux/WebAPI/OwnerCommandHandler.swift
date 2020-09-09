@@ -26,7 +26,7 @@ public enum ResultStatus: Equatable {
 	case argumentError
 	case encodeRequestError
 	case decodeResultError
-	case recieveDetaNilError
+	case receivedDataNilError
 	case quotePermissionError
 	case timeout
 	case unknownError
@@ -70,7 +70,7 @@ public struct NGData: Codable {
 	public let body: String
 }// end struct NGData
 
-internal struct NGWrodList: Codable {
+internal struct NGWordList: Codable {
 	let meta: MetaInformation
 	let data: Array<NGData>
 }// end struct NGWordList
@@ -138,7 +138,7 @@ internal struct Source: Codable {
 public enum ContentType: String, Codable {
 	case video = "video"
 	case live = "live"
-}// end enum ConteentsType
+}// end enum ContentsType
 
 internal struct Content: Codable {
 	let id: String
@@ -153,18 +153,18 @@ internal struct Layout: Codable {
 internal struct Quotation: Codable {
 	let layout: Layout
 	let contents: Array<Content>
-}// end struct Quatation
+}// end struct Quotation
 
-internal struct UpdatteQuotation: Codable {
+internal struct UpdateQuotation: Codable {
 	let layout: Layout
 	let `repeat`: Bool
-}// end struct UpdatteQuotation
+}// end struct UpdateQuotation
 
 internal struct CurrentQuotation: Codable {
 	let meta: MetaInformation
 	let layout: Layout?
 	let currentContent: Content?
-}// end struct CurrentQuatation
+}// end struct CurrentQuotation
 
 internal struct UpdateLayout: Codable {
 	let layout: Layout
@@ -182,19 +182,19 @@ internal struct MovieInfo: Codable {
 	let quotable: Bool
 }// end struct MovieInfo
 
-internal struct QuatableResult: Codable {
+internal struct QuotableResult: Codable {
 	let meta: MetaInformation
 	let data: MovieInfo?
-}// end struct QuatableResult
+}// end struct QuotableResult
 
 	// MARK: end time enhancement specific definition
-internal struct ExtendMehtod: Codable {
+internal struct ExtendMethod: Codable {
 	var minutes: Int
 	var type: String
-}// end ExtendMehtod
+}// end ExtendMethod
 
 internal struct ExtendMethods: Codable {
-	var methods: Array<ExtendMehtod>?
+	var methods: Array<ExtendMethod>?
 }// end struct ExtendMethods
 
 internal struct TimeExtension: Codable {
@@ -225,7 +225,7 @@ internal struct UpdateStateResult: Codable {
 	var meta: MetaInformation
 }// end struct UpdateStateResult
 
-	// MAR: Questioonary specific definition
+	// MAR: Questionary specific definition
 public enum EnqueteError {
 	case noError
 	case itemCountUnderTwo
@@ -256,7 +256,7 @@ internal struct EnqueteResult: Codable {
 	let meta: MetaInformation
 }// end struct EnqueteResult
 
-	// MARK: State control specfic definition
+	// MARK: State control specific definition
 public enum StreamControl {
 	enum key: String {
 		case state = "state"
@@ -287,7 +287,7 @@ extension CommentKeys: StringEnum { }
 fileprivate let DefaultVolume: Float = 0.5
 fileprivate let Success: String = "OK"
 internal let SmileVideoPrefix: String = "sm"
-internal let NicoMoviewPrefix: String = "nm"
+internal let NicoMoviePrefix: String = "nm"
 internal let SmileOfficialPrefix: String = "so"
 internal let NicoNicoLivePrefix: String = "lv"
 
@@ -300,7 +300,7 @@ public enum Color {
 		case yellow = "yellow"
 		case green = "green"
 		case cyan = "cyan"
-		case blue = "bule"
+		case blue = "blue"
 		case purple = "purple"
 		case black = "black"
 	}// end enum normal member usable comment color
@@ -312,7 +312,7 @@ public enum Color {
 		case yellow = "yellow"
 		case green = "green"
 		case cyan = "cyan"
-		case blue = "bule"
+		case blue = "blue"
 		case purple = "purple"
 		case black = "black"
 		case white2 = "white2"
@@ -350,7 +350,7 @@ private let ApiBase: String = "https://live2.nicovideo.jp/watch/"
 private let UserNamaAPIBase: String = "https://live2.nicovideo.jp/unama/watch/"
 private let UserNamaAPITool: String = "https://live2.nicovideo.jp/unama/tool/v2/programs"
 private let QuoteAPIBase: String = "https://lapi.spi.nicovideo.jp/v1/tools/live/contents/"
-private let QuatableAPIBase: String = "https://lapi.spi.nicovideo.jp/v1/tools/live/quote/services/video/contents/"
+private let QuptableAPIBase: String = "https://lapi.spi.nicovideo.jp/v1/tools/live/quote/services/video/contents/"
 
 private let StartStopStream: String = "/segment"
 private let operatorComment: String = "/operator_comment"
@@ -378,7 +378,7 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 		// MARK: - Constructor/Destructor
 	public init (program: String, cookies: Array<HTTPCookie>) {
 		self.program = program
-		videoPrefixSet = Set(arrayLiteral: SmileVideoPrefix, NicoMoviewPrefix, SmileOfficialPrefix)
+		videoPrefixSet = Set(arrayLiteral: SmileVideoPrefix, NicoMoviePrefix, SmileOfficialPrefix)
 		apiBaseString = ApiBase + self.program
 		super.init(cookies)
 	}// end init
@@ -403,7 +403,7 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 			let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, resp: URLResponse?, err: Error?) in
 				defer { semaphore.signal() } // must increment semaphore when exit from closure
 				guard let weakSelf = self, let data: Data = dat else {
-					status = .recieveDetaNilError
+					status = .receivedDataNilError
 					return
 				}// end guard
 				do {
@@ -413,7 +413,7 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 				} catch let error {
 					status = .decodeResultError
 					print(error.localizedDescription)
-				}// end do try - catch decode recieved data
+				}// end do try - catch decode received data
 			}// end closure of request completion handler
 			task.resume()
 			let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
@@ -445,7 +445,7 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 			request.httpBody = try encoder.encode(commentToPost)
 			let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
 				defer { handler(status) } // must increment semaphore when exit from closure
-				guard let data: Data = dat else { status = .recieveDetaNilError; return }// end guard
+				guard let data: Data = dat else { status = .receivedDataNilError; return }// end guard
 				do {
 					let decoder: JSONDecoder = JSONDecoder()
 					let meta: MetaResult = try decoder.decode(MetaResult.self, from: data)
@@ -471,7 +471,7 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 		let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, resp: URLResponse?, err: Error?) in
 			defer { semaphore.signal() } // must increment semaphore when exit from closure
 			guard let weakSelf = self, let data: Data = dat else {
-				status = .recieveDetaNilError
+				status = .receivedDataNilError
 				return
 			}// end guard
 			do {
@@ -500,7 +500,7 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 		let request: URLRequest = makeRequest(url: url, method: .delete)
 		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
 			defer { handler(status) }
-			status = .recieveDetaNilError
+			status = .receivedDataNilError
 			guard let data: Data = dat else { return }
 			do {
 				let decoder: JSONDecoder = JSONDecoder()
@@ -525,15 +525,15 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 		var status: ResultStatus = .unknownError
 		var request: URLRequest = makeRequest(url: url, method: .post, contentsType: ContentTypeJSON)
 		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
-		let enquetee: Enquete = Enquete(question: question, items: items)
+		let enquete: Enquete = Enquete(question: question, items: items)
 		do {
 			let encoder: JSONEncoder = JSONEncoder()
-			let data: Data = try encoder.encode(enquetee)
+			let data: Data = try encoder.encode(enquete)
 			request.httpBody = data
 			let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, req: URLResponse?, err: Error?) in
 				defer { semaphore.signal() } // must increment semaphore when exit from closure
 				guard let weakSelf = self, let data: Data = dat else {
-					status = .recieveDetaNilError
+					status = .receivedDataNilError
 					return
 				}// end guard
 				do {
@@ -574,7 +574,7 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 			request.httpBody = data
 			let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, req: URLResponse?, err: Error?) in
 				defer { handler(status) } // must increment semaphore when exit from closure
-				status = .recieveDetaNilError
+				status = .receivedDataNilError
 				guard let data: Data = dat else { return }// end guard
 				do {
 					let decoder: JSONDecoder = JSONDecoder()
@@ -613,7 +613,7 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 			} catch let error {
 				print(error.localizedDescription)
 			}// end do try - catch decode result
-		}// end closurre
+		}// end closure
 		task.resume()
 		let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
 		if timeout == .timedOut {
@@ -641,7 +641,7 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 			} catch let error {
 				print(error.localizedDescription)
 			}// end do try - catch decode result
-		}// end closurre
+		}// end closure
 		completionHandler = nil
 		task.resume()
 	}// end displayQuestionaryResult
@@ -656,7 +656,7 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 		let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, req: URLResponse?, err: Error?) in
 			defer { semaphore.signal() } // must increment semaphore when exit from closure
 			guard let weakSelf = self, let data: Data = dat else {
-				status = .recieveDetaNilError
+				status = .receivedDataNilError
 				return
 			}// end guard
 			do {
@@ -666,7 +666,7 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 				status = .decodeResultError
 				print(error.localizedDescription)
 			}// end do try - catch decode result
-		}// end closurre
+		}// end closure
 		task.resume()
 		let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
 		if timeout == .timedOut {
@@ -685,7 +685,7 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 		let request: URLRequest = makeRequest(url: url, method: .delete)
 		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, req: URLResponse?, err: Error?) in
 			defer { handler(status) } // must increment semaphore when exit from closure
-			status = .recieveDetaNilError
+			status = .receivedDataNilError
 			guard let data: Data = dat else { return }// end guard
 			do {
 				let result: EnqueteResult = try decoder.decode(EnqueteResult.self, from: data)
@@ -694,7 +694,7 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 				status = .decodeResultError
 				print(error.localizedDescription)
 			}// end do try - catch decode result
-		}// end closurre
+		}// end closure
 		completionHandler = nil
 		task.resume()
 	}// end endQuestionary
@@ -842,7 +842,7 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 			guard let weakSelf = self, let data: Data = dat else { return }
 			do {
 				let decoder: JSONDecoder = JSONDecoder()
-				let list: NGWrodList = try decoder.decode(NGWrodList.self, from: data)
+				let list: NGWordList = try decoder.decode(NGWordList.self, from: data)
 				guard .success == weakSelf.checkMetaInformation(list.meta) else { return }
 				for foundWord: NGData in list.data {
 					wordsList.append(foundWord)
@@ -869,7 +869,7 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 			guard let data: Data = dat else { return }
 			do {
 				let decoder: JSONDecoder = JSONDecoder()
-				let list: NGWrodList = try decoder.decode(NGWrodList.self, from: data)
+				let list: NGWordList = try decoder.decode(NGWordList.self, from: data)
 				guard .success == self.checkMetaInformation(list.meta) else { return }
 				for foundWord: NGData in list.data {
 					wordsList.append(foundWord)
@@ -944,7 +944,7 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 
 		// MARK: quote
 	public func checkQuotable (_ video: String) -> (quotable: Bool, status: ResultStatus) {
-		guard let url: URL = URL(string: QuatableAPIBase + video) else { return (false, .apiAddressError) }
+		guard let url: URL = URL(string: QuptableAPIBase + video) else { return (false, .apiAddressError) }
 
 		let request: URLRequest = makeRequest(url: url, method: .get)
 		var status: ResultStatus = .unknownError
@@ -953,19 +953,19 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 		let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, resp: URLResponse?, err: Error?) in
 			defer { semaphore.signal() } // must increment semaphore when exit from closure
 			guard let weakSelf = self, let data: Data = dat else {
-				status = .recieveDetaNilError
+				status = .receivedDataNilError
 				return
 			}// end guard check data is not nil
 			do {
 				let decoder: JSONDecoder = JSONDecoder()
-				let result: QuatableResult = try decoder.decode(QuatableResult.self, from: data)
+				let result: QuotableResult = try decoder.decode(QuotableResult.self, from: data)
 				status = weakSelf.checkMetaInformation(result.meta)
 				if let info: MovieInfo = result.data {
 					quotable = info.quotable
 				}// end optional binding check for have data section from decoded json structure
 			} catch let error {
 				print(error.localizedDescription)
-			}// end do try - catch decode recieved json
+			}// end do try - catch decode received json
 		}// end closure for url request result data handler
 		task.resume()
 		let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
@@ -1002,7 +1002,7 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 			let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, req:  URLResponse?, err:  Error?) in
 				defer { semaphore.signal() } // must increment semaphore when exit from closure
 				guard let weakSelf = self, let data: Data = dat else {
-					status = .recieveDetaNilError
+					status = .receivedDataNilError
 					return
 				}// end guard is not satisfied
 				do {
@@ -1012,7 +1012,7 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 				} catch let error {
 					status = .decodeResultError
 					print(error.localizedDescription)
-				}// end do try - catch decode reesult data to meta information
+				}// end do try - catch decode result data to meta information
 			}// end closure completion handler
 			task.resume()
 			let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
@@ -1034,7 +1034,7 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 		var subSource: Source
 		(mainSource, subSource) = makeLayers(mode: mixingMode, mainVolume: main, quoteVolume: quote)
 		let layout: Layout = Layout(main: mainSource, sub: subSource)
-		let newLayout: UpdatteQuotation = UpdatteQuotation(layout: layout, repeat: enableRepeat)
+		let newLayout: UpdateQuotation = UpdateQuotation(layout: layout, repeat: enableRepeat)
 		var status: ResultStatus = .unknownError
 		var layoutJSON: Data
 		do {
@@ -1079,7 +1079,7 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 		let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, req:  URLResponse?, err:  Error?) in
 			defer { semaphore.signal() } // must increment semaphore when exit from closure
 			guard let weakSelf = self, let data: Data = dat else {
-				status = .recieveDetaNilError
+				status = .receivedDataNilError
 				return
 			}// end guard is not satisfied
 			do {
@@ -1110,15 +1110,15 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 		let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, rest: URLResponse?, err: Error?) in
 			defer { semaphore.signal() } // must increment semaphore when exit from closure
 			guard let weakSelf = self, let data: Data = dat else {
-				status = .recieveDetaNilError
+				status = .receivedDataNilError
 				return
 			}// end guard
 			do {
 				let decoder: JSONDecoder = JSONDecoder()
 				let extendableList: TimeExtension = try decoder.decode(TimeExtension.self, from: data)
 				status = weakSelf.checkMetaInformation(extendableList.meta)
-				if let methods: Array<ExtendMehtod> = extendableList.data?.methods {
-					for method: ExtendMehtod in methods {
+				if let methods: Array<ExtendMethod> = extendableList.data?.methods {
+					for method: ExtendMethod in methods {
 						extendableMinutes.append(String(method.minutes))
 					}// end foreach methods
 				}// end optional binding for
@@ -1145,14 +1145,14 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 		let request: URLRequest = makeRequest(url: url, method: .get)
 		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, rest: URLResponse?, err: Error?) in
 			defer { handler(extendableTimes, status) } // must increment semaphore when exit from closure
-			status = .recieveDetaNilError
+			status = .receivedDataNilError
 			guard let data: Data = dat else { return }// end guard
 			do {
 				let decoder: JSONDecoder = JSONDecoder()
 				let extendableList: TimeExtension = try decoder.decode(TimeExtension.self, from: data)
 				status = self.checkMetaInformation(extendableList.meta)
-				if let methods: Array<ExtendMehtod> = extendableList.data?.methods {
-					for method: ExtendMehtod in methods {
+				if let methods: Array<ExtendMethod> = extendableList.data?.methods {
+					for method: ExtendMethod in methods {
 						extendableTimes.append(String(method.minutes))
 					}// end foreach methods
 				}// end optional binding for
@@ -1179,7 +1179,7 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 			let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, resp: URLResponse?, err: Error?) in
 				defer { semaphore.signal() } // must increment semaphore when exit from closure
 				guard let weakSelf = self, let data: Data = dat else {
-					status = .recieveDetaNilError
+					status = .receivedDataNilError
 					return
 				}// end guard
 				do {
@@ -1221,7 +1221,7 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 			request.httpBody = extendTimeData
 			let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
 				defer { handler(newEndTime, status) } // must increment semaphore when exit from closure
-				status = .recieveDetaNilError
+				status = .receivedDataNilError
 				guard let data: Data = dat else { return }// end guard
 				do {
 					let decoder: JSONDecoder = JSONDecoder()
@@ -1258,7 +1258,7 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 			let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, resp: URLResponse?, err: Error?) in
 				defer { semaphore.signal() } // must increment semaphore when exit from closure
 				guard let weakSelf = self, let data: Data = dat else {
-					status = .recieveDetaNilError
+					status = .receivedDataNilError
 					return
 				}// end guard
 				do {
@@ -1302,7 +1302,7 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 			request.httpBody = extendTimeData
 			let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
 				defer { handler(startTime, endTime, status) } // must increment semaphore when exit from closure
-				status = .recieveDetaNilError
+				status = .receivedDataNilError
 				guard let data: Data = dat else { return }// end guard
 				do {
 					let decoder: JSONDecoder = JSONDecoder()
