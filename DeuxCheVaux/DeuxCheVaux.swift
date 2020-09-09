@@ -9,9 +9,9 @@
 import Cocoa
 
 fileprivate let FrameworkName: String = "DeuxCheVaux"
-fileprivate let FramewrokVersionMajor: Float = 0.3
-fileprivate let FramewrokVersionMinor: Int = 8
-fileprivate let FramerokVersionFix: Int = 8
+fileprivate let FrameworkVersionMajor: Float = 0.3
+fileprivate let FrameworkVersionMinor: Int = 8
+fileprivate let FrameworkVersionFix: Int = 8
 
 fileprivate let QueueLabel: String = "tv.from.chajka.DeuxCheVaux"
 
@@ -32,14 +32,14 @@ public final class DeuxCheVaux: NSObject {
 	public var applicationVersionFix: Int
 	public private(set) var firstLaunch: Bool
 	public let frameworkName: String
-	public let framewrokVersionMajor: Float
-	public let framewrokVersionMinor: Int
-	public let framerokVersionFix: Int
+	public let frameworkVersionMajor: Float
+	public let frameworkVersionMinor: Int
+	public let frameworkVersionFix: Int
 	public var userAgent: String {
 		get {
 			let applicationNameVersion = "\(applicationName)/\(applicationVersionMajor).\(applicationVersionMinor).\(applicationVersionFix)"
-			let frameworkNameVersiion = "\(framewrokVersionMajor) \(framewrokVersionMajor).\(framewrokVersionMinor).\(framerokVersionFix)"
-			return "\(applicationNameVersion) (\(frameworkNameVersiion))"
+			let frameworkNameVersion = "\(frameworkVersionMajor) \(frameworkVersionMajor).\(frameworkVersionMinor).\(frameworkVersionFix)"
+			return "\(applicationNameVersion) (\(frameworkNameVersion))"
 		}// end get
 	}// end computed property
 
@@ -58,15 +58,15 @@ public final class DeuxCheVaux: NSObject {
 		applicationVersionFix = 0
 		firstLaunch = false
 		frameworkName = FrameworkName
-		framewrokVersionMajor = FramewrokVersionMajor
-		framewrokVersionMinor = FramewrokVersionMinor
-		framerokVersionFix = FramerokVersionFix
+		frameworkVersionMajor = FrameworkVersionMajor
+		frameworkVersionMinor = FrameworkVersionMinor
+		frameworkVersionFix = FrameworkVersionFix
 		let url: URL = URL(fileURLWithPath: nullDevicePath)
 		if let outputStream: OutputStream = OutputStream(url: url, append: true) {
 			self.nullDevice = outputStream
 		} else {
 			self.nullDevice = nil
-		}// end if make null device output streame is success or not.
+		}// end if make null device output stream is success or not.
 		super.init()
 		startRunLoop()
 		if let nullDevice: OutputStream = nullDevice, let runLoop = runLoop {

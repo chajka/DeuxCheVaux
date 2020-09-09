@@ -124,13 +124,13 @@ public struct MixInfo: Codable {
 }// end struct MixInfo
 
 	// MARK: New mixing api specific definition
-public enum QuateSource: String, Codable {
+public enum QuoteSource: String, Codable {
 	case `self` = "self"
 	case quote = "quote"
-}// end enum QuateSource
+}// end enum QuoteSource
 
 internal struct Source: Codable {
-	let source: QuateSource
+	let source: QuoteSource
 	let volume: Float
 	let isSoundOnly: Bool?
 }// end struct Source
@@ -349,7 +349,7 @@ internal let ContentTypeJSON: String = "application/json"
 private let ApiBase: String = "https://live2.nicovideo.jp/watch/"
 private let UserNamaAPIBase: String = "https://live2.nicovideo.jp/unama/watch/"
 private let UserNamaAPITool: String = "https://live2.nicovideo.jp/unama/tool/v2/programs"
-private let QuateAPIBase: String = "https://lapi.spi.nicovideo.jp/v1/tools/live/contents/"
+private let QuoteAPIBase: String = "https://lapi.spi.nicovideo.jp/v1/tools/live/contents/"
 private let QuatableAPIBase: String = "https://lapi.spi.nicovideo.jp/v1/tools/live/quote/services/video/contents/"
 
 private let StartStopStream: String = "/segment"
@@ -982,7 +982,7 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 		let quoteContentPrefix: String = String(quoteContent.prefix(2))
 		if videoPrefixSet.contains(quoteContentPrefix) { type = .video }
 		else if quoteContentPrefix == NicoNicoLivePrefix { type = .live }
-		guard let url: URL = URL(string: QuateAPIBase + program + QuoteSuffix), let contentType: ConteentType = type else { return .apiAddressError }
+		guard let url: URL = URL(string: QuoteAPIBase + program + QuoteSuffix), let contentType: ConteentType = type else { return .apiAddressError }
 
 		var mainSource: Source
 		var subSource: Source
@@ -1028,7 +1028,7 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 	}// end startQuotation
 
 	public func layoutQuotation (mode mixingMode: MixingMode, mainVolume main: Float, quoteVolume quote: Float, repeat enableRepeat: Bool) -> ResultStatus {
-		guard let url: URL = URL(string: QuateAPIBase + program + QuoteLayout) else { return .apiAddressError }
+		guard let url: URL = URL(string: QuoteAPIBase + program + QuoteLayout) else { return .apiAddressError }
 
 		var mainSource: Source
 		var subSource: Source
@@ -1071,7 +1071,7 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 	}// end layoutQuotation
 
 	public func stopQuotation () -> ResultStatus {
-		guard let url: URL = URL(string: QuateAPIBase + program + QuoteSuffix) else { return .apiAddressError }
+		guard let url: URL = URL(string: QuoteAPIBase + program + QuoteSuffix) else { return .apiAddressError }
 
 		let request: URLRequest = makeRequest(url: url, method: .delete)
 		var status: ResultStatus = .unknownError

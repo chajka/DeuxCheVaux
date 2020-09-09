@@ -171,8 +171,8 @@ public final class NicoInformationHandler: HTTPCommunicatable {
 		task.resume()
 	}// end myUserIdentifier
 
-	public func fetchNickName (forIdentifier userIdentifieer: String) -> String? {
-		if let nickname = fetchNickname(from: userIdentifieer) {
+	public func fetchNickName (forIdentifier userIdentifier: String) -> String? {
+		if let nickname = fetchNickname(from: userIdentifier) {
 			return nickname
 		}// end if
 
@@ -198,9 +198,9 @@ public final class NicoInformationHandler: HTTPCommunicatable {
 		task.resume()
 	}// end fetchNickname
 
-	public func thumbnail (identifieer userIdentifer: String, whenNoImage insteadImage: NSImage) -> NSImage {
-		let prefix: String = String(userIdentifer.prefix(userIdentifer.count - 4))
-		let urlString: String = String(format: ThumbnailAPIFormat, prefix, userIdentifer)
+	public func thumbnail (identifier userIdentifier: String, whenNoImage insteadImage: NSImage) -> NSImage {
+		let prefix: String = String(userIdentifier.prefix(userIdentifier.count - 4))
+		let urlString: String = String(format: ThumbnailAPIFormat, prefix, userIdentifier)
 		guard let url: URL = URL(string: urlString) else { return insteadImage }
 		let request: URLRequest = makeRequest(url: url, method: .get)
 		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
@@ -217,9 +217,9 @@ public final class NicoInformationHandler: HTTPCommunicatable {
 		return thumbnail
 	}// end thumbnail
 
-	public func thumbnail (identifieer userIdentifer: String, with handler: @escaping ThumbnailHandler) -> Void {
-		let prefix: String = String(userIdentifer.prefix(userIdentifer.count - 4))
-		let urlString: String = String(format: ThumbnailAPIFormat, prefix, userIdentifer)
+	public func thumbnail (identifier userIdentifier: String, with handler: @escaping ThumbnailHandler) -> Void {
+		let prefix: String = String(userIdentifier.prefix(userIdentifier.count - 4))
+		let urlString: String = String(format: ThumbnailAPIFormat, prefix, userIdentifier)
 		var thumbnail: NSImage? = nil
 		guard let url: URL = URL(string: urlString) else { handler(thumbnail); return }// end guard url initialize failed
 		let request: URLRequest = makeRequest(url: url, method: .get)
