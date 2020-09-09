@@ -13,7 +13,7 @@ public typealias OwnerOperationHandler = (ResultStatus) -> Void
 public typealias QuestionaryResultHandler = (Array<EnqueteItem>?, ResultStatus) -> Void
 public typealias OwnerOperationBoolHandler = (Bool) -> Void
 public typealias NGWordsHandler = (Array<NGData>) -> Void
-public typealias ExtendalbesTimesHandler = (Array<String>, ResultStatus) -> Void
+public typealias ExtendalbeTimesHandler = (Array<String>, ResultStatus) -> Void
 public typealias NewEndTimeHandler = (Date?, ResultStatus) -> Void
 public typealias UpdateProgramStateHandler = (Date, Date, ResultStatus) -> Void
 
@@ -1136,11 +1136,11 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 		return (extendableMinutes, status)
 	}// end extendableTimes
 
-	public func extendableTimes (with handler: @escaping ExtendalbesTimesHandler) -> Void {
-		var completionHandler: ExtendalbesTimesHandler? = handler
+	public func extendableTimes (with handler: @escaping ExtendalbeTimesHandler) -> Void {
+		var completionHandler: ExtendalbeTimesHandler? = handler
 		var extendableTimes: Array<String> = Array()
 		var status: ResultStatus = .apiAddressError
-		defer { if let handler: ExtendalbesTimesHandler = completionHandler { handler(extendableTimes, status) } }
+		defer { if let handler: ExtendalbeTimesHandler = completionHandler { handler(extendableTimes, status) } }
 		guard let url: URL = URL(string: apiBaseString + programExtension) else { return }
 		let request: URLRequest = makeRequest(url: url, method: .get)
 		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, rest: URLResponse?, err: Error?) in
