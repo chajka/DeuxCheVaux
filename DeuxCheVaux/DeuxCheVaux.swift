@@ -8,7 +8,7 @@
 
 import Cocoa
 
-fileprivate let FramewrokName: String = "DeuxCheVaux"
+fileprivate let FrameworkName: String = "DeuxCheVaux"
 fileprivate let FramewrokVersionMajor: Float = 0.3
 fileprivate let FramewrokVersionMinor: Int = 8
 fileprivate let FramerokVersionFix: Int = 8
@@ -57,7 +57,7 @@ public final class DeuxCheVaux: NSObject {
 		applicationVersionMinor = 0
 		applicationVersionFix = 0
 		firstLaunch = false
-		frameworkName = FramewrokName
+		frameworkName = FrameworkName
 		framewrokVersionMajor = FramewrokVersionMajor
 		framewrokVersionMinor = FramewrokVersionMinor
 		framerokVersionFix = FramerokVersionFix
