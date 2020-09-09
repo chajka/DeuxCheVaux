@@ -135,14 +135,14 @@ internal struct Source: Codable {
 	let isSoundOnly: Bool?
 }// end struct Source
 
-public enum ConteentType: String, Codable {
+public enum ContentType: String, Codable {
 	case video = "video"
 	case live = "live"
 }// end enum ConteentsType
 
 internal struct Content: Codable {
 	let id: String
-	let type: ConteentType
+	let type: ContentType
 }// end struct Contents
 
 internal struct Layout: Codable {
@@ -978,11 +978,11 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 	}// end checkQuotable
 
 	public func startQuotation (quote quoteContent: String, mode mixingMode: MixingMode, mainVolume main: Float, quoteVolume quote: Float) -> ResultStatus {
-		var type: ConteentType? = nil
+		var type: ContentType? = nil
 		let quoteContentPrefix: String = String(quoteContent.prefix(2))
 		if videoPrefixSet.contains(quoteContentPrefix) { type = .video }
 		else if quoteContentPrefix == NicoNicoLivePrefix { type = .live }
-		guard let url: URL = URL(string: QuoteAPIBase + program + QuoteSuffix), let contentType: ConteentType = type else { return .apiAddressError }
+		guard let url: URL = URL(string: QuoteAPIBase + program + QuoteSuffix), let contentType: ContentType = type else { return .apiAddressError }
 
 		var mainSource: Source
 		var subSource: Source
