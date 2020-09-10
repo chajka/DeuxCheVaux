@@ -138,6 +138,7 @@ public final class ProgramInfo: NSObject {
 	public private(set) var programDesc: String!
 	public private(set) var programDescription: NSAttributedString!
 	public private(set) var broadcaster: BroadcasterInfo!
+	public private(set) var thumbnailURL: URL!
 	public private(set) var canNicoAd: Bool!
 	public private(set) var servers: Array<MessageServer> = Array()
 
@@ -163,6 +164,7 @@ public final class ProgramInfo: NSObject {
 		endTime = Date(timeIntervalSince1970: programInfo.endAt)
 		programDesc = programInfo.description
 		broadcaster = BroadcasterInfo(name: programInfo.broadcaster.name, identifier: programInfo.broadcaster.id)
+		self.thumbnailURL = programInfo.socialGroup.thumbnailUrl
 		for room: Room in programInfo.rooms {
 			if let webSocket: URL = URL(string: room.webSocketUri), let xml: URL = URL(string: room.xmlSocketUri) {
 				if let xmlHost: String = xml.host, let port: Int = xml.port {
