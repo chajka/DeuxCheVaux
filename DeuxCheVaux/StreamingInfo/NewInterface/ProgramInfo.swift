@@ -31,6 +31,7 @@ public struct SocialGroup: Codable {
 	let name: String
 	let communityLevel: Int?
 	let ownerName: String?
+	let thumbnailUrl: URL
 }// end struct SocialGroup
 
 public struct Broadcaster: Codable {
