@@ -39,6 +39,24 @@ public struct Broadcaster: Codable {
 	let id: String
 }// end struct Broadcaster
 
+public enum MaxQuality: String, Codable {
+	case highest = "6Mbps720p"
+	case high = "2Mbps450p"
+	case normal = "1Mbps450p"
+	case low = "384kbps288p"
+	case lowest = "192kbps288p"
+}// end enum MaxQuality
+
+public enum Orientation: String, Codable {
+	case landscape = "Landscape"
+	case portrait = "Portrait"
+}// end enum Orientation
+
+public struct StreamSetting: Codable {
+	public let maxQuality: MaxQuality
+	public let orientation: Orientation
+}// end struct StreamSetting
+
 public struct ProgramInformation: Codable {
 	let title: String
 	let description: String
@@ -52,6 +70,7 @@ public struct ProgramInformation: Codable {
 	let isUserNiconicoAdsEnabled: Bool
 	let socialGroup: SocialGroup
 	let broadcaster: Broadcaster
+	let streamSetting: StreamSetting
 }// end struct ProtramInformation
 
 public struct ProgramInfoJSON: Codable {
