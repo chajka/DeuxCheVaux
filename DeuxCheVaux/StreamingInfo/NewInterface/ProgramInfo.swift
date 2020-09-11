@@ -45,8 +45,8 @@ public enum SocialType: String, Codable {
 }// end enum SocialType
 
 public struct Room: Codable {
-	let webSocketUri: String
-	let xmlSocketUri: String
+	let webSocketUri: URL
+	let xmlSocketUri: URL
 	let name: String
 	let id: Int
 	let threadId: String
@@ -193,13 +193,13 @@ public final class ProgramInfo: NSObject {
 		broadcaster = BroadcasterInfo(name: programInfo.broadcaster.name, identifier: programInfo.broadcaster.id)
 		self.thumbnailURL = programInfo.socialGroup.thumbnailUrl
 		for room: Room in programInfo.rooms {
-			if let webSocket: URL = URL(string: room.webSocketUri), let xml: URL = URL(string: room.xmlSocketUri) {
-				if let xmlHost: String = xml.host, let port: Int = xml.port {
-					let xmlSocket: XMLSocket = XMLSocket(address: xmlHost, port: port)
-					let server: MessageServer = MessageServer(XMLSocket: xmlSocket, webSocket: webSocket, thread: room.threadId, name: room.name, identifier: room.id)
-					servers.append(server)
-				}// end optional binding check for get xml socket server addreess and port
-			}// end optional binding check for make url for web socket and xml socket
+			let webSocket: URL = room.webSocketUri
+			let xml: URL = room.xmlSocketUri
+			if let xmlHost: String = xml.host, let port: Int = xml.port {
+				let xmlSocket: XMLSocket = XMLSocket(address: xmlHost, port: port)
+				let server: MessageServer = MessageServer(XMLSocket: xmlSocket, webSocket: webSocket, thread: room.threadId, name: room.name, identifier: room.id)
+				servers.append(server)
+			}// end optional biniding check for get xml socket server addreess and port
 		}// end foreach rooms
 	}// end init
 
@@ -227,13 +227,13 @@ public final class ProgramInfo: NSObject {
 				programDesc = programInfo.description
 				broadcaster = BroadcasterInfo(name: programInfo.broadcaster.name, identifier: programInfo.broadcaster.id)
 				for room: Room in programInfo.rooms {
-					if let webSocket: URL = URL(string: room.webSocketUri), let xml: URL = URL(string: room.xmlSocketUri) {
-						if let xmlHost: String = xml.host, let port: Int = xml.port {
-							let xmlSocket: XMLSocket = XMLSocket(address: xmlHost, port: port)
-							let server: MessageServer = MessageServer(XMLSocket: xmlSocket, webSocket: webSocket, thread: room.threadId, name: room.name, identifier: room.id)
-							servers.append(server)
-						}// end optional biniding check for get xml socket server addreess and port
-					}// end optional binding check for make url for web socket and xml socket
+					let webSocket: URL = room.webSocketUri
+					let xml: URL = room.xmlSocketUri
+					if let xmlHost: String = xml.host, let port: Int = xml.port {
+						let xmlSocket: XMLSocket = XMLSocket(address: xmlHost, port: port)
+						let server: MessageServer = MessageServer(XMLSocket: xmlSocket, webSocket: webSocket, thread: room.threadId, name: room.name, identifier: room.id)
+						servers.append(server)
+					}// end optional biniding check for get xml socket server addreess and port
 				}// end foreach rooms
 			}// end if optional check for data
 		} catch let error {
