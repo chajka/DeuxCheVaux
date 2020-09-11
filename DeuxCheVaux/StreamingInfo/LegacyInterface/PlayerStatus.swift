@@ -8,33 +8,6 @@
 
 import Cocoa
 
-public struct XMLSocket {
-	public var address: String
-	public var port: Int
-
-	static func == (lhs: XMLSocket, rhs: XMLSocket) -> Bool {
-		return (lhs.address == rhs.address) && (lhs.port == rhs.port)
-	}// end func ==
-}// end struct XMLSocket
-
-public struct MessageServer: Equatable {
-	public let XMLSocket: XMLSocket
-	public let webSocket: URL?
-	public let thread: String
-	public let name: String?
-	public let identifier: Int?
-
-	static public func == (lhs: MessageServer, rhs: MessageServer) -> Bool {
-		return (lhs.XMLSocket == rhs.XMLSocket) && (lhs.webSocket == rhs.webSocket) && (lhs.thread == rhs.thread)
-	}// end func ==
-}// end struct MessageServer
-
-public enum SocialType: String, Codable {
-	case community = "community"
-	case channel = "channel"
-	case official = "official"
-}// end enum SocialType
-
 enum PlayerStatusKey: String {
 	case programNumber = "id"
 	case programTitle = "title"
