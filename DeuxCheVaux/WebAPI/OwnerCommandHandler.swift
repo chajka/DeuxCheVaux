@@ -13,9 +13,9 @@ public typealias OwnerOperationHandler = (ResultStatus) -> Void
 public typealias QuestionaryResultHandler = (ResultStatus, Array<EnqueteItem>?) -> Void
 public typealias OwnerOperationBoolHandler = (Bool) -> Void
 public typealias NGWordsHandler = (Array<NGData>) -> Void
-public typealias NewEndTimeHandler = (Date?, ResultStatus) -> Void
 public typealias UpdateProgramStateHandler = (Date, Date, ResultStatus) -> Void
 public typealias ExtendalbeTimesHandler = (ResultStatus, Array<String>) -> Void
+public typealias NewEndTimeHandler = (ResultStatus, Date?) -> Void
 
 	// MARK: common structure
 public enum ResultStatus: Equatable {
@@ -1211,7 +1211,7 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 		var completionHandler: NewEndTimeHandler? = handler
 		var newEndTime: Date? = nil
 		var status: ResultStatus = .apiAddressError
-		defer { if let handler: NewEndTimeHandler = completionHandler { handler(newEndTime, status) } }
+		defer { if let handler: NewEndTimeHandler = completionHandler { handler(status, newEndTime) } }
 		guard let url: URL = URL(string: apiBaseString + programExtension), let minutesToExtend: Int = Int(min) else { return }
 		let extend: ExtendTime = ExtendTime(minutes: minutesToExtend)
 		do {
@@ -1220,7 +1220,7 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 			var request: URLRequest = makeRequest(url: url, method: .post, contentsType: ContentTypeJSON)
 			request.httpBody = extendTimeData
 			let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
-				defer { handler(newEndTime, status) } // must increment semaphore when exit from closure
+				defer { handler(status, newEndTime) } // must increment semaphore when exit from closure
 				status = .receivedDataNilError
 				guard let data: Data = dat else { return }// end guard
 				do {
