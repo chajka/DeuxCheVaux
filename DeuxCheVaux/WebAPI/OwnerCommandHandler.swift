@@ -13,9 +13,9 @@ public typealias OwnerOperationHandler = (ResultStatus) -> Void
 public typealias QuestionaryResultHandler = (ResultStatus, Array<EnqueteItem>?) -> Void
 public typealias OwnerOperationBoolHandler = (Bool) -> Void
 public typealias NGWordsHandler = (Array<NGData>) -> Void
-public typealias ExtendalbeTimesHandler = (Array<String>, ResultStatus) -> Void
 public typealias NewEndTimeHandler = (Date?, ResultStatus) -> Void
 public typealias UpdateProgramStateHandler = (Date, Date, ResultStatus) -> Void
+public typealias ExtendalbeTimesHandler = (ResultStatus, Array<String>) -> Void
 
 	// MARK: common structure
 public enum ResultStatus: Equatable {
@@ -1140,11 +1140,11 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 		var completionHandler: ExtendalbeTimesHandler? = handler
 		var extendableTimes: Array<String> = Array()
 		var status: ResultStatus = .apiAddressError
-		defer { if let handler: ExtendalbeTimesHandler = completionHandler { handler(extendableTimes, status) } }
+		defer { if let handler: ExtendalbeTimesHandler = completionHandler { handler(status, extendableTimes) } }
 		guard let url: URL = URL(string: apiBaseString + programExtension) else { return }
 		let request: URLRequest = makeRequest(url: url, method: .get)
 		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, rest: URLResponse?, err: Error?) in
-			defer { handler(extendableTimes, status) } // must increment semaphore when exit from closure
+			defer { handler(status, extendableTimes) } // must increment semaphore when exit from closure
 			status = .receivedDataNilError
 			guard let data: Data = dat else { return }// end guard
 			do {
