@@ -10,7 +10,7 @@ import Cocoa
 
 	// MARK: public type definitions
 public typealias OwnerOperationHandler = (ResultStatus) -> Void
-public typealias QuestionaryResultHandler = (Array<EnqueteItem>?, ResultStatus) -> Void
+public typealias QuestionaryResultHandler = (ResultStatus, Array<EnqueteItem>?) -> Void
 public typealias OwnerOperationBoolHandler = (Bool) -> Void
 public typealias NGWordsHandler = (Array<NGData>) -> Void
 public typealias ExtendalbeTimesHandler = (Array<String>, ResultStatus) -> Void
@@ -627,12 +627,12 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 		var completionHandler: QuestionaryResultHandler? = handler
 		var status: ResultStatus = .apiAddressError
 		var answers: Array<EnqueteItem>? = nil
-		defer { if let completionHandler: QuestionaryResultHandler = completionHandler { completionHandler(answers, status) } }
+		defer { if let completionHandler: QuestionaryResultHandler = completionHandler { completionHandler(status, answers) } }
 		guard let url: URL = URL(string: UserNamaAPIBase + program + QuestionaryResult) else { return }
 		let decoder: JSONDecoder = JSONDecoder()
 		let request: URLRequest = makeRequest(url: url, method: .post)
 		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, req: URLResponse?, err: Error?) in
-			defer { handler(answers, status) } // must increment semaphore when exit from closure
+			defer { handler(status, answers) } // must increment semaphore when exit from closure
 			guard let data: Data = dat else { return }// end guard
 			do {
 				let result: EnqueteResult = try decoder.decode(EnqueteResult.self, from: data)
