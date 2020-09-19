@@ -38,7 +38,7 @@ public final class DeuxCheVaux: NSObject {
 	public var userAgent: String {
 		get {
 			let applicationNameVersion = "\(applicationName)/\(applicationVersionMajor).\(applicationVersionMinor).\(applicationVersionFix)"
-			let frameworkNameVersion = "\(frameworkVersionMajor) \(frameworkVersionMajor).\(frameworkVersionMinor).\(frameworkVersionFix)"
+			let frameworkNameVersion = "\(frameworkName)/\(frameworkVersionMajor).\(frameworkVersionMinor).\(frameworkVersionFix)"
 			return "\(applicationNameVersion) (\(frameworkNameVersion))"
 		}// end get
 	}// end computed property
