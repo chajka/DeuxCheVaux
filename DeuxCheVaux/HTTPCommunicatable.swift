@@ -13,7 +13,7 @@ fileprivate let RequestTimeOut: TimeInterval = 2.0
 fileprivate let DataTimeOut: TimeInterval = 2.0
 
 fileprivate let UserSessionName: String = "user_session"
-private let NicoSeesionHeaderKey: String = "X-niconico-session"
+private let NicoSessionHeaderKey: String = "X-niconico-session"
 
 public enum HTTPMethod: String {
 	case get = "GET"
@@ -32,8 +32,8 @@ public extension URLRequest {
 			return nil
 		}// end get
 		set {
-			if let httpMehtod: HTTPMethod = newValue {
-				self.httpMethod = httpMehtod.rawValue
+			if let httpMethod: HTTPMethod = newValue {
+				self.httpMethod = httpMethod.rawValue
 			} else {
 				self.httpMethod = HTTPMethod.get.rawValue
 			}// end optional binding check for new value is member of enum HTTPMethod
@@ -68,7 +68,7 @@ public class HTTPCommunicatable: NSObject {
 		request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
 		for cookie: HTTPCookie in cookies {
 			if cookie.name == UserSessionName {
-				request.addValue(cookie.value, forHTTPHeaderField: NicoSeesionHeaderKey)
+				request.addValue(cookie.value, forHTTPHeaderField: NicoSessionHeaderKey)
 			}// end if found niconico user_session
 		}// end foreach
 		request.addValue(userAgent, forHTTPHeaderField: UserAgentKey)

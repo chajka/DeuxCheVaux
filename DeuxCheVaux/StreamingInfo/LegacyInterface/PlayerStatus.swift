@@ -8,33 +8,6 @@
 
 import Cocoa
 
-public struct XMLSocket {
-	public var address: String
-	public var port: Int
-
-	static func == (lhs: XMLSocket, rhs: XMLSocket) -> Bool {
-		return (lhs.address == rhs.address) && (lhs.port == rhs.port)
-	}// end func ==
-}// end struct XMLSocket
-
-public struct MessageServer: Equatable {
-	public let XMLSocet: XMLSocket
-	public let webSocket: URL?
-	public let thread: String
-	public let name: String?
-	public let identifier: Int?
-
-	static public func == (lhs: MessageServer, rhs: MessageServer) -> Bool {
-		return (lhs.XMLSocet == rhs.XMLSocet) && (lhs.webSocket == rhs.webSocket) && (lhs.thread == rhs.thread)
-	}// end func ==
-}// end struct MessageServer
-
-public enum SocialType: String, Codable {
-	case community = "community"
-	case channel = "channel"
-	case official = "official"
-}// end enum SocialType
-
 enum PlayerStatusKey: String {
 	case programNumber = "id"
 	case programTitle = "title"
@@ -47,7 +20,7 @@ enum PlayerStatusKey: String {
 	case baseTime = "base_time"
 	case startTime = "start_time"
 	case endTime = "end_time"
-	case communityThumbail = "thumb_url"
+	case communityThumbnail = "thumb_url"
 	case listenerIdentifier = "user_id"
 	case listenerName = "nickname"
 	case listenerIsPremium = "is_premium"
@@ -81,7 +54,7 @@ public final class PlayerStatus: NSObject , XMLParserDelegate {
 	public private(set) var baseTime: Date!
 	public private(set) var startTime: Date!
 	public private(set) var endTime: Date!
-	public private(set) var communityThumbnaiURL: URL!
+	public private(set) var communityThumbnailURL: URL!
 
 	public private(set) var listenerIdentifier: String!
 	public private(set) var listenerName: String!
@@ -123,7 +96,7 @@ public final class PlayerStatus: NSObject , XMLParserDelegate {
 		guard let _ = baseTime else { return false }
 		guard let _ = startTime else { return false }
 		guard let _ = endTime else { return false }
-		guard let _ = communityThumbnaiURL else { return false }
+		guard let _ = communityThumbnailURL else { return false }
 		guard let _ = listenerIdentifier else { return false }
 		guard let _ = listenerName else { return false }
 		guard let _ = listenerIsPremium else { return false }
@@ -183,8 +156,8 @@ public final class PlayerStatus: NSObject , XMLParserDelegate {
 				if let unixTime: TimeInterval = endTimeInterval {
 					endTime = Date(timeIntervalSince1970: unixTime)
 				}// end unix time string can convert unix time
-			case .communityThumbail:
-				communityThumbnaiURL = URL(string: stringBuffer)
+			case .communityThumbnail:
+				communityThumbnailURL = URL(string: stringBuffer)
 			case .listenerIdentifier:
 				listenerIdentifier = String(stringBuffer)
 			case .listenerName:
@@ -215,7 +188,7 @@ public final class PlayerStatus: NSObject , XMLParserDelegate {
 			case .msThread:
 				thread = String(stringBuffer)
 				let xmlserver: XMLSocket = XMLSocket(address: server, port: port)
-				let ms: MessageServer = MessageServer(XMLSocet: xmlserver, webSocket: nil, thread: thread, name: nil, identifier: nil)
+				let ms: MessageServer = MessageServer(XMLSocket: xmlserver, webSocket: nil, thread: thread, name: nil, identifier: nil)
 				messageServers.append(ms)
 			case .messageServerList:
 				messageServers.removeFirst()
