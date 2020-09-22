@@ -17,9 +17,36 @@ public enum UserLanguage: String, Codable {
 	case en = "en-us"
 }// end public enum UserLanguage
 
+public struct XMLSocket {
+	public var address: String
+	public var port: Int
+
+	static func == (lhs: XMLSocket, rhs: XMLSocket) -> Bool {
+		return (lhs.address == rhs.address) && (lhs.port == rhs.port)
+	}// end func ==
+}// end struct XMLSocket
+
+public struct MessageServer: Equatable {
+	public let XMLSocket: XMLSocket
+	public let webSocket: URL?
+	public let thread: String
+	public let name: String?
+	public let identifier: Int?
+
+	static public func == (lhs: MessageServer, rhs: MessageServer) -> Bool {
+		return (lhs.XMLSocket == rhs.XMLSocket) && (lhs.webSocket == rhs.webSocket) && (lhs.thread == rhs.thread)
+	}// end func ==
+}// end struct MessageServer
+
+public enum SocialType: String, Codable {
+	case community = "community"
+	case channel = "channel"
+	case official = "official"
+}// end enum SocialType
+
 public struct Room: Codable {
-	let webSocketUri: String
-	let xmlSocketUri: String
+	let webSocketUri: URL
+	let xmlSocketUri: URL
 	let name: String
 	let id: Int
 	let threadId: String
@@ -31,6 +58,7 @@ public struct SocialGroup: Codable {
 	let name: String
 	let communityLevel: Int?
 	let ownerName: String?
+	let thumbnailUrl: URL
 }// end struct SocialGroup
 
 public struct Broadcaster: Codable {
@@ -38,7 +66,25 @@ public struct Broadcaster: Codable {
 	let id: String
 }// end struct Broadcaster
 
-public struct ProtramInformation: Codable {
+public enum MaxQuality: String, Codable {
+	case highest = "6Mbps720p"
+	case high = "2Mbps450p"
+	case normal = "1Mbps450p"
+	case low = "384kbps288p"
+	case lowest = "192kbps288p"
+}// end enum MaxQuality
+
+public enum Orientation: String, Codable {
+	case landscape = "Landscape"
+	case portrait = "Portrait"
+}// end enum Orientation
+
+public struct StreamSetting: Codable {
+	public let maxQuality: MaxQuality
+	public let orientation: Orientation
+}// end struct StreamSetting
+
+public struct ProgramInformation: Codable {
 	let title: String
 	let description: String
 	let isMemberOnly: Bool
@@ -51,11 +97,12 @@ public struct ProtramInformation: Codable {
 	let isUserNiconicoAdsEnabled: Bool
 	let socialGroup: SocialGroup
 	let broadcaster: Broadcaster
+	let streamSetting: StreamSetting
 }// end struct ProtramInformation
 
-fileprivate struct ProgramInfoJSON: Codable {
-	let meta: MetaInformation
-	let data: ProtramInformation?
+public struct ProgramInfoJSON: Codable {
+	public let meta: MetaInformation
+	public let data: ProgramInformation?
 }// end struct ProgramInfoJSON
 
 public enum ProgramInfoError: Error {
@@ -115,8 +162,10 @@ public final class ProgramInfo: NSObject {
 	public private(set) var baseTime: Date!
 	public private(set) var startTime: Date!
 	public private(set) var endTime: Date!
-	public private(set) var programDesctiption: NSAttributedString!
+	public private(set) var programDesc: String!
+	public private(set) var programDescription: NSAttributedString!
 	public private(set) var broadcaster: BroadcasterInfo!
+	public private(set) var thumbnailURL: URL!
 	public private(set) var canNicoAd: Bool!
 	public private(set) var servers: Array<MessageServer> = Array()
 
@@ -128,6 +177,32 @@ public final class ProgramInfo: NSObject {
 		if result != .NoError { throw result }
 	}// end init
 
+	public init (_ programInfo: ProgramInformation) {
+		title = programInfo.title
+		ownerName = programInfo.broadcaster.name
+		ownerIdentifier = programInfo.broadcaster.id
+		let social: SocialGroup = programInfo.socialGroup
+		self.social = Social(name: social.name, identifier: social.id, level: social.communityLevel, type: programInfo.socialGroup.type, ownerName: social.ownerName)
+		status = programInfo.status
+		isMemberOnly = programInfo.isMemberOnly
+		categories = programInfo.categories
+		baseTime = Date(timeIntervalSince1970: programInfo.vposBaseAt)
+		startTime = Date(timeIntervalSince1970: programInfo.beginAt)
+		endTime = Date(timeIntervalSince1970: programInfo.endAt)
+		programDesc = programInfo.description
+		broadcaster = BroadcasterInfo(name: programInfo.broadcaster.name, identifier: programInfo.broadcaster.id)
+		self.thumbnailURL = programInfo.socialGroup.thumbnailUrl
+		for room: Room in programInfo.rooms {
+			let webSocket: URL = room.webSocketUri
+			let xml: URL = room.xmlSocketUri
+			if let xmlHost: String = xml.host, let port: Int = xml.port {
+				let xmlSocket: XMLSocket = XMLSocket(address: xmlHost, port: port)
+				let server: MessageServer = MessageServer(XMLSocket: xmlSocket, webSocket: webSocket, thread: room.threadId, name: room.name, identifier: room.id)
+				servers.append(server)
+			}// end optional biniding check for get xml socket server addreess and port
+		}// end foreach rooms
+	}// end init
+
 		// MARK: - Override
 		// MARK: - Actions
 		// MARK: - Public methods
@@ -136,7 +211,7 @@ public final class ProgramInfo: NSObject {
 		do {
 			let decoder: JSONDecoder = JSONDecoder()
 			let result: ProgramInfoJSON = try decoder.decode(ProgramInfoJSON.self, from: data)
-			if let programInfo: ProtramInformation = result.data {
+			if let programInfo: ProgramInformation = result.data {
 				title = programInfo.title
 				ownerName = programInfo.broadcaster.name
 				ownerIdentifier = programInfo.broadcaster.id
@@ -149,28 +224,16 @@ public final class ProgramInfo: NSObject {
 				baseTime = Date(timeIntervalSince1970: programInfo.vposBaseAt)
 				startTime = Date(timeIntervalSince1970: programInfo.beginAt)
 				endTime = Date(timeIntervalSince1970: programInfo.endAt)
-				let descriptionString: String = programInfo.description
-				let descriptionHTML: String = "<html><body>" + programInfo.description + "</body></html>"
-				if let descriptiionData: Data = descriptionHTML.data(using: String.Encoding.utf8) {
-					do {
-						let readingOptions: Dictionary<NSAttributedString.DocumentReadingOptionKey, Any> = [.documentType: NSAttributedString.DocumentType.html, .textEncodingName: "utf-8"]
-						programDesctiption = try NSAttributedString(data: descriptiionData, options: readingOptions, documentAttributes: nil)
-					} catch let error {
-						print(error.localizedDescription)
-						programDesctiption = NSAttributedString(string: descriptionString)
-					}// end do try - catch make attributed string
-				} else {
-					programDesctiption = NSAttributedString(string: descriptionString)
-				}// end optional binding check for string convert to data
+				programDesc = programInfo.description
 				broadcaster = BroadcasterInfo(name: programInfo.broadcaster.name, identifier: programInfo.broadcaster.id)
 				for room: Room in programInfo.rooms {
-					if let webSocket: URL = URL(string: room.webSocketUri), let xml: URL = URL(string: room.xmlSocketUri) {
-						if let xmlHost: String = xml.host, let port: Int = xml.port {
-							let xmlSocket: XMLSocket = XMLSocket(address: xmlHost, port: port)
-							let server: MessageServer = MessageServer(XMLSocet: xmlSocket, webSocket: webSocket, thread: room.threadId, name: room.name, identifier: room.id)
-							servers.append(server)
-						}// end optional biniding check for get xml socket server addreess and port
-					}// end optional binding check for make url for web socket and xml socket
+					let webSocket: URL = room.webSocketUri
+					let xml: URL = room.xmlSocketUri
+					if let xmlHost: String = xml.host, let port: Int = xml.port {
+						let xmlSocket: XMLSocket = XMLSocket(address: xmlHost, port: port)
+						let server: MessageServer = MessageServer(XMLSocket: xmlSocket, webSocket: webSocket, thread: room.threadId, name: room.name, identifier: room.id)
+						servers.append(server)
+					}// end optional biniding check for get xml socket server addreess and port
 				}// end foreach rooms
 			}// end if optional check for data
 		} catch let error {
