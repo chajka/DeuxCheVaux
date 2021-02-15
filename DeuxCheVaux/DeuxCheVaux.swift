@@ -11,7 +11,7 @@ import Cocoa
 fileprivate let FrameworkName: String = "DeuxCheVaux"
 fileprivate let FrameworkVersionMajor: Float = 0.3
 fileprivate let FrameworkVersionMinor: Int = 9
-fileprivate let FrameworkVersionFix: Int = 0
+fileprivate let FrameworkVersionFix: Int = 1
 
 fileprivate let QueueLabel: String = "tv.from.chajka.DeuxCheVaux"
 
