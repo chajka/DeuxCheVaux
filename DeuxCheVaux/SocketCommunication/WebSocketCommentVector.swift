@@ -76,7 +76,7 @@ struct CommentBody: Codable {
 public struct ThreadInfo: Codable {
 	let resultcode: Int
 	let thread: UInt64
-	let last_res: Int
+	let last_res: Int?
 	let ticket: String
 	let revision: Int
 	let server_time: TimeInterval
