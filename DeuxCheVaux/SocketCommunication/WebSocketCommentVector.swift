@@ -329,7 +329,11 @@ public final class WebSocketCommentVector: NSObject {
 					do {
 						let info: ThreadResult = try decoder.decode(ThreadResult.self, from: json)
 						weakSelf.ticket = info.thread.ticket
-						weakSelf.lastRes = info.thread.last_res
+						if let last_res: Int = info.thread.last_res {
+							weakSelf.lastRes = last_res
+						} else {
+							weakSelf.lastRes = 1
+						}// end optional binding check for last_res
 					} catch let error {
 						Swift.print("Error: \(error.localizedDescription),\nDroped \(message)")
 					}// end do try - catch decode json
