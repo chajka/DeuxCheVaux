@@ -63,6 +63,7 @@ fileprivate struct UserProgramInfo: Codable {
 	enum ProviderType: String, Codable {
 		case channel = "channel"
 		case community = "community"
+		case official = "official"
 	}// end enum ProviderType
 
 	private enum CodingKeys: String, CodingKey {
