@@ -323,29 +323,37 @@ public final class NicoInformationHandler: HTTPCommunicatable {
 		task.resume()
 	}// end rawData
 
-	public func currentPrograms () -> Array<Program> {
-		let url: URL = URL(string: FollowingProgramsFormat)!
+	public func currentPrograms (page targetPage: Int = 1) -> (programs: Array<Program>, maxPages: Int) {
+		let url: URL = URL(string: FollowingProgramsFormat + (targetPage != 1 ? FollowingProgramsPage + String(targetPage) : ""))!
 		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
 		let request: URLRequest = makeRequest(url: url, method: .get)
 		var programs: Array<Program> = Array()
+		var maxPages: Int = 0
 		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
 			defer { semaphore.signal() }
 			guard let data: Data = dat, let info: UserPrograms = try? JSONDecoder().decode(UserPrograms.self, from: data) else { return }
+			maxPages = info.data.totalPage
 			let currentPrograms: Array<UserProgramInfo> = info.data.notifyboxContent
 			for prog: UserProgramInfo in currentPrograms {
-				let liveNumber: String = URL(string: prog.thumbnailLinkURL)?.lastPathComponent ?? ""
-				let title: String = prog.title
-				let community: String = prog.communityName
-				let owner: String = prog.ownerIdentifier
-				let thumb: NSImage? = NSImage(contentsOf: URL(string: prog.thumnailURL)!)
-				let program: Program = Program(program: liveNumber, title: title, community: community, owner: owner, thumbnail: thumb)
-				programs.append(program)
+				switch prog.providerType {
+				case .official:
+					continue
+				case .channel: fallthrough
+				case .community:
+					let liveNumber: String = URL(string: prog.thumbnailLinkURL)?.lastPathComponent ?? ""
+					let title: String = prog.title
+					let community: String = prog.communityName
+					let owner: String = prog.ownerIdentifier
+					let thumb: NSImage? = NSImage(contentsOf: URL(string: prog.thumnailURL)!)
+					let program: Program = Program(program: liveNumber, title: title, community: community, owner: owner, thumbnail: thumb)
+					programs.append(program)
+				}// end switch case by provider type
 			}// end foreach all program informations
 		}// end current programs completion handler closure
 		task.resume()
 		let _: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
 
-		return programs
+		return (programs, maxPages)
 	}// end currentPrograms
 
 	public func currentPrograms (with handler: @escaping CurrentProgramsHandler) -> Void {
