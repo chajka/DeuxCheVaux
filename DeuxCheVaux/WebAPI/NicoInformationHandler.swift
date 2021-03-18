@@ -357,14 +357,18 @@ public final class NicoInformationHandler: HTTPCommunicatable {
 	}// end currentPrograms
 
 	public func currentPrograms (with handler: @escaping CurrentProgramsHandler) -> Void {
-		let url: URL = URL(string: FollowingProgramsFormat)!
-		let request: URLRequest = makeRequest(url: url, method: .get)
+		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
+		var url: URL = URL(string: FollowingProgramsFormat)!
+		var request: URLRequest = makeRequest(url: url, method: .get)
 		var programs: Array<Program> = Array()
+		var maxPage: Int = 0
 		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
-			defer { handler(programs) }
+			defer { semaphore.signal() }
 			guard let data: Data = dat, let info: UserPrograms = try? JSONDecoder().decode(UserPrograms.self, from: data) else { return }
+			maxPage = info.data.totalPage
 			let currentPrograms: Array<UserProgramInfo> = info.data.notifyboxContent
 			for prog: UserProgramInfo in currentPrograms {
+				if prog.providerType == .official { continue }
 				let liveNumber: String = URL(string: prog.thumbnailLinkURL)?.lastPathComponent ?? ""
 				let title: String = prog.title
 				let community: String = prog.communityName
@@ -375,6 +379,31 @@ public final class NicoInformationHandler: HTTPCommunicatable {
 			}// end foreach all program informations
 		}// end current programs completion handler closure
 		task.resume()
+		_ = semaphore.wait(timeout: .now() + Timeout)
+		if maxPage > 1 {
+			for page: Int in 2 ... maxPage {
+				url = URL(string: FollowingProgramsFormat + FollowingProgramsPage + String(page))!
+				request = makeRequest(url: url, method: .get)
+				let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
+					defer { semaphore.signal() }
+					guard let data: Data = dat, let info: UserPrograms = try? JSONDecoder().decode(UserPrograms.self, from: data) else { return }
+					let currentPrograms: Array<UserProgramInfo> = info.data.notifyboxContent
+					for prog: UserProgramInfo in currentPrograms {
+						if prog.providerType == .official { continue }
+						let liveNumber: String = URL(string: prog.thumbnailLinkURL)?.lastPathComponent ?? ""
+						let title: String = prog.title
+						let community: String = prog.communityName
+						let owner: String = prog.ownerIdentifier
+						let thumb: NSImage? = NSImage(contentsOf: URL(string: prog.thumnailURL)!)
+						let program: Program = Program(program: liveNumber, title: title, community: community, owner: owner, thumbnail: thumb)
+						programs.append(program)
+					}// end foreach all program informations
+				}// end handler
+				task.resume()
+				_ = semaphore.wait(timeout: .now() + Timeout)
+			}
+		}// end if total page over 2 or more
+		handler(programs)
 	}// end currentPrograms
 
 		// MARK: - Internal methods
