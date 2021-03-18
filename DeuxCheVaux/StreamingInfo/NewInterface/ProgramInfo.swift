@@ -8,7 +8,7 @@
 
 import Cocoa
 
-fileprivate let ProgramInfoFormat: String = "https://live2.nicovideo.jp/watch/"
+fileprivate let ProgramInfoFormat: String = "https://live.nicovideo.jp/watch/"
 fileprivate let ProgramInfoSuffix: String = "/programinfo"
 
 public enum UserLanguage: String, Codable {
