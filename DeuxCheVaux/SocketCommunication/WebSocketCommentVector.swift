@@ -169,6 +169,7 @@ public final class WebSocketCommentVector: NSObject {
 		// MARK: - Class methods
 		// MARK: - Properties
 	public let url: URL
+	public var lastRes: Int!
 	public let roomLabel: String
 	public private(set) weak var runLoop: RunLoop?
 	public weak var delegate: WebSocketCommentVectorDelegate?
@@ -180,7 +181,6 @@ public final class WebSocketCommentVector: NSObject {
 	private let userIdentifier: String
 	private let userLanguage: UserLanguage
 	private let cookies: Array<HTTPCookie>
-	private var lastRes: Int!
 	private var ticket: String!
 	private let baseTime: Date
 	private let background: DispatchQueue = DispatchQueue(label: "tv.from.chajka.Charleston", qos: DispatchQoS(qosClass: DispatchQoS.QoSClass.background, relativePriority: 0), attributes: DispatchQueue.Attributes.concurrent)
