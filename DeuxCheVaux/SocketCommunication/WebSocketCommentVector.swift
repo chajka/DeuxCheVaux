@@ -332,7 +332,7 @@ public final class WebSocketCommentVector: NSObject {
 						if let last_res: Int = info.thread.last_res {
 							weakSelf.lastRes = last_res
 						} else {
-							weakSelf.lastRes = 1
+							weakSelf.lastRes = 0
 						}// end optional binding check for last_res
 					} catch let error {
 						Swift.print("Error: \(error.localizedDescription),\nDroped \(message)")
