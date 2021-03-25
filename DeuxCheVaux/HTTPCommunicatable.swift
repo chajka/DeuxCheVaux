@@ -12,8 +12,8 @@ internal let Timeout: Double = 2.0
 fileprivate let RequestTimeOut: TimeInterval = 2.0
 fileprivate let DataTimeOut: TimeInterval = 2.0
 
-fileprivate let UserSessionName: String = "user_session"
-private let NicoSessionHeaderKey: String = "X-niconico-session"
+internal let UserSessionName: String = "user_session"
+internal let NicoSessionHeaderKey: String = "X-niconico-session"
 
 public enum HTTPMethod: String {
 	case get = "GET"
