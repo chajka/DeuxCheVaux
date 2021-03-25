@@ -155,7 +155,7 @@ fileprivate enum ElementType: String {
 	case chat_result
 }// end enum elementName
 
-public let Arena: String = "Arena"
+public let Arena: String = "\u{30A2}\u{30EA}\u{30FC}\u{30CA}"
 internal let CommunityChannelPrefix = "c"
 
 public protocol WebSocketCommentVectorDelegate: class  {
