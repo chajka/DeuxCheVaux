@@ -9,7 +9,7 @@
 import Cocoa
 import SwiftWebSocket
 
-fileprivate let ThreadVersion: Int = 20061206
+fileprivate let ThreadVersion: String = "20061206"
 fileprivate let ServiceName: String = "LIVE"
 fileprivate let SubProtocol: String = "msg.nicovideo.jp#json"
 fileprivate let Ticket: String = "ticket"
@@ -42,13 +42,12 @@ internal enum HeartbeatElement: String {
 }// end enum HeartbeatElement
 
 public struct ThreadRequest: Codable {
-	let version: Int
+	let version: String
 	let thread: String
 	let service: String
 	let user_id: String
 	let res_from: Int
 	let with_global: Int
-	let scores: Int
 	let nicoru: Int
 
 	init(thread: String, uid: String, resFrom: Int) {
@@ -58,7 +57,6 @@ public struct ThreadRequest: Codable {
 		self.user_id = uid
 		self.res_from = resFrom
 		self.with_global = 1
-		self.scores = 1
 		self.nicoru = 1
 	}
 }// end struct ThreadRequest
@@ -75,7 +73,7 @@ struct CommentBody: Codable {
 
 public struct ThreadInfo: Codable {
 	let resultcode: Int
-	let thread: UInt64
+	let thread: String
 	let last_res: Int?
 	let ticket: String
 	let revision: Int
@@ -87,7 +85,7 @@ struct ThreadResult: Codable {
 }// end struct ThreadResult
 
 public struct ChatElements: Codable {
-	public let thread: UInt64
+	public let thread: String
 	public let vpos: TimeInterval
 	public let no: Int
 	public let user_id: String
@@ -157,7 +155,7 @@ fileprivate enum ElementType: String {
 	case chat_result
 }// end enum elementName
 
-public let Arena: String = "Arena"
+public let Arena: String = "\u{30A2}\u{30EA}\u{30FC}\u{30CA}"
 internal let CommunityChannelPrefix = "c"
 
 public protocol WebSocketCommentVectorDelegate: class  {
@@ -201,6 +199,11 @@ public final class WebSocketCommentVector: NSObject {
 		roomLabel = prefix == CommunityChannelPrefix ? Arena : room
 		var request: URLRequest = URLRequest(url: self.url)
 		request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookie)
+		for cookie: HTTPCookie in cookies {
+			if cookie.name == UserSessionName {
+				request.addValue(cookie.value, forHTTPHeaderField: NicoSessionHeaderKey)
+			}// end if found niconico user_session
+		}// end foreach
 		let userAgent: String = DeuxCheVaux.shared.userAgent
 		request.addValue(userAgent, forHTTPHeaderField: UserAgentKey)
 		if let runLoop: RunLoop = self.runLoop {
@@ -306,9 +309,14 @@ public final class WebSocketCommentVector: NSObject {
 			guard let weakSelf = self else { return }
 			let threadData: ThreadRequest = ThreadRequest(thread: weakSelf.thread, uid: weakSelf.userIdentifier, resFrom: history)
 			let commentRequest: CommentRequest = CommentRequest(thread: threadData)
-			if let json: Data = try? JSONEncoder().encode(commentRequest), let request: String = String(data: json, encoding: .utf8) {
-				weakSelf.socket.send(text: request)
-			}// end optional binding check for
+			do {
+				let json: Data = try JSONEncoder().encode(commentRequest)
+				if let request: String = String(data: json, encoding: .utf8) {
+					weakSelf.socket.send(text: "[\(request)]")
+				}
+			} catch let error {
+				print(error.localizedDescription)
+			}
 		}// end open event
 
 		socket.event.close = { (code: Int, reason: String, clean: Bool) in
@@ -330,7 +338,7 @@ public final class WebSocketCommentVector: NSObject {
 						let info: ThreadResult = try decoder.decode(ThreadResult.self, from: json)
 						weakSelf.ticket = info.thread.ticket
 						if let last_res: Int = info.thread.last_res {
-							weakSelf.lastRes = last_res
+							weakSelf.lastRes = last_res > 1 ? last_res - 1 : last_res
 						} else {
 							weakSelf.lastRes = 0
 						}// end optional binding check for last_res
