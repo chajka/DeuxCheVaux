@@ -199,6 +199,11 @@ public final class WebSocketCommentVector: NSObject {
 		roomLabel = prefix == CommunityChannelPrefix ? Arena : room
 		var request: URLRequest = URLRequest(url: self.url)
 		request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookie)
+		for cookie: HTTPCookie in cookies {
+			if cookie.name == UserSessionName {
+				request.addValue(cookie.value, forHTTPHeaderField: NicoSessionHeaderKey)
+			}// end if found niconico user_session
+		}// end foreach
 		let userAgent: String = DeuxCheVaux.shared.userAgent
 		request.addValue(userAgent, forHTTPHeaderField: UserAgentKey)
 		if let runLoop: RunLoop = self.runLoop {
