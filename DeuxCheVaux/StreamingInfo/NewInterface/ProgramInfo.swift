@@ -27,14 +27,14 @@ public struct XMLSocket {
 }// end struct XMLSocket
 
 public struct MessageServer: Equatable {
-	public let XMLSocket: XMLSocket
+	public let XMLSocket: XMLSocket?
 	public let webSocket: URL?
 	public let thread: String
 	public let name: String?
 	public let identifier: Int?
 
 	static public func == (lhs: MessageServer, rhs: MessageServer) -> Bool {
-		return (lhs.XMLSocket == rhs.XMLSocket) && (lhs.webSocket == rhs.webSocket) && (lhs.thread == rhs.thread)
+		return (lhs.webSocket == rhs.webSocket) && (lhs.thread == rhs.thread)
 	}// end func ==
 }// end struct MessageServer
 
@@ -46,7 +46,7 @@ public enum SocialType: String, Codable {
 
 public struct Room: Codable {
 	let webSocketUri: URL
-	let xmlSocketUri: URL
+	let xmlSocketUri: URL?
 	let name: String
 	let id: Int
 	let threadId: String
