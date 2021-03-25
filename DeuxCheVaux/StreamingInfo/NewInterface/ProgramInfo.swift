@@ -194,12 +194,8 @@ public final class ProgramInfo: NSObject {
 		self.thumbnailURL = programInfo.socialGroup.thumbnailUrl
 		for room: Room in programInfo.rooms {
 			let webSocket: URL = room.webSocketUri
-			let xml: URL = room.xmlSocketUri
-			if let xmlHost: String = xml.host, let port: Int = xml.port {
-				let xmlSocket: XMLSocket = XMLSocket(address: xmlHost, port: port)
-				let server: MessageServer = MessageServer(XMLSocket: xmlSocket, webSocket: webSocket, thread: room.threadId, name: room.name, identifier: room.id)
-				servers.append(server)
-			}// end optional biniding check for get xml socket server addreess and port
+			let server: MessageServer = MessageServer(XMLSocket: nil, webSocket: webSocket, thread: room.threadId, name: room.name, identifier: room.id)
+			servers.append(server)
 		}// end foreach rooms
 	}// end init
 
@@ -228,12 +224,8 @@ public final class ProgramInfo: NSObject {
 				broadcaster = BroadcasterInfo(name: programInfo.broadcaster.name, identifier: programInfo.broadcaster.id)
 				for room: Room in programInfo.rooms {
 					let webSocket: URL = room.webSocketUri
-					let xml: URL = room.xmlSocketUri
-					if let xmlHost: String = xml.host, let port: Int = xml.port {
-						let xmlSocket: XMLSocket = XMLSocket(address: xmlHost, port: port)
-						let server: MessageServer = MessageServer(XMLSocket: xmlSocket, webSocket: webSocket, thread: room.threadId, name: room.name, identifier: room.id)
-						servers.append(server)
-					}// end optional biniding check for get xml socket server addreess and port
+					let server: MessageServer = MessageServer(XMLSocket: nil, webSocket: webSocket, thread: room.threadId, name: room.name, identifier: room.id)
+					servers.append(server)
 				}// end foreach rooms
 			}// end if optional check for data
 		} catch let error {
