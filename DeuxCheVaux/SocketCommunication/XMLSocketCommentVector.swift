@@ -114,8 +114,8 @@ public final class XMLSocketCommentVector: NSObject ,StreamDelegate {
 		// MARK: - Constructor/Destructor
 	public init (playerStatus: PlayerStatus, serverOffset: Int, history: Int = defaultHistroryCount, cookies: Array<HTTPCookie>) {
 		let messageServer = playerStatus.messageServers[serverOffset]
-		server = messageServer.XMLSocket.address
-		port = messageServer.XMLSocket.port
+		server = messageServer.XMLSocket?.address
+		port = messageServer.XMLSocket?.port
 		thread = messageServer.thread
 		threadData = String(format: threadFormat, messageServer.thread, history).data(using: .utf8)!
 		userIdentifier = playerStatus.listenerIdentifier
