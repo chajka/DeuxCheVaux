@@ -309,9 +309,14 @@ public final class WebSocketCommentVector: NSObject {
 			guard let weakSelf = self else { return }
 			let threadData: ThreadRequest = ThreadRequest(thread: weakSelf.thread, uid: weakSelf.userIdentifier, resFrom: history)
 			let commentRequest: CommentRequest = CommentRequest(thread: threadData)
-			if let json: Data = try? JSONEncoder().encode(commentRequest), let request: String = String(data: json, encoding: .utf8) {
-				weakSelf.socket.send(text: request)
-			}// end optional binding check for
+			do {
+				let json: Data = try JSONEncoder().encode(commentRequest)
+				if let request: String = String(data: json, encoding: .utf8) {
+					weakSelf.socket.send(text: "[\(request)]")
+				}
+			} catch let error {
+				print(error.localizedDescription)
+			}
 		}// end open event
 
 		socket.event.close = { (code: Int, reason: String, clean: Bool) in
