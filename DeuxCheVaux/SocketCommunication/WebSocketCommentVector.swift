@@ -48,7 +48,6 @@ public struct ThreadRequest: Codable {
 	let user_id: String
 	let res_from: Int
 	let with_global: Int
-	let scores: Int
 	let nicoru: Int
 
 	init(thread: String, uid: String, resFrom: Int) {
@@ -58,7 +57,6 @@ public struct ThreadRequest: Codable {
 		self.user_id = uid
 		self.res_from = resFrom
 		self.with_global = 1
-		self.scores = 1
 		self.nicoru = 1
 	}
 }// end struct ThreadRequest
