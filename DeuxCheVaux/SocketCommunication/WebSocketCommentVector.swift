@@ -9,7 +9,7 @@
 import Cocoa
 import SwiftWebSocket
 
-fileprivate let ThreadVersion: Int = 20061206
+fileprivate let ThreadVersion: String = "20061206"
 fileprivate let ServiceName: String = "LIVE"
 fileprivate let SubProtocol: String = "msg.nicovideo.jp#json"
 fileprivate let Ticket: String = "ticket"
@@ -42,7 +42,7 @@ internal enum HeartbeatElement: String {
 }// end enum HeartbeatElement
 
 public struct ThreadRequest: Codable {
-	let version: Int
+	let version: String
 	let thread: String
 	let service: String
 	let user_id: String
@@ -75,7 +75,7 @@ struct CommentBody: Codable {
 
 public struct ThreadInfo: Codable {
 	let resultcode: Int
-	let thread: UInt64
+	let thread: String
 	let last_res: Int?
 	let ticket: String
 	let revision: Int
@@ -87,7 +87,7 @@ struct ThreadResult: Codable {
 }// end struct ThreadResult
 
 public struct ChatElements: Codable {
-	public let thread: UInt64
+	public let thread: String
 	public let vpos: TimeInterval
 	public let no: Int
 	public let user_id: String
