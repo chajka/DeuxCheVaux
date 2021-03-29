@@ -129,7 +129,7 @@ public struct ChatElements: Codable {
 			message += ",\(vpos)"
 			message += ",\(no)"
 			message += ",\(user_id)"
-			message += ",\(content)"
+			message += ",\(content.replacingOccurrences(of: "\"", with: "\"\""))"
 			message += ",\(date)"
 			message += ",\(date_usec)"
 			message += ",\(String(describing: premium != nil ? premium! : 0))"
@@ -312,7 +312,7 @@ public final class WebSocketCommentVector: NSObject {
 			do {
 				let json: Data = try JSONEncoder().encode(commentRequest)
 				if let request: String = String(data: json, encoding: .utf8) {
-					weakSelf.socket.send(text: "[\(request)]")
+					weakSelf.socket.send(text: "\(request)")
 				}
 			} catch let error {
 				print(error.localizedDescription)
