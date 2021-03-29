@@ -312,7 +312,7 @@ public final class WebSocketCommentVector: NSObject {
 			do {
 				let json: Data = try JSONEncoder().encode(commentRequest)
 				if let request: String = String(data: json, encoding: .utf8) {
-					weakSelf.socket.send(text: "[\(request)]")
+					weakSelf.socket.send(text: "\(request)")
 				}
 			} catch let error {
 				print(error.localizedDescription)
