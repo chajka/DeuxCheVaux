@@ -129,7 +129,7 @@ public struct ChatElements: Codable {
 			message += ",\(vpos)"
 			message += ",\(no)"
 			message += ",\(user_id)"
-			message += ",\(content)"
+			message += ",\(content.replacingOccurrences(of: "\"", with: "\"\""))"
 			message += ",\(date)"
 			message += ",\(date_usec)"
 			message += ",\(String(describing: premium != nil ? premium! : 0))"
