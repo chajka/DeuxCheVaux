@@ -19,6 +19,14 @@ fileprivate let AutorizationBearer: String = "bearer "
 fileprivate let RefreshToken: String = "jp.nicovideo.oauth2-refresh_token"
 fileprivate let IDToken: String = "jp.nicovideo.oauth2-id_token"
 
+fileprivate struct Tokens : Codable {
+	let access_token: String
+	let token_type: String
+	let expires_in: Int
+	let scope: String
+	let refresh_token: String
+	let id_token: String?
+}// end struct Tokens
 
 public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		// MARK:   Class Variables
