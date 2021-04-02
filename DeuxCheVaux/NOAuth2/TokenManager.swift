@@ -168,4 +168,33 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 	}// end func read token from keychain
 
 		// MARK: - Delegate / Protocol clients
+	public func webView (_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
+		if let url: URL = webView.url {
+			if url.absoluteURL == AuthorizedURL {
+				window?.setIsVisible(false)
+			} else {
+				window?.setIsVisible(true)
+			}// end my window need visible or not
+		}// end if my web view url is valid
+	}// end func webView didStartProvisionalNavigation
+
+	public func webView (_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+		webView.evaluateJavaScript("document.getElementsByTagName('div')[0].innerHTML") { (json: Any?, error: Error?) -> Void in
+			guard let jsonString: String = json as? String, let jsonData: Data = jsonString.data(using: .utf8) else { return }
+			do {
+				let decoder: JSONDecoder = JSONDecoder()
+				let tokens: Tokens = try decoder.decode(Tokens.self, from: jsonData)
+				self.refreshToken = tokens.refresh_token
+				self.accessToken = tokens.access_token
+				if let id_token: String = tokens.id_token {
+					self.idToken = id_token
+				}
+				self.expire = tokens.expires_in
+				_ = self.updateToken(to: self.refreshToken, tokenType: RefreshToken)
+				_ = self.updateToken(to: self.idToken, tokenType: IDToken)
+			} catch let error {
+				print(error.localizedDescription)
+			}
+		}
+	}// end func wevbiew didFinish
 }// end class TokenManager
