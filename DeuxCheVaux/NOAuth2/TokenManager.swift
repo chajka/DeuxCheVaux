@@ -53,6 +53,16 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 	private var refreshTokenTimer: DispatchSourceTimer? = nil
 
 		// MARK: - Constructor / Destructor
+	private convenience init() {
+		self.init(windowNibName: TokenManagerNibName)
+		if let token: String = readToken(tokenType: RefreshToken) {
+			self.refreshToken = token
+		}// end optional binding check for old refresh token in iCloudKeychain or not
+		if let token: String = readToken(tokenType: IDToken) {
+			self.idToken = token
+		}// end optional binding check for id token in iCloudKeychain or not
+	}// end convinience init
+
 		// MARK: - OVerrides
 	public override func windowDidLoad() {
 		super.windowDidLoad()
