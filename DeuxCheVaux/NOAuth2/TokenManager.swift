@@ -56,5 +56,40 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		return resultCode == errSecSuccess
 	}// end func save token into keychain
 
+	func updateToken (to token: String, tokenType type: String) -> Bool {
+		let query: Dictionary<String, AnyObject> = [
+			kSecClass as String: kSecClassGenericPassword,
+			kSecMatchLimit as String: kSecMatchLimitAll,
+			kSecReturnPersistentRef as String: kCFBooleanTrue,
+			kSecReturnData as String: kCFBooleanTrue,
+			kSecAttrSynchronizable as String: kCFBooleanTrue,
+			kSecAttrAccessible as String: kSecAttrAccessibleAlways,
+			kSecAttrService as String: type as NSString
+		]
+		let itemToUpdate: Dictionary<String, AnyObject> = [
+			kSecClass as String: kSecClassGenericPassword,
+			kSecReturnPersistentRef as String: kCFBooleanTrue,
+			kSecAttrAccessible as String: kSecAttrAccessibleAlways,
+			kSecAttrSynchronizable as String: kCFBooleanTrue,
+			kSecAttrType as String: kSecAttrApplicationLabel,
+			kSecAttrService as String: type as NSString,
+			kSecValueData as String: token.data(using: .utf8)! as NSData
+		]
+		var result: AnyObject?
+		var resultCode = withUnsafeMutablePointer(to: &result) {
+			 SecItemCopyMatching(query as CFDictionary, $0)
+		}
+		if let keychainItems = result as? Array<NSDictionary> {
+			for _ in keychainItems {
+				resultCode = SecItemDelete(query as CFDictionary)
+			}
+		}
+		resultCode = withUnsafeMutablePointer(to: &result) {
+			SecItemAdd(itemToUpdate as CFDictionary, $0)
+		}
+		return resultCode == errSecSuccess
+	}// end update token of keychain
+
+
 		// MARK: - Delegate / Protocol clients
 }// end class TokenManager
