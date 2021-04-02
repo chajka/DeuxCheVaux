@@ -78,6 +78,12 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 
 		// MARK: - Actions
 		// MARK: - Public Method
+	public func authenticate () {
+		window?.setIsVisible(true)
+		let request: URLRequest = URLRequest(url: oauthURL)
+		webView.load(request)
+	}// end func authenticate
+
 		// MARK: - Private Methods
 	func saveToken (refreshToken token: String, tokenType type: String) -> Bool {
 		let query: Dictionary<String, AnyObject> = [
