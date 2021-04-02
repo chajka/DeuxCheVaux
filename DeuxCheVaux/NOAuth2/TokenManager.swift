@@ -7,6 +7,8 @@
 //
 
 import Cocoa
+import WebKit
+import Security
 
 class TokenManager: NSWindowController {
 
