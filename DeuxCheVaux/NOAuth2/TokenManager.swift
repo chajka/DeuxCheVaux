@@ -125,6 +125,14 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		watcherCount -= 1
 	}// end func stop
 
+	func makeRequest (url: URL) -> URLRequest {
+		var request: URLRequest = URLRequest(url: url)
+		request.setValue(AutorizationBearer + accessToken, forHTTPHeaderField: UserAgentKey)
+		request.setValue(DeuxCheVaux.shared.userAgent, forHTTPHeaderField: UserAgentKey)
+
+		return request
+	}// end func makeRequest
+
 		// MARK: - Private Methods
 	func saveToken (refreshToken token: String, tokenType type: String) -> Bool {
 		let query: Dictionary<String, AnyObject> = [
