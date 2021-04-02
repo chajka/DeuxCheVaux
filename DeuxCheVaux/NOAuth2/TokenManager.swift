@@ -121,6 +121,10 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		}// end if refresh token timer is not set
 	}// end func start
 
+	public func stop () {
+		watcherCount -= 1
+	}// end func stop
+
 		// MARK: - Private Methods
 	func saveToken (refreshToken token: String, tokenType type: String) -> Bool {
 		let query: Dictionary<String, AnyObject> = [
