@@ -43,6 +43,15 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 	@IBOutlet weak var webView: WKWebView!
 
 		// MARK: - Member Variables
+	private let concurrentBackground: DispatchQueue = DispatchQueue(label: "tv.from.chajka.DeuxCheVaux", qos: DispatchQoS(qosClass: DispatchQoS.QoSClass.background, relativePriority: 0), attributes: DispatchQueue.Attributes.concurrent)
+	private var oauthURL: URL!
+	private var refreshQuery: String!
+	private var expire: Int = AccessTokenInterval
+
+	private var watcherCount: Int = 0
+
+	private var refreshTokenTimer: DispatchSourceTimer? = nil
+
 		// MARK: - Constructor / Destructor
 		// MARK: - OVerrides
 	public override func windowDidLoad() {
