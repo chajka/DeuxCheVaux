@@ -90,6 +90,33 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		return resultCode == errSecSuccess
 	}// end update token of keychain
 
+	func readToken (tokenType type: String) -> String? {
+		let query: Dictionary<String, AnyObject> = [
+			kSecClass as String: kSecClassGenericPassword,
+			kSecMatchLimit as String: kSecMatchLimitAll,
+			kSecReturnPersistentRef as String: kCFBooleanTrue,
+			kSecReturnData as String: kCFBooleanTrue,
+			kSecAttrSynchronizable as String: kCFBooleanTrue,
+			kSecAttrAccessible as String: kSecAttrAccessibleAlways,
+			kSecAttrService as String: type as NSString
+		]
+		var result: AnyObject?
+		let resultCode = withUnsafeMutablePointer(to: &result) {
+			 SecItemCopyMatching(query as CFDictionary, $0)
+		}
+		if resultCode == errSecItemNotFound {
+			return nil
+		} else {
+			if let keychainItems = result as? Array<NSDictionary> {
+				for item: NSDictionary in keychainItems {
+					if let data: Data = item[kSecValueData] as? Data {
+						return String(data: data, encoding: .utf8)!
+					}// end if token found
+				}// end foreach keychain item
+			}// end if found keychain items
+		}// end if keychain items found or not
+		return nil
+	}// end func read token from keychain
 
 		// MARK: - Delegate / Protocol clients
 }// end class TokenManager
