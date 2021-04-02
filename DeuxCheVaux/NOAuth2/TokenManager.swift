@@ -40,6 +40,8 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 
 		// MARK: - Computed Properties
 		// MARK: - Outlets
+	@IBOutlet weak var webView: WKWebView!
+
 		// MARK: - Member Variables
 		// MARK: - Constructor / Destructor
 		// MARK: - OVerrides
