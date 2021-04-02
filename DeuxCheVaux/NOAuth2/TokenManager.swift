@@ -63,6 +63,14 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		}// end optional binding check for id token in iCloudKeychain or not
 	}// end convinience init
 
+	deinit {
+		if let timer: DispatchSourceTimer = refreshTokenTimer, !timer.isCancelled {
+			timer.cancel()
+			timer.suspend()
+			refreshTokenTimer = nil
+		}// end if optional binding check for 
+	}// end deinit
+	
 		// MARK: - OVerrides
 	public override func windowDidLoad() {
 		super.windowDidLoad()
