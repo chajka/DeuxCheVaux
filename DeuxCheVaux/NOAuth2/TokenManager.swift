@@ -30,6 +30,8 @@ fileprivate struct Tokens : Codable {
 
 public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		// MARK:   Class Variables
+	public static let shared: TokenManager = TokenManager()
+
 		// MARK: - Class Methods
 		// MARK: - Properties
 		// MARK: - Computed Properties
