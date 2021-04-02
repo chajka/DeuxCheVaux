@@ -10,7 +10,6 @@ import Cocoa
 import WebKit
 import Security
 
-class TokenManager: NSWindowController {
 
     override func windowDidLoad() {
         super.windowDidLoad()
@@ -18,6 +17,7 @@ class TokenManager: NSWindowController {
         // Implement this method to handle any initialization after your window controller's window has been loaded from its nib file.
     }
 
+public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		// MARK:   Class Variables
 		// MARK: - Class Methods
 		// MARK: - Properties
