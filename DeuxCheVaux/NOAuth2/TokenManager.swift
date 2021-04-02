@@ -36,5 +36,25 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		// MARK: - Actions
 		// MARK: - Public Method
 		// MARK: - Private Methods
+	func saveToken (refreshToken token: String, tokenType type: String) -> Bool {
+		let query: Dictionary<String, AnyObject> = [
+			kSecClass as String: kSecClassGenericPassword,
+			kSecReturnPersistentRef as String: kCFBooleanTrue,
+			kSecAttrAccessible as String: kSecAttrAccessibleAlways,
+			kSecAttrSynchronizable as String: kCFBooleanTrue,
+			kSecAttrType as String: kSecAttrApplicationLabel,
+			kSecAttrService as String: type as NSString,
+			kSecValueData as String: token.data(using: .utf8)! as NSData
+		]
+		var result: AnyObject?
+		let resultCode: OSStatus = withUnsafeMutablePointer(to: &result) {
+			SecItemAdd(query as CFDictionary, $0)
+		}
+		if resultCode == errSecDuplicateItem {
+			return false
+		}
+		return resultCode == errSecSuccess
+	}// end func save token into keychain
+
 		// MARK: - Delegate / Protocol clients
 }// end class TokenManager
