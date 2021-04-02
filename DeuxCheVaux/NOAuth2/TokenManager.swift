@@ -84,6 +84,43 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		webView.load(request)
 	}// end func authenticate
 
+	public func start (with oAuthURL: URL, refreshQuery query: String) {
+		oauthURL = oAuthURL
+		refreshQuery = query
+		watcherCount += 1
+		if refreshToken == nil { authenticate() }
+		if refreshTokenTimer == nil {
+			refreshTokenTimer = DispatchSource.makeTimerSource(flags: DispatchSource.TimerFlags(), queue: concurrentBackground)
+			if let timer: DispatchSourceTimer = refreshTokenTimer {
+				timer.setEventHandler {
+					let queryURLString: String = self.oauthURL.absoluteString
+					guard let query: String = self.refreshQuery, let token: String = self.refreshToken else { return }
+					let queryURL: URL = URL(string: queryURLString + "?" + query + "=" + token)!
+					let request: URLRequest = self.makeRequest(url: queryURL)
+					let task: URLSessionDataTask = URLSession(configuration: URLSessionConfiguration.default).dataTask(with: request) { (dat:Data?, resp: URLResponse?, err: Error?) in
+						guard let data: Data = dat, let html: String = String(data: data, encoding: .utf8) else { return }
+						let body: String = String(html.split(separator: ">",maxSplits: 11).last!)
+						let jsonString: String = String(body.split(separator: "<", maxSplits: 2).first!)
+						if let json: Data = jsonString.data(using: .utf8) {
+							let decoder: JSONDecoder = JSONDecoder()
+							do {
+								let tokens: Tokens = try decoder.decode(Tokens.self, from: json)
+								self.refreshToken = tokens.refresh_token
+								self.accessToken = tokens.access_token
+								_ = self.updateToken(to: self.refreshToken, tokenType: RefreshToken)
+							} catch let error {
+								print(error.localizedDescription)
+							}// end do try - catch decode tokens json
+						}// end if json to convert data
+					}// end closure
+					task.resume()
+				}// end event handler
+				timer.schedule(deadline: DispatchTime.now() + .seconds(expire), repeating: .seconds(expire), leeway: .microseconds(10))
+				timer.resume()
+			}// end if optional binding check for refresh token timer
+		}// end if refresh token timer is not set
+	}// end func start
+
 		// MARK: - Private Methods
 	func saveToken (refreshToken token: String, tokenType type: String) -> Bool {
 		let query: Dictionary<String, AnyObject> = [
