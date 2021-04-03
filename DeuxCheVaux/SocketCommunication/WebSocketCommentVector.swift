@@ -136,7 +136,7 @@ public struct ChatElements: Codable {
 			message += ",\"\(mail ?? "")\""
 			message += ",\"\(anonymity ?? 0)\""
 			message += ",\"\(score ?? 0)\""
-			message += ",\(origin ?? "")"
+			message += ",\"\(origin ?? "")\""
 			message += ",\"\(locale?.rawValue ?? UserLanguage.ja.rawValue)\""
 
 			return message
