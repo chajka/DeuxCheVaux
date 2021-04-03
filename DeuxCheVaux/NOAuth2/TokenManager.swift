@@ -48,6 +48,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 	private var oauthURL: URL!
 	private var refreshQuery: String!
 	private var expire: Int = AccessTokenInterval
+	private let session: URLSession = URLSession(configuration: URLSessionConfiguration.default)
 
 	private var watcherCount: Int = 0
 
