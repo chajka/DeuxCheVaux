@@ -141,14 +141,14 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		watcherCount -= 1
 	}// end func stop
 
-	func makeRequest (url: URL) -> URLRequest {
+	public func makeRequest (url: URL) -> URLRequest {
 		var request: URLRequest = URLRequest(url: url)
 		request.addValue(DeuxCheVaux.shared.userAgent, forHTTPHeaderField: UserAgentKey)
 
 		return request
 	}// end func makeRequest
 
-	func makeAccessTokenRequest (url: URL) -> URLRequest {
+	public func makeAccessTokenRequest (url: URL) -> URLRequest {
 		var request: URLRequest = URLRequest(url: url)
 		if let token: String = accessToken {
 			request.addValue(AutorizationBearer + token, forHTTPHeaderField: AuthorizationKey)
@@ -160,7 +160,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 	}// end func makeRequest
 
 		// MARK: - Private Methods
-	func getUserInfo() {
+	private func getUserInfo() {
 		let request:URLRequest =  makeAccessTokenRequest(url: UserInfoURL)
 		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
 			guard let data: Data = dat else { return }
@@ -176,7 +176,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		task.resume()
 	}// end func get user info from oAuth2 server
 
-	func saveToken (refreshToken token: String, tokenType type: String) -> Bool {
+	private func saveToken (refreshToken token: String, tokenType type: String) -> Bool {
 		let query: Dictionary<String, AnyObject> = [
 			kSecClass as String: kSecClassGenericPassword,
 			kSecReturnPersistentRef as String: kCFBooleanTrue,
@@ -196,7 +196,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		return resultCode == errSecSuccess
 	}// end func save token into keychain
 
-	func updateToken (to token: String, tokenType type: String) -> Bool {
+	private func updateToken (to token: String, tokenType type: String) -> Bool {
 		let query: Dictionary<String, AnyObject> = [
 			kSecClass as String: kSecClassGenericPassword,
 			kSecMatchLimit as String: kSecMatchLimitAll,
@@ -230,7 +230,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		return resultCode == errSecSuccess
 	}// end update token of keychain
 
-	func readToken (tokenType type: String) -> String? {
+	private func readToken (tokenType type: String) -> String? {
 		let query: Dictionary<String, AnyObject> = [
 			kSecClass as String: kSecClassGenericPassword,
 			kSecMatchLimit as String: kSecMatchLimitAll,
