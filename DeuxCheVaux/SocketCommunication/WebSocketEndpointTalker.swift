@@ -16,7 +16,7 @@ public final class WebSocketEndpointTalker: NSObject {
 		// MARK: - Outlets
 		// MARK: - Member Variables
 		// MARK: - Constructor / Destructor
-		// MARK: - OVerrides
+		// MARK: - Overrides
 		// MARK: - Actions
 		// MARK: - Public Methods
 		// MARK: - Private Methods
