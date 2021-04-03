@@ -11,6 +11,7 @@ import SwiftWebSocket
 
 fileprivate let SubProtocol: String = "msg.nicovideo.jp#json"
 fileprivate let StartWatching: String = "{\"type\":\"startWatching\",\"data\":{\"stream\":{\"quality\":\"abr\",\"limit\":\"super_high\",\"latency\":\"low\",\"chasePlay\":false},\"reconnect\":false}}"
+fileprivate let Pong: String = "{\"type\":\"pong\"}"
 
 fileprivate enum MessageKind: String {
 	case seat = "seat"
@@ -74,6 +75,45 @@ public final class WebSocketEndpointTalker: NSObject {
 		endpoint.event.error = { (error: Error) in
 			print("error: \(error)")
 		}// end error event
+
+		endpoint.event.message = { [weak self] (message: Any) in
+			guard let weakSelf = self, let json: Data = (message as? String)?.data(using: String.Encoding.utf8) else { return }
+			let decoder: JSONDecoder = JSONDecoder()
+			do {
+				let messageType: MessageType = try decoder.decode(MessageType.self, from: json)
+				if let type: MessageKind = MessageKind(rawValue: messageType.type) {
+					switch type {
+					case .seat:
+						break
+					case .akashic:
+						break
+					case .stream:
+						break
+					case .room:
+						break
+					case .serverTime:
+						break
+					case .statistics:
+						break
+					case .schedule:
+						break
+					case .ping:
+						weakSelf.endpoint.send(text: Pong)
+					case .disconnect:
+						break
+					case .reconnect:
+						break
+					case .postCommentResult:
+						break
+					case .tagUpdated:
+						break
+					}
+				}// end optional binding check for MessageKind
+				
+			} catch let error {
+				print(error.localizedDescription)
+			}
+		}
 	}// end func setupSocketEventHandler
 
 		// MARK: - Delegate / Protocol clients
