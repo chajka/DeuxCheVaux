@@ -9,6 +9,7 @@
 import Cocoa
 import SwiftWebSocket
 
+fileprivate let SubProtocol: String = "msg.nicovideo.jp#json"
 
 public final class WebSocketEndpointTalker: NSObject {
 		// MARK:   Class Variables
