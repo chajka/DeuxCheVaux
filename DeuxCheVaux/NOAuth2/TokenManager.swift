@@ -29,6 +29,16 @@ fileprivate struct Tokens: Codable {
 	let id_token: String?
 }// end struct Tokens
 
+fileprivate struct UserInfo: Codable {
+	let sub: String
+	let nickname: String
+	let profile: String
+	let picture: String
+	let gender: String?
+	let zoneinfo: String
+	let updated_at: Int
+}// end struct UserInfo
+
 public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		// MARK:   Class Variables
 	public static let shared: TokenManager = TokenManager()
