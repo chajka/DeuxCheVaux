@@ -42,6 +42,15 @@ fileprivate struct UserInfo: Codable {
 	let updated_at: Int
 }// end struct UserInfo
 
+fileprivate struct URLData: Codable {
+	let url: String
+}// end struct URLData
+
+fileprivate struct URLResult: Codable {
+	let meta: MetaInformation
+	let data: URLData
+}// end struct URLResult
+
 public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		// MARK:   Class Variables
 	public static let shared: TokenManager = TokenManager()
