@@ -160,6 +160,23 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 	}// end func makeRequest
 
 		// MARK: - Private Methods
+	func getUserInfo() {
+		let request:URLRequest =  makeAccessTokenRequest(url: UserInfoURL)
+		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
+			guard let data: Data = dat else { return }
+			do {
+				let decoder: JSONDecoder = JSONDecoder()
+				let userInfo: UserInfo = try decoder.decode(UserInfo.self, from: data)
+				self.userIdentifier = userInfo.sub
+				self.userNickname = userInfo.nickname
+			} catch let error {
+				print(error.localizedDescription)
+			}// end do try - catch decode user info
+			print(String(data: data, encoding: .utf8))
+		}
+		task.resume()
+	}// end func get user info from oAuth2 server
+
 	func saveToken (refreshToken token: String, tokenType type: String) -> Bool {
 		let query: Dictionary<String, AnyObject> = [
 			kSecClass as String: kSecClassGenericPassword,
