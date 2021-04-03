@@ -32,6 +32,15 @@ fileprivate struct MessageType: Codable {
 	let type: String
 }// end struct MessageType
 
+fileprivate struct SeatData: Codable {
+	let keepIntervalSec: Int
+}// end struct SeatData
+
+fileprivate struct Seat: Codable {
+	let type: String
+	let data: SeatData
+}// end struct Seat
+
 public final class WebSocketEndpointTalker: NSObject {
 		// MARK:   Class Variables
 		// MARK: - Class Methods
@@ -43,6 +52,7 @@ public final class WebSocketEndpointTalker: NSObject {
 		// MARK: - Member Variables
 	private weak var runLoop: RunLoop? = DeuxCheVaux.shared.runLoop
 	private var endpoint: WebSocket
+	private var keepSeatInterval: Int = 0
 
 		// MARK: - Constructor / Destructor
 	public init (url: URL) {
@@ -84,7 +94,12 @@ public final class WebSocketEndpointTalker: NSObject {
 				if let type: MessageKind = MessageKind(rawValue: messageType.type) {
 					switch type {
 					case .seat:
-						break
+						do {
+							let seat: Seat = try decoder.decode(Seat.self, from: json)
+							weakSelf.keepSeatInterval = seat.data.keepIntervalSec
+						} catch let error {
+							print("seat decode error \(error.localizedDescription)")
+						}
 					case .akashic:
 						break
 					case .stream:
