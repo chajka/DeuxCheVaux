@@ -7,6 +7,8 @@
 //
 
 import Cocoa
+import SwiftWebSocket
+
 
 public final class WebSocketEndpointTalker: NSObject {
 		// MARK:   Class Variables
