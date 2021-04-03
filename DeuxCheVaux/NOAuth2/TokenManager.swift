@@ -116,7 +116,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 					}// end closure
 					task.resume()
 				}// end event handler
-				timer.schedule(deadline: DispatchTime.now() + .seconds(expire), repeating: .seconds(expire), leeway: .microseconds(10))
+				timer.schedule(deadline: DispatchTime.now(), repeating: .seconds(expire), leeway: .microseconds(10))
 				timer.resume()
 			}// end if optional binding check for refresh token timer
 		}// end if refresh token timer is not set
