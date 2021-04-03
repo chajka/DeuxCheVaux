@@ -14,6 +14,9 @@ fileprivate let TokenManagerNibName: String = "TokenManager"
 fileprivate let AuthorizationBaseURL: URL = URL(string: "https://oauth.nicovideo.jp/")!
 fileprivate let AuthorizedURL: URL = AuthorizationBaseURL.appendingPathComponent("oauth2/authorized")
 fileprivate let UserInfoURL: URL = AuthorizationBaseURL.appendingPathComponent("open_id/userinfo")
+fileprivate let WSEndPointURLString: String = "https://api.live2.nicovideo.jp/api/v1/wsendpoint"
+fileprivate let WSEndPointProgramKey: String = "?nicoliveProgramId="
+fileprivate let WSEndPointUserIDKey: String = "&userId="
 fileprivate let AccessTokenInterval: Int = 60 * 60
 fileprivate let AuthorizationKey: String = "Authorization"
 fileprivate let AutorizationBearer: String = "Bearer "
