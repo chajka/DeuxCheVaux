@@ -12,6 +12,10 @@ import SwiftWebSocket
 fileprivate let SubProtocol: String = "msg.nicovideo.jp#json"
 fileprivate let StartWatching: String = "{\"type\":\"startWatching\",\"data\":{\"stream\":{\"quality\":\"abr\",\"limit\":\"super_high\",\"latency\":\"low\",\"chasePlay\":false},\"reconnect\":false}}"
 
+fileprivate struct MessageType: Codable {
+	let type: String
+}// end struct MessageType
+
 public final class WebSocketEndpointTalker: NSObject {
 		// MARK:   Class Variables
 		// MARK: - Class Methods
