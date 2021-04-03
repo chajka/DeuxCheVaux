@@ -71,6 +71,14 @@ public final class WebSocketEndpointTalker: NSObject {
 		endpoint.allowSelfSignedSSL = true
 	}// end init
 
+	deinit {
+		if let timer: DispatchSourceTimer = keepSeatTimer {
+			timer.suspend()
+			timer.cancel()
+			keepSeatTimer = nil
+		}// end optional binding check for keep seat timer
+	}// end deinit
+
 		// MARK: - Overrides
 		// MARK: - Actions
 		// MARK: - Public Methods
