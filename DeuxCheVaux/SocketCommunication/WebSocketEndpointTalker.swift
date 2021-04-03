@@ -108,8 +108,11 @@ public final class WebSocketEndpointTalker: NSObject {
 					switch type {
 					case .seat:
 						do {
+							guard let timer: DispatchSourceTimer = weakSelf.keepSeatTimer else { return }
 							let seat: Seat = try decoder.decode(Seat.self, from: json)
 							weakSelf.keepSeatInterval = seat.data.keepIntervalSec
+							timer.schedule(deadline: DispatchTime.now(), repeating: .seconds(weakSelf.keepSeatInterval), leeway: .milliseconds(10))
+							timer.resume()
 						} catch let error {
 							print("seat decode error \(error.localizedDescription)")
 						}
