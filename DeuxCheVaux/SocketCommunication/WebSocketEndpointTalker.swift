@@ -32,7 +32,9 @@ public final class WebSocketEndpointTalker: NSObject {
 			endpoint = WebSocket(request: request, subProtocols: [SubProtocol], runLoop: runLoop)
 		} else {
 			endpoint = WebSocket(request: request, subProtocols: [SubProtocol])
-		}
+		}// end optional binding check for runLoop
+		endpoint.compression.on = true
+		endpoint.allowSelfSignedSSL = true
 	}// end init
 
 		// MARK: - Overrides
