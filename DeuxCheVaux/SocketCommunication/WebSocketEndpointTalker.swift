@@ -66,6 +66,10 @@ public final class WebSocketEndpointTalker: NSObject {
 			guard let weakSelf = self else { return }
 			weakSelf.endpoint.send(text: StartWatching)
 		}// end open event
+
+		endpoint.event.close = { (code: Int, reason: String, clean: Bool) in
+			print("code: \(code), reason: \(reason), clean: \(clean)")
+		}// end close event
 	}// end func setupSocketEventHandler
 
 		// MARK: - Delegate / Protocol clients
