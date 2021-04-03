@@ -61,5 +61,12 @@ public final class WebSocketEndpointTalker: NSObject {
 		// MARK: - Actions
 		// MARK: - Public Methods
 		// MARK: - Private Methods
+	private func setupSocketEventHandler () {
+		endpoint.event.open = { [weak self] in
+			guard let weakSelf = self else { return }
+			weakSelf.endpoint.send(text: StartWatching)
+		}// end open event
+	}// end func setupSocketEventHandler
+
 		// MARK: - Delegate / Protocol clients
 }// end class WebSocketEndpointTalker
