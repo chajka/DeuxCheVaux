@@ -21,10 +21,18 @@ public final class WebSocketEndpointTalker: NSObject {
 		// MARK: - Outlets
 		// MARK: - Member Variables
 	private weak var runLoop: RunLoop? = DeuxCheVaux.shared.runLoop
+	private var endpoint: WebSocket
 
 		// MARK: - Constructor / Destructor
 	public init (url: URL) {
 		self.url = url
+		var request: URLRequest = URLRequest(url: self.url)
+		request.addValue(DeuxCheVaux.shared.userAgent, forHTTPHeaderField: UserAgentKey)
+		if let runLoop: RunLoop = self.runLoop {
+			endpoint = WebSocket(request: request, subProtocols: [SubProtocol], runLoop: runLoop)
+		} else {
+			endpoint = WebSocket(request: request, subProtocols: [SubProtocol])
+		}
 	}// end init
 
 		// MARK: - Overrides
