@@ -128,8 +128,11 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 
 	func makeRequest (url: URL) -> URLRequest {
 		var request: URLRequest = URLRequest(url: url)
-		request.setValue(AutorizationBearer + accessToken, forHTTPHeaderField: UserAgentKey)
-		request.setValue(DeuxCheVaux.shared.userAgent, forHTTPHeaderField: UserAgentKey)
+		request.addValue(DeuxCheVaux.shared.userAgent, forHTTPHeaderField: UserAgentKey)
+
+		return request
+	}// end func makeRequest
+
 
 		return request
 	}// end func makeRequest
