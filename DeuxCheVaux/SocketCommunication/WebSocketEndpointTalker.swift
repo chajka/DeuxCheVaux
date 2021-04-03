@@ -12,6 +12,21 @@ import SwiftWebSocket
 fileprivate let SubProtocol: String = "msg.nicovideo.jp#json"
 fileprivate let StartWatching: String = "{\"type\":\"startWatching\",\"data\":{\"stream\":{\"quality\":\"abr\",\"limit\":\"super_high\",\"latency\":\"low\",\"chasePlay\":false},\"reconnect\":false}}"
 
+fileprivate enum MessageKind: String {
+	case seat = "seat"
+	case akashic = "akashic"
+	case stream = "stream"
+	case room = "room"
+	case serverTime = "serverTime"
+	case statistics = "statistics"
+	case schedule = "schedule"
+	case ping = "ping"
+	case disconnect = "disconnect"
+	case reconnect = "reconnect"
+	case postCommentResult = "postCommentResult"
+	case tagUpdated = "tagUpdated"
+}// end enum MessageKind
+
 fileprivate struct MessageType: Codable {
 	let type: String
 }// end struct MessageType
