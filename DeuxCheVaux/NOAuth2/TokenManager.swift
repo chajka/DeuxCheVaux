@@ -13,13 +13,14 @@ import Security
 fileprivate let TokenManagerNibName: String = "TokenManager"
 fileprivate let AuthorizationBaseURL: URL = URL(string: "https://oauth.nicovideo.jp/")!
 fileprivate let AuthorizedURL: URL = AuthorizationBaseURL.appendingPathComponent("oauth2/authorized")
+fileprivate let UserInfoURL: URL = AuthorizationBaseURL.appendingPathComponent("open_id/userinfo")
 fileprivate let AccessTokenInterval: Int = 60 * 60
 fileprivate let AuthorizationKey: String = "Authorization"
-fileprivate let AutorizationBearer: String = "bearer "
+fileprivate let AutorizationBearer: String = "Bearer "
 fileprivate let RefreshToken: String = "jp.nicovideo.oauth2-refresh_token"
 fileprivate let IDToken: String = "jp.nicovideo.oauth2-id_token"
 
-fileprivate struct Tokens : Codable {
+fileprivate struct Tokens: Codable {
 	let access_token: String
 	let token_type: String
 	let expires_in: Int
