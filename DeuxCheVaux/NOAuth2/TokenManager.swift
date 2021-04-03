@@ -172,8 +172,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 			} catch let error {
 				print(error.localizedDescription)
 			}// end do try - catch decode user info
-			print(String(data: data, encoding: .utf8))
-		}
+		}// end completion handler
 		task.resume()
 	}// end func get user info from oAuth2 server
 
