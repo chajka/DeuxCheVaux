@@ -8,7 +8,7 @@
 
 import Cocoa
 
-class WebSocketEndpointTalker: NSObject {
+public final class WebSocketEndpointTalker: NSObject {
 		// MARK:   Class Variables
 		// MARK: - Class Methods
 		// MARK: - Properties
