@@ -20,6 +20,8 @@ public final class WebSocketEndpointTalker: NSObject {
 		// MARK: - Computed Properties
 		// MARK: - Outlets
 		// MARK: - Member Variables
+	private weak var runLoop: RunLoop? = DeuxCheVaux.shared.runLoop
+
 		// MARK: - Constructor / Destructor
 	public init (url: URL) {
 		self.url = url
