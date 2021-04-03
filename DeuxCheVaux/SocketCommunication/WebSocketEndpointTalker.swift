@@ -70,6 +70,10 @@ public final class WebSocketEndpointTalker: NSObject {
 		endpoint.event.close = { (code: Int, reason: String, clean: Bool) in
 			print("code: \(code), reason: \(reason), clean: \(clean)")
 		}// end close event
+
+		endpoint.event.error = { (error: Error) in
+			print("error: \(error)")
+		}// end error event
 	}// end func setupSocketEventHandler
 
 		// MARK: - Delegate / Protocol clients
