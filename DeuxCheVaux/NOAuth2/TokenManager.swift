@@ -133,6 +133,13 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		return request
 	}// end func makeRequest
 
+	func makeAccessTokenRequest (url: URL) -> URLRequest {
+		var request: URLRequest = URLRequest(url: url)
+		if let token: String = accessToken {
+			request.addValue(AutorizationBearer + token, forHTTPHeaderField: AuthorizationKey)
+		}// end optional binding check for access token
+		request.addValue(DeuxCheVaux.shared.userAgent, forHTTPHeaderField: UserAgentKey)
+		request.httpMethod = "GET"
 
 		return request
 	}// end func makeRequest
