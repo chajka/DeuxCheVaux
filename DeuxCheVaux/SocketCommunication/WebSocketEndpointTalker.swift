@@ -9,5 +9,16 @@
 import Cocoa
 
 class WebSocketEndpointTalker: NSObject {
-
+		// MARK:   Class Variables
+		// MARK: - Class Methods
+		// MARK: - Properties
+		// MARK: - Computed Properties
+		// MARK: - Outlets
+		// MARK: - Member Variables
+		// MARK: - Constructor / Destructor
+		// MARK: - OVerrides
+		// MARK: - Actions
+		// MARK: - Public Methods
+		// MARK: - Private Methods
+		// MARK: - Delegate / Protocol clients
 }// end class WebSocketEndpointTalker
