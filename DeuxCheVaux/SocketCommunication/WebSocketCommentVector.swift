@@ -338,7 +338,7 @@ public final class WebSocketCommentVector: NSObject {
 						let info: ThreadResult = try decoder.decode(ThreadResult.self, from: json)
 						weakSelf.ticket = info.thread.ticket
 						if let last_res: Int = info.thread.last_res {
-							weakSelf.lastRes = last_res > 1 ? last_res - 1 : last_res
+							weakSelf.lastRes = last_res
 						} else {
 							weakSelf.lastRes = 0
 						}// end optional binding check for last_res
