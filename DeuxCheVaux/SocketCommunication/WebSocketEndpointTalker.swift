@@ -12,6 +12,7 @@ import SwiftWebSocket
 fileprivate let SubProtocol: String = "msg.nicovideo.jp#json"
 fileprivate let StartWatching: String = "{\"type\":\"startWatching\",\"data\":{\"stream\":{\"quality\":\"abr\",\"limit\":\"super_high\",\"latency\":\"low\",\"chasePlay\":false},\"reconnect\":false}}"
 fileprivate let Pong: String = "{\"type\":\"pong\"}"
+fileprivate let KeepSeat: String = "{\"type\":\"keepSeat\"}"
 
 fileprivate enum MessageKind: String {
 	case seat = "seat"
@@ -54,6 +55,8 @@ public final class WebSocketEndpointTalker: NSObject {
 	private var endpoint: WebSocket
 	private var keepSeatInterval: Int = 0
 
+	private var keepSeatTimer: DispatchSourceTimer? = nil
+
 		// MARK: - Constructor / Destructor
 	public init (url: URL) {
 		self.url = url
@@ -72,6 +75,16 @@ public final class WebSocketEndpointTalker: NSObject {
 		// MARK: - Actions
 		// MARK: - Public Methods
 		// MARK: - Private Methods
+	private func setupKeepSeatTimer () {
+		keepSeatTimer = DispatchSource.makeTimerSource()
+		if let timer: DispatchSourceTimer = keepSeatTimer {
+			timer.setEventHandler { [weak self] in
+				guard let weakSelf = self else { return }
+				weakSelf.endpoint.send(text: KeepSeat)
+			}// end event Handler
+		}// end optional binding check for keep seat timer
+	}// end func setupKeepSeatTimer
+
 	private func setupSocketEventHandler () {
 		endpoint.event.open = { [weak self] in
 			guard let weakSelf = self else { return }
