@@ -63,6 +63,7 @@ public final class WebSocketEndpointTalker: NSObject {
 		// MARK: - Class Methods
 		// MARK: - Properties
 	public let url: URL
+	public weak var delegate: heartbeatDelegate?
 
 		// MARK: - Computed Properties
 		// MARK: - Outlets
