@@ -150,7 +150,15 @@ public final class WebSocketEndpointTalker: NSObject {
 					case .serverTime:
 						break
 					case .statistics:
-						break
+						do {
+							let statistics: Statistics = try decoder.decode(Statistics.self, from: json)
+							let stat: StatData = statistics.data
+							if let delegate: heartbeatDelegate = weakSelf.delegate {
+								delegate.heartbeat(viewer: stat.viewers, comments: stat.comments, ad: stat.adPoints, gift: stat.giftPoints)
+							}// end optional binding check for heartbeat delegate
+						} catch let error {
+							print("statistics decode error \(error.localizedDescription)")
+						}// end do try - catch decode statistics json
 					case .schedule:
 						break
 					case .ping:
