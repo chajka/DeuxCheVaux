@@ -54,6 +54,10 @@ fileprivate struct Statistics: Codable {
 	let data: StatData
 }// end struct Statistics
 
+public protocol heartbeatDelegate: class {
+	func heartbeat (viewer: Int, comments: Int, ad: Int, gift: Int)
+}// end protocol heartbeatDelegate
+
 public final class WebSocketEndpointTalker: NSObject {
 		// MARK:   Class Variables
 		// MARK: - Class Methods
