@@ -42,6 +42,18 @@ fileprivate struct Seat: Codable {
 	let data: SeatData
 }// end struct Seat
 
+fileprivate struct StatData: Codable {
+	let viewers: Int
+	let comments: Int
+	let adPoints: Int
+	let giftPoints: Int
+}// end struct StatData
+
+fileprivate struct Statistics: Codable {
+	let type: String
+	let data: StatData
+}// end struct Statistics
+
 public final class WebSocketEndpointTalker: NSObject {
 		// MARK:   Class Variables
 		// MARK: - Class Methods
