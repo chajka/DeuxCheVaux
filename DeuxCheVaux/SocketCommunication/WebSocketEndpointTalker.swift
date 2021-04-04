@@ -58,10 +58,10 @@ fileprivate struct PostCommentData: Codable {
 	let text: String
 	let vpos: Int
 	let isAnonymous: Bool
-	let color: String
-	let size: String
-	let position: String
-	let font: String
+	let color: String?
+	let size: String?
+	let position: String?
+	let font: String?
 }// end struct PostCommentData
 
 fileprivate struct PostComment: Codable {
