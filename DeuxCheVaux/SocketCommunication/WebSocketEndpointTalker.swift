@@ -54,6 +54,21 @@ fileprivate struct Statistics: Codable {
 	let data: StatData
 }// end struct Statistics
 
+fileprivate struct PostCommentData: Codable {
+	let text: String
+	let vpos: Int
+	let isAnonymous: Bool
+	let color: String
+	let size: String
+	let position: String
+	let font: String
+}// end struct PostCommentData
+
+fileprivate struct PostComment: Codable {
+	let type: String
+	let data: PostCommentData
+}// end struct PostComment
+
 public protocol heartbeatDelegate: class {
 	func heartbeat (viewer: Int, comments: Int, ad: Int, gift: Int)
 }// end protocol heartbeatDelegate
