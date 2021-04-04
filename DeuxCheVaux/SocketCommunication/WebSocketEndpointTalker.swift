@@ -114,6 +114,16 @@ public final class WebSocketEndpointTalker: NSObject {
 		// MARK: - Overrides
 		// MARK: - Actions
 		// MARK: - Public Methods
+	public func open () {
+		setupKeepSeatTimer()
+		setupSocketEventHandler()
+		endpoint.open()
+	}// end open
+
+	public func close () {
+		endpoint.close()
+	}// end close
+
 	public func postComment (comment: String, vpos: Int, isAnoymous: Bool, color: String = "white", size: String = "medium", position: String = "naka", font: String = "defont") {
 		let commentToPost: PostCommentData = PostCommentData(text: comment, vpos: vpos, isAnonymous: isAnoymous, color: color, size: size, position: position, font: font)
 		let comment: PostComment = PostComment(type: "postComment", data: commentToPost)
