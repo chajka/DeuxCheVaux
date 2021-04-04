@@ -175,7 +175,7 @@ public final class WebSocketEndpointTalker: NSObject {
 				}// end optional binding check for MessageKind
 				
 			} catch let error {
-				print(error.localizedDescription)
+				print("type json decode error \(error.localizedDescription)")
 			}
 		}
 	}// end func setupSocketEventHandler
