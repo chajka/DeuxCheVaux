@@ -208,6 +208,8 @@ public final class WebSocketEndpointTalker: NSObject {
 					case .tagUpdated:
 						break
 					}
+				} else {
+					print("incorrect type : \(message)")
 				}// end optional binding check for MessageKind
 				
 			} catch let error {
