@@ -143,9 +143,8 @@ public final class WebSocketEndpointTalker: NSObject {
 	private func setupKeepSeatTimer () {
 		keepSeatTimer = DispatchSource.makeTimerSource()
 		if let timer: DispatchSourceTimer = keepSeatTimer {
-			timer.setEventHandler { [weak self] in
-				guard let weakSelf = self else { return }
-				weakSelf.endpoint.send(text: KeepSeat)
+			timer.setEventHandler {
+				self.endpoint.send(text: KeepSeat)
 			}// end event Handler
 		}// end optional binding check for keep seat timer
 	}// end func setupKeepSeatTimer
