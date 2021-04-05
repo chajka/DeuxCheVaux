@@ -93,6 +93,7 @@ public final class WebSocketEndpointTalker: NSObject {
 		self.url = url
 		var request: URLRequest = URLRequest(url: self.url)
 		request.addValue(DeuxCheVaux.shared.userAgent, forHTTPHeaderField: UserAgentKey)
+		request.addValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
 		if let runLoop: RunLoop = self.runLoop {
 			endpoint = WebSocket(request: request, runLoop: runLoop)
 		} else {
