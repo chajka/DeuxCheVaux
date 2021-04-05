@@ -118,6 +118,7 @@ public final class WebSocketEndpointTalker: NSObject {
 		setupKeepSeatTimer()
 		setupSocketEventHandler()
 		endpoint.open()
+		endpoint.send(text: StartWatching)
 	}// end open
 
 	public func close () {
@@ -148,9 +149,7 @@ public final class WebSocketEndpointTalker: NSObject {
 	}// end func setupKeepSeatTimer
 
 	private func setupSocketEventHandler () {
-		endpoint.event.open = { [weak self] in
-			guard let weakSelf = self else { return }
-			weakSelf.endpoint.send(text: StartWatching)
+		endpoint.event.open = {
 		}// end open event
 
 		endpoint.event.close = { (code: Int, reason: String, clean: Bool) in
