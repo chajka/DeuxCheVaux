@@ -95,8 +95,6 @@ public struct ChatElements: Codable {
 	public let premium: Int?
 	public let mail: String?
 	public let anonymity: Int?
-	public let score: Int?
-	public let origin: String?
 	public let locale: UserLanguage?
 	
 	public static var logHeader: String {
@@ -113,8 +111,6 @@ public struct ChatElements: Codable {
 			message += ",\"premium\""
 			message += ",\"mail\""
 			message += ",\"anonymity\""
-			message += ",\"score\""
-			message += ",\"origin\""
 			message += ",\"locale\""
 
 			return message
@@ -135,8 +131,6 @@ public struct ChatElements: Codable {
 			message += ",\"\(String(describing: premium != nil ? premium! : 0))\""
 			message += ",\"\(mail ?? "")\""
 			message += ",\"\(anonymity ?? 0)\""
-			message += ",\"\(score ?? 0)\""
-			message += ",\"\(origin ?? "")\""
 			message += ",\"\(locale?.rawValue ?? UserLanguage.ja.rawValue)\""
 
 			return message
