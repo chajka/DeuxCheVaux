@@ -45,8 +45,8 @@ fileprivate struct Seat: Codable {
 fileprivate struct StatData: Codable {
 	let viewers: Int
 	let comments: Int
-	let adPoints: Int
-	let giftPoints: Int
+	let adPoints: Int?
+	let giftPoints: Int?
 }// end struct StatData
 
 fileprivate struct Statistics: Codable {
@@ -69,8 +69,8 @@ fileprivate struct PostComment: Codable {
 	let data: PostCommentData
 }// end struct PostComment
 
-public protocol heartbeatDelegate: class {
-	func heartbeat (viewer: Int, comments: Int, ad: Int, gift: Int)
+public protocol HeartbeatDelegate: class {
+	func heartbeat (viewer: Int, comments: Int, ad: Int?, gift: Int?)
 }// end protocol heartbeatDelegate
 
 public final class WebSocketEndpointTalker: NSObject {
@@ -78,14 +78,14 @@ public final class WebSocketEndpointTalker: NSObject {
 		// MARK: - Class Methods
 		// MARK: - Properties
 	public let url: URL
-	public weak var delegate: heartbeatDelegate?
+	public weak var delegate: HeartbeatDelegate?
 
 		// MARK: - Computed Properties
 		// MARK: - Outlets
 		// MARK: - Member Variables
 	private weak var runLoop: RunLoop? = DeuxCheVaux.shared.runLoop
 	private var endpoint: WebSocket
-	private var keepSeatInterval: Int = 0
+	private var keepSeatInterval: Int = 30
 
 	private var keepSeatTimer: DispatchSourceTimer? = nil
 
@@ -190,7 +190,7 @@ public final class WebSocketEndpointTalker: NSObject {
 						do {
 							let statistics: Statistics = try decoder.decode(Statistics.self, from: json)
 							let stat: StatData = statistics.data
-							if let delegate: heartbeatDelegate = weakSelf.delegate {
+							if let delegate: HeartbeatDelegate = weakSelf.delegate {
 								delegate.heartbeat(viewer: stat.viewers, comments: stat.comments, ad: stat.adPoints, gift: stat.giftPoints)
 							}// end optional binding check for heartbeat delegate
 						} catch let error {
