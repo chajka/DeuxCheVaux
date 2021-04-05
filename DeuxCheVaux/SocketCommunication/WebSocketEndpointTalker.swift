@@ -125,13 +125,15 @@ public final class WebSocketEndpointTalker: NSObject {
 		endpoint.close()
 	}// end close
 
-	public func postComment (comment: String, vpos: Int, isAnoymous: Bool, color: String = "white", size: String = "medium", position: String = "naka", font: String = "defont") {
+	public func postComment (comment: String, vpos: Int, isAnoymous: Bool, color: String? = "white", size: String? = "medium", position: String? = "naka", font: String? = "defont") {
 		let commentToPost: PostCommentData = PostCommentData(text: comment, vpos: vpos, isAnonymous: isAnoymous, color: color, size: size, position: position, font: font)
 		let comment: PostComment = PostComment(type: "postComment", data: commentToPost)
 		let encoder: JSONEncoder = JSONEncoder()
 		do {
 			let json: Data = try encoder.encode(comment)
-			endpoint.send(data: json)
+			if let postComment: String = String(data: json, encoding: .utf8) {
+				endpoint.send(text: postComment)
+			}// end optional binding check for json data convert to string
 		} catch let error {
 			print("post comment json encode error \(error.localizedDescription)")
 		}// end do try - catch encode json
