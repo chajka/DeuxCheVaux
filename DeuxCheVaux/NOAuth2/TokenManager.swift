@@ -229,6 +229,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		if resultCode == errSecDuplicateItem {
 			return false
 		}
+
 		return resultCode == errSecSuccess
 	}// end func save token into keychain
 
@@ -263,6 +264,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		resultCode = withUnsafeMutablePointer(to: &result) {
 			SecItemAdd(itemToUpdate as CFDictionary, $0)
 		}
+
 		return resultCode == errSecSuccess
 	}// end update token of keychain
 
@@ -291,6 +293,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 				}// end foreach keychain item
 			}// end if found keychain items
 		}// end if keychain items found or not
+
 		return nil
 	}// end func read token from keychain
 
