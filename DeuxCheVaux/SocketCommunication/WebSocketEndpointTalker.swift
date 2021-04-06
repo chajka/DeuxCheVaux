@@ -201,9 +201,9 @@ public final class WebSocketEndpointTalker: NSObject {
 					case .ping:
 						weakSelf.endpoint.send(text: Pong)
 					case .disconnect:
-						break
+						print("discsonnect message from ws endpoint")
 					case .reconnect:
-						break
+						print("recsonnect message from ws endpoint")
 					case .postCommentResult:
 						break
 					case .tagUpdated:
