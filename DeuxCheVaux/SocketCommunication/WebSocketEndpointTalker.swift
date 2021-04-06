@@ -222,7 +222,12 @@ public final class WebSocketEndpointTalker: NSObject {
 					case .ping:
 						weakSelf.endpoint.send(text: Pong)
 					case .disconnect:
-						print("discsonnect message from ws endpoint")
+						do {
+							let message: Disconnect = try decoder.decode(Disconnect.self, from: json)
+							print("Disconnect reason \(message.data.reason)")
+						} catch let error {
+							print("Disconnect decode error \(error.localizedDescription)")
+						}// end do try - catch decode json
 					case .reconnect:
 						print("recsonnect message from ws endpoint")
 					case .postCommentResult:
