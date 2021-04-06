@@ -62,6 +62,18 @@ fileprivate struct Disconnect: Codable {
 	let data: Reason
 }// end struct Disconnect
 
+public enum DisconnectReason: String {
+	case takeover = "TAKEOVER"
+	case noPermission = "NO_PERMISSION"
+	case endProgram = "END_PROGRAM"
+	case pingTimeout = "PING_TIMEOUT"
+	case tooManyConnections = "TOO_MANY_CONNECTIONS"
+	case tooManyWatchings = "TOO_MANY_WATCHINGS"
+	case crowded = "CROWDED"
+	case maintenanceIn = "MAINTENANCE_IN"
+	case serverTemporaryUnavailable = "SERVICE_TEMPORARILY_UNAVAILABLE"
+}// end enum DisconnectReason
+
 fileprivate struct PostCommentData: Codable {
 	let text: String
 	let vpos: Int
