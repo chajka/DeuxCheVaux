@@ -324,7 +324,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 				_ = self.updateToken(to: self.idToken, tokenType: IDToken)
 			} catch let error {
 				print(error.localizedDescription)
-			}
-		}
+			}// end do try - catch decode json
+		}// end evaluate java scrippt completion handler
 	}// end func wevbiew didFinish
 }// end class TokenManager
