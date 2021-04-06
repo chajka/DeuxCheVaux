@@ -53,6 +53,15 @@ fileprivate struct Statistics: Codable {
 	let data: StatData
 }// end struct Statistics
 
+fileprivate struct Reason: Codable {
+	let reason: String
+}// end struct Reason
+
+fileprivate struct Disconnect: Codable {
+	let type: String
+	let data: Reason
+}// end struct Disconnect
+
 fileprivate struct PostCommentData: Codable {
 	let text: String
 	let vpos: Int
