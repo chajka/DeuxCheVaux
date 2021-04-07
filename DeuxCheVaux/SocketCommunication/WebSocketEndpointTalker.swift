@@ -127,6 +127,7 @@ public final class WebSocketEndpointTalker: NSObject {
 	private weak var runLoop: RunLoop? = DeuxCheVaux.shared.runLoop
 	private var endpoint: WebSocket
 	private var keepSeatInterval: Int = 30
+	private var roomInfoHandler: OpenEndpointHander? = nil
 
 	private var keepSeatTimer: DispatchSourceTimer? = nil
 
