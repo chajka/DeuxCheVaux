@@ -40,9 +40,9 @@ fileprivate struct MessageServerData: Codable {
 fileprivate struct RoomData: Codable {
 	let messageServer: MessageServerData
 	let name: String
-	let threadID: String
+	let threadId: String
 	let isFirst: Bool
-	let waybackKey: String
+	let waybackkey: String
 	let yourPostKey: String
 }// end struct RoomData
 
