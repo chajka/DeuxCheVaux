@@ -194,11 +194,11 @@ public final class WebSocketEndpointTalker: NSObject {
 		}// end open event
 
 		endpoint.event.close = { (code: Int, reason: String, clean: Bool) in
-			print("code: \(code), reason: \(reason), clean: \(clean)")
+			print("talker code: \(code), reason: \(reason), clean: \(clean)")
 		}// end close event
 
 		endpoint.event.error = { (error: Error) in
-			print("error: \(error)")
+			print("talker error: \(error)")
 		}// end error event
 
 		endpoint.event.message = { [weak self] (message: Any) in
