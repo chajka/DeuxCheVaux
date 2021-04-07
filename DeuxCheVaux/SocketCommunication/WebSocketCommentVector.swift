@@ -235,14 +235,16 @@ public final class WebSocketCommentVector: NSObject {
 		// MARK: - Internal methods
 		// MARK: - Private methods
 	private func setupSocketEventHandler (history: Int) {
+		self.history = history
 		socket.event.open = { [weak self] in
 			guard let weakSelf = self else { return }
-			let threadData: ThreadRequest = ThreadRequest(thread: weakSelf.thread, uid: weakSelf.userIdentifier, resFrom: history)
+			let threadData: ThreadRequest = ThreadRequest(thread: weakSelf.thread, uid: weakSelf.userIdentifier, resFrom: weakSelf.history)
 			let commentRequest: CommentRequest = CommentRequest(thread: threadData)
 			do {
 				let json: Data = try JSONEncoder().encode(commentRequest)
 				if let request: String = String(data: json, encoding: .utf8) {
 					weakSelf.socket.send(text: "\(request)")
+					weakSelf.history = 0
 				}
 			} catch let error {
 				print(error.localizedDescription)
