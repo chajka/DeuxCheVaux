@@ -260,7 +260,7 @@ public final class WebSocketCommentVector: NSObject {
 		}// end close event
 
 		socket.event.error = { (error: Error) in
-			print("error: \(error)")
+			print("socket \(self.roomLabel) error: \(error)")
 		}// end error event
 
 		socket.event.message = { [weak self] (message: Any) in
