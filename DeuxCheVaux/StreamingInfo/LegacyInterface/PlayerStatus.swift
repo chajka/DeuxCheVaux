@@ -28,7 +28,6 @@ enum PlayerStatusKey: String {
 	case listenerIsVIP = "is_vip"
 	case msAddress = "addr"
 	case msPort = "port"
-	case msThread = "thread"
 	case messageServerList = "ms_list"
 	case code = "code"
 }// end enum PlayerStatusKey
@@ -185,11 +184,6 @@ public final class PlayerStatus: NSObject , XMLParserDelegate {
 				if let portNumber: Int = Int(stringBuffer) {
 					port = portNumber
 				}// end if port number is convert to integer
-			case .msThread:
-				thread = String(stringBuffer)
-				let xmlserver: XMLSocket = XMLSocket(address: server, port: port)
-				let ms: MessageServer = MessageServer(XMLSocket: xmlserver, webSocket: nil, thread: thread, name: nil, identifier: nil)
-				messageServers.append(ms)
 			case .messageServerList:
 				messageServers.removeFirst()
 			case .code:
