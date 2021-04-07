@@ -219,6 +219,7 @@ public final class WebSocketCommentVector: NSObject {
 		// MARK: - Actions
 		// MARK: - Public methods
 	public func open (history: Int) {
+		disconnected = false
 		setupSocketEventHandler(history: history)
 		socket.open()
 		keepaliveTimer = setupKeepAliveTimer()
