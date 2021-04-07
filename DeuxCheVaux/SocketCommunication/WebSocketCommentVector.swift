@@ -176,7 +176,7 @@ public final class WebSocketCommentVector: NSObject {
 	private var ticket: String!
 	private let baseTime: Date
 	private var history: Int = 0
-	private var disconnected: Bool = true
+	private var connecting: Bool = false
 	private let background: DispatchQueue = DispatchQueue(label: "tv.from.chajka.Charleston", qos: DispatchQoS(qosClass: DispatchQoS.QoSClass.background, relativePriority: 0), attributes: DispatchQueue.Attributes.concurrent)
 	private var keepaliveTimer: DispatchSourceTimer? = nil
 
@@ -219,7 +219,7 @@ public final class WebSocketCommentVector: NSObject {
 		// MARK: - Actions
 		// MARK: - Public methods
 	public func open (history: Int) {
-		disconnected = false
+		connecting = true
 		setupSocketEventHandler(history: history)
 		socket.open()
 		keepaliveTimer = setupKeepAliveTimer()
@@ -227,7 +227,7 @@ public final class WebSocketCommentVector: NSObject {
 	}// end open
 
 	public func close () {
-		disconnected = true
+		connecting = false
 		cleanupKeepAliveTimer()
 		socket.close()
 	}// end close
@@ -253,7 +253,7 @@ public final class WebSocketCommentVector: NSObject {
 
 		socket.event.close = { [weak self] (code: Int, reason: String, clean: Bool) in
 			guard let weakSelf = self else { return }
-			if !weakSelf.disconnected {
+			if weakSelf.connecting {
 				weakSelf.socket.open()
 			}// end if connected
 			print("socket \(weakSelf.roomLabel) code: \(code), reason: \(reason), clean: \(clean)")
