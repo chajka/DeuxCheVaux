@@ -128,6 +128,7 @@ public final class WebSocketEndpointTalker: NSObject {
 	private var endpoint: WebSocket
 	private var keepSeatInterval: Int = 30
 	private var roomInfoHandler: OpenEndpointHander? = nil
+	private var connecting: Bool = false
 
 	private var keepSeatTimer: DispatchSourceTimer? = nil
 
@@ -158,6 +159,7 @@ public final class WebSocketEndpointTalker: NSObject {
 		// MARK: - Actions
 		// MARK: - Public Methods
 	public func open (handler: OpenEndpointHander? = nil) {
+		connecting = true
 		roomInfoHandler = handler
 		setupKeepSeatTimer()
 		setupSocketEventHandler()
@@ -166,6 +168,7 @@ public final class WebSocketEndpointTalker: NSObject {
 	}// end open
 
 	public func close () {
+		connecting = false
 		endpoint.close()
 	}// end close
 
@@ -198,6 +201,9 @@ public final class WebSocketEndpointTalker: NSObject {
 		}// end open event
 
 		endpoint.event.close = { (code: Int, reason: String, clean: Bool) in
+			if self.connecting {
+				self.endpoint.open()
+			}// end if conecting
 			print("talker code: \(code), reason: \(reason), clean: \(clean)")
 		}// end close event
 
