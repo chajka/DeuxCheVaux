@@ -46,7 +46,7 @@ fileprivate struct RoomData: Codable {
 	let yourPostKey: String
 }// end struct RoomData
 
-fileprivate struct RoomType: Codable {
+fileprivate struct RoomInfo: Codable {
 	let type: String
 	let data: RoomData
 }// end struct RoomType
