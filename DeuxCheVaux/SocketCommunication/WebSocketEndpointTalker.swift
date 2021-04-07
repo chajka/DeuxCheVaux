@@ -112,6 +112,8 @@ public protocol HeartbeatDelegate: class {
 	func heartbeat (viewer: Int, comments: Int, ad: Int?, gift: Int?)
 }// end protocol heartbeatDelegate
 
+public typealias OpenEndpointHander = (_ websocketURI: URL, _ threadId: String, _ yourpostkey: String) -> Void
+
 public final class WebSocketEndpointTalker: NSObject {
 		// MARK:   Class Variables
 		// MARK: - Class Methods
