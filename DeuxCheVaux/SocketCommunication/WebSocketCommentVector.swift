@@ -251,8 +251,12 @@ public final class WebSocketCommentVector: NSObject {
 			}
 		}// end open event
 
-		socket.event.close = { (code: Int, reason: String, clean: Bool) in
-			print("code: \(code), reason: \(reason), clean: \(clean)")
+		socket.event.close = { [weak self] (code: Int, reason: String, clean: Bool) in
+			guard let weakSelf = self else { return }
+			if !weakSelf.disconnected {
+				weakSelf.socket.open()
+			}// end if connected
+			print("socket \(weakSelf.roomLabel) code: \(code), reason: \(reason), clean: \(clean)")
 		}// end close event
 
 		socket.event.error = { (error: Error) in
