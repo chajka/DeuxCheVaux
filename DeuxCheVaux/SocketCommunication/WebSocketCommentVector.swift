@@ -227,6 +227,7 @@ public final class WebSocketCommentVector: NSObject {
 	}// end open
 
 	public func close () {
+		disconnected = true
 		cleanupKeepAliveTimer()
 		socket.close()
 	}// end close
