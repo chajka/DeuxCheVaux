@@ -32,6 +32,25 @@ fileprivate struct MessageType: Codable {
 	let type: String
 }// end struct MessageType
 
+fileprivate struct MessageServerData: Codable {
+	let uri: String
+	let type: String
+}// end struct MessageServerData
+
+fileprivate struct RoomData: Codable {
+	let messageServer: MessageServerData
+	let name: String
+	let threadID: String
+	let isFirst: Bool
+	let waybackKey: String
+	let yourPostKey: String
+}// end struct RoomData
+
+fileprivate struct RoomType: Codable {
+	let type: String
+	let data: RoomData
+}// end struct RoomType
+
 fileprivate struct SeatData: Codable {
 	let keepIntervalSec: Int
 }// end struct SeatData
