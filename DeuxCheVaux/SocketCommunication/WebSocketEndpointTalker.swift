@@ -227,7 +227,14 @@ public final class WebSocketEndpointTalker: NSObject {
 					case .stream:
 						break
 					case .room:
-						break
+						do {
+							let room: RoomInfo = try decoder.decode(RoomInfo.self, from: json)
+							if let handler: OpenEndpointHander = weakSelf.roomInfoHandler {
+								handler(URL(string: room.data.messageServer.uri)!, room.data.threadId, room.data.yourPostKey)
+							}// end if Optional binding check for roomInfoHandler
+						} catch let error {
+							print("room decode error \(error.localizedDescription)")
+						}
 					case .serverTime:
 						break
 					case .statistics:
