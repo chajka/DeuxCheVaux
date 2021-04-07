@@ -157,7 +157,8 @@ public final class WebSocketEndpointTalker: NSObject {
 		// MARK: - Overrides
 		// MARK: - Actions
 		// MARK: - Public Methods
-	public func open () {
+	public func open (handler: OpenEndpointHander? = nil) {
+		roomInfoHandler = handler
 		setupKeepSeatTimer()
 		setupSocketEventHandler()
 		endpoint.open()
