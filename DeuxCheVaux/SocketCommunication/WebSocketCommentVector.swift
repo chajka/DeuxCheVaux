@@ -175,6 +175,8 @@ public final class WebSocketCommentVector: NSObject {
 	private let cookies: Array<HTTPCookie>
 	private var ticket: String!
 	private let baseTime: Date
+	private var history: Int = 0
+	private var disconnected: Bool = true
 	private let background: DispatchQueue = DispatchQueue(label: "tv.from.chajka.Charleston", qos: DispatchQoS(qosClass: DispatchQoS.QoSClass.background, relativePriority: 0), attributes: DispatchQueue.Attributes.concurrent)
 	private var keepaliveTimer: DispatchSourceTimer? = nil
 
