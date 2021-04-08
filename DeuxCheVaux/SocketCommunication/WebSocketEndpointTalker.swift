@@ -175,7 +175,7 @@ public final class WebSocketEndpointTalker: NSObject {
 
 	public func postComment (comment: String, vpos: Int, isAnoymous: Bool, color: String? = nil, size: String? = nil, position: String? = nil, font: String? = nil) {
 		let commentToPost: PostCommentData = PostCommentData(text: comment, vpos: vpos, isAnonymous: isAnoymous, color: color, size: size, position: position, font: font)
-		let comment: PostComment = PostComment(type: "postComment", data: commentToPost)
+		let comment: PostComment = PostComment(type: PostCommenType, data: commentToPost)
 		let encoder: JSONEncoder = JSONEncoder()
 		do {
 			let json: Data = try encoder.encode(comment)
