@@ -12,6 +12,7 @@ import SwiftWebSocket
 fileprivate let StartWatching: String = "{\"type\":\"startWatching\",\"data\":{\"stream\":{\"quality\":\"abr\",\"limit\":\"super_high\",\"latency\":\"low\",\"chasePlay\":false},\"reconnect\":false}}"
 fileprivate let Pong: String = "{\"type\":\"pong\"}"
 fileprivate let KeepSeat: String = "{\"type\":\"keepSeat\"}"
+fileprivate let PostCommenType: String = "postComment"
 
 fileprivate enum MessageKind: String {
 	case seat = "seat"
