@@ -117,8 +117,7 @@ public final class NicoInformationHandler: HTTPCommunicatable {
 		// MARK: - Properties
 		// MARK: - Member variables
 		// MARK: - Constructor/Destructor
-	public override init (_ cookie: Array<HTTPCookie>) {
-		super.init(cookie)
+	public override init () {
 	}// end init
 
 		// MARK: - Override

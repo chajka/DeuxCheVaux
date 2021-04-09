@@ -44,16 +44,14 @@ public extension URLRequest {
 public class HTTPCommunicatable: NSObject {
 		// MARK: Properties
 		// MARK: - Member variables
-	internal let cookies: Array<HTTPCookie>
 	internal let session: URLSession
 
 		// MARK: - Constructor/Destructor
-	public init (_ cookies: Array<HTTPCookie>) {
+	public override init () {
 		let sessionConfiguration = URLSessionConfiguration.default
 		sessionConfiguration.timeoutIntervalForRequest = RequestTimeOut
 		sessionConfiguration.timeoutIntervalForResource = DataTimeOut
 		sessionConfiguration.httpCookieAcceptPolicy = HTTPCookie.AcceptPolicy.onlyFromMainDocumentDomain
-		self.cookies = cookies
 		session = URLSession(configuration: sessionConfiguration)
 	}// end init
 
@@ -65,12 +63,7 @@ public class HTTPCommunicatable: NSObject {
 		let deuxCheVaux: DeuxCheVaux = DeuxCheVaux.shared
 		let userAgent: String = deuxCheVaux.userAgent
 		var request: URLRequest = URLRequest(url: requestURL, cachePolicy: URLRequest.CachePolicy.reloadIgnoringLocalAndRemoteCacheData, timeoutInterval: Timeout)
-		request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
-		for cookie: HTTPCookie in cookies {
-			if cookie.name == UserSessionName {
-				request.addValue(cookie.value, forHTTPHeaderField: NicoSessionHeaderKey)
-			}// end if found niconico user_session
-		}// end foreach
+		request.addValue(TokenManager.shared.user_session, forHTTPHeaderField: NicoSessionHeaderKey)
 		request.addValue(userAgent, forHTTPHeaderField: UserAgentKey)
 		if let contentsType: String = type {
 			request.addValue(contentsType, forHTTPHeaderField: ContentTypeKey)

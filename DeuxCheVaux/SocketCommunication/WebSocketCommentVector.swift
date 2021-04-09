@@ -172,7 +172,6 @@ public final class WebSocketCommentVector: NSObject {
 	private let program: String
 	private let userIdentifier: String
 	private let userLanguage: UserLanguage
-	private let cookies: Array<HTTPCookie>
 	private var ticket: String!
 	private let baseTime: Date
 	private var history: Int = 0
@@ -181,25 +180,19 @@ public final class WebSocketCommentVector: NSObject {
 	private var keepaliveTimer: DispatchSourceTimer? = nil
 
 		// MARK: - Constructor/Destructor
-	public init (url: URL, thread: String, program: String, uid: String, lang: UserLanguage, baseTime: Date, room: String, cookie: Array<HTTPCookie>) {
+	public init (url: URL, thread: String, program: String, uid: String, lang: UserLanguage, baseTime: Date, room: String) {
 		self.url = url
 		self.thread = thread
 		self.program = program
 		userIdentifier = uid
 		userLanguage = lang
-		cookies = cookie
 		self.baseTime = baseTime
 		runLoop = DeuxCheVaux.shared.runLoop
 		let roomPrefix: Substring = room.prefix(1)
 		let prefix = String(roomPrefix)
 		roomLabel = prefix == CommunityChannelPrefix ? Arena : room
 		var request: URLRequest = URLRequest(url: self.url)
-		request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookie)
-		for cookie: HTTPCookie in cookies {
-			if cookie.name == UserSessionName {
-				request.addValue(cookie.value, forHTTPHeaderField: NicoSessionHeaderKey)
-			}// end if found niconico user_session
-		}// end foreach
+		request.addValue(TokenManager.shared.user_session, forHTTPHeaderField: NicoSessionHeaderKey)
 		let userAgent: String = DeuxCheVaux.shared.userAgent
 		request.addValue(userAgent, forHTTPHeaderField: UserAgentKey)
 		if let runLoop: RunLoop = self.runLoop {
@@ -278,6 +271,7 @@ public final class WebSocketCommentVector: NSObject {
 						} else {
 							weakSelf.lastRes = 0
 						}// end optional binding check for last_res
+						print("\(weakSelf.roomLabel) \(String(describing: weakSelf.lastRes!))")
 					} catch let error {
 						Swift.print("Error: \(error.localizedDescription),\nDroped \(message)")
 					}// end do try - catch decode json
