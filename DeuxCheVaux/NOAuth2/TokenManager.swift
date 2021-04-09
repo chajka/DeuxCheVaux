@@ -62,6 +62,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 	public var refreshToken: String!
 	public var accessToken: String!
 	public var idToken: String!
+	public var user_session: String!
 
 		// MARK: - Computed Properties
 		// MARK: - Outlets
