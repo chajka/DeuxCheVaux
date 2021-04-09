@@ -90,6 +90,9 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		if let token: String = readToken(tokenType: IDToken) {
 			self.idToken = token
 		}// end optional binding check for id token in iCloudKeychain or not
+		if let session: String = readToken(tokenType: SessionToken) {
+			self.user_session = session
+		}// end optional binding check for user_session in iCloudKeychain or not
 	}// end convinience init
 
 	deinit {
