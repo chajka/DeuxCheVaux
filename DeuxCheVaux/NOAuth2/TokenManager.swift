@@ -321,15 +321,15 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 					let nickname: Nickname = try decoder.decode(Nickname.self, from: data)
 					if nickname.data?.id != uid {
 						self.authenticate()
-					}
+					}// end authenticate if can not get correct user id
 				} catch let error {
 					self.authenticate()
 					print(error.localizedDescription)
-				}
-			}
+				}// end do try - catch decode nickname json.
+			}// end completion handler
 			task.resume()
 			_ = semaphore.wait(timeout: DispatchTime.now() + .seconds(2))
-		}
+		}// end if user identifier is there
 	}// end func verifyUserSession
 
 		// MARK: - Delegate / Protocol clients
@@ -344,6 +344,16 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 	}// end func webView didStartProvisionalNavigation
 
 	public func webView (_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+		webView.configuration.websiteDataStore.httpCookieStore.getAllCookies { (cookies:Array<HTTPCookie>) in
+			for cookie: HTTPCookie in cookies {
+				if cookie.name == UserSessionName && cookie.domain == UserSessionDomain {
+					if !self.saveToken(refreshToken: cookie.value, tokenType: SessionToken) {
+						_ = self.updateToken(to: cookie.value, tokenType: SessionToken)
+					}// end if can not save user session
+					self.user_session = cookie.value
+				}// end if found user session cookie
+			}// end foreach cookie
+		}// end all cookies handler
 		webView.evaluateJavaScript("document.getElementsByTagName('div')[0].innerHTML") { (json: Any?, error: Error?) -> Void in
 			guard let jsonString: String = json as? String, let jsonData: Data = jsonString.data(using: .utf8) else { return }
 			do {
