@@ -20,7 +20,7 @@ fileprivate let WSEndPointProgramKey: String = "?nicoliveProgramId="
 fileprivate let WSEndPointUserIDKey: String = "&userId="
 fileprivate let AccessTokenInterval: Int = 60 * 60
 fileprivate let AuthorizationKey: String = "Authorization"
-fileprivate let AutorizationBearer: String = "Bearer "
+fileprivate let AuthorizationBearer: String = "Bearer "
 fileprivate let RefreshToken: String = "jp.nicovideo.oauth2-refresh_token"
 fileprivate let IDToken: String = "jp.nicovideo.oauth2-id_token"
 fileprivate let SessionToken: String = "jp.nicovideo.user_session"
@@ -195,7 +195,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 	public func makeRequestWithAccessToken (url: URL) -> URLRequest {
 		var request: URLRequest = URLRequest(url: url)
 		if let token: String = accessToken {
-			request.addValue(AutorizationBearer + token, forHTTPHeaderField: AuthorizationKey)
+			request.addValue(AuthorizationBearer + token, forHTTPHeaderField: AuthorizationKey)
 		}// end optional binding check for access token
 		request.addValue(DeuxCheVaux.shared.userAgent, forHTTPHeaderField: UserAgentKey)
 		request.httpMethod = "GET"
