@@ -157,7 +157,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		var wsEndPointURL: URL = URL(string: "https://live.nicovideo.jp")!
 		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
 		let url: URL = URL(string: WSEndPointURLString + WSEndPointProgramKey + liveNumber + WSEndPointUserIDKey + userIdentifier)!
-		let request = makeAccessTokenRequest(url: url)
+		let request = makeRequestWithAccessToken(url: url)
 		let task = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
 			defer { semaphore.signal() }
 			guard let data: Data = dat else { return }
@@ -184,7 +184,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		return request
 	}// end func makeRequest
 
-	public func makeAccessTokenRequest (url: URL) -> URLRequest {
+	public func makeRequestWithAccessToken (url: URL) -> URLRequest {
 		var request: URLRequest = URLRequest(url: url)
 		if let token: String = accessToken {
 			request.addValue(AutorizationBearer + token, forHTTPHeaderField: AuthorizationKey)
@@ -197,7 +197,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 
 		// MARK: - Private Methods
 	private func getUserInfo() {
-		let request:URLRequest =  makeAccessTokenRequest(url: UserInfoURL)
+		let request:URLRequest =  makeRequestWithAccessToken(url: UserInfoURL)
 		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
 			guard let data: Data = dat else { return }
 			do {
