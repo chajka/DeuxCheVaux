@@ -113,7 +113,8 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		// MARK: - Public Method
 	public func authenticate () {
 		window?.setIsVisible(true)
-		let request: URLRequest = URLRequest(url: oauthURL)
+		var request: URLRequest = URLRequest(url: oauthURL)
+		request.addValue(DeuxCheVaux.shared.userAgent, forHTTPHeaderField: UserAgentKey)
 		webView.load(request)
 	}// end func authenticate
 
