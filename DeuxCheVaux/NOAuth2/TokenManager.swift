@@ -205,8 +205,10 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 
 		// MARK: - Private Methods
 	private func getUserInfo() {
+		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
 		let request:URLRequest =  makeRequestWithAccessToken(url: UserInfoURL)
 		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
+			defer { semaphore.signal() }
 			guard let data: Data = dat else { return }
 			do {
 				let decoder: JSONDecoder = JSONDecoder()
@@ -218,6 +220,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 			}// end do try - catch decode user info
 		}// end completion handler
 		task.resume()
+		_ = semaphore.wait(timeout: DispatchTime.now() + .seconds(2))
 	}// end func get user info from oAuth2 server
 
 	private func saveToken (refreshToken token: String, tokenType type: String) -> Bool {
