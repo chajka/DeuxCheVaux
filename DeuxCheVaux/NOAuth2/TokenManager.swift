@@ -93,6 +93,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		if let session: String = readToken(tokenType: SessionToken) {
 			self.user_session = session
 		}// end optional binding check for user_session in iCloudKeychain or not
+		verifyUserSession()
 	}// end convinience init
 
 	deinit {
@@ -303,10 +304,37 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		return nil
 	}// end func read token from keychain
 
+	private func verifyUserSession () {
+		getUserInfo()
+		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
+		if let uid: String = self.userIdentifier {
+			let url: URL = URL(string: NicknameAPIFormat + uid)!
+			var request: URLRequest = makeRequest(url: url)
+			request.addValue(user_session, forHTTPHeaderField: NicoSessionHeaderKey)
+			let session: URLSession = URLSession(configuration: URLSessionConfiguration.default)
+			let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
+				defer { semaphore.signal() }
+				guard let data: Data = dat else { return }
+				let decoder: JSONDecoder = JSONDecoder()
+				do {
+					let nickname: Nickname = try decoder.decode(Nickname.self, from: data)
+					if nickname.data?.id != uid {
+						self.authenticate()
+					}
+				} catch let error {
+					self.authenticate()
+					print(error.localizedDescription)
+				}
+			}
+			task.resume()
+			_ = semaphore.wait(timeout: DispatchTime.now() + .seconds(2))
+		}
+	}// end func verifyUserSession
+
 		// MARK: - Delegate / Protocol clients
 	public func webView (_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
 		if let url: URL = webView.url {
-			if url.absoluteURL == AuthorizedURL {
+			if url.absoluteURL == AuthorizedURL || url.absoluteURL == oauthURL {
 				window?.setIsVisible(false)
 			} else {
 				window?.setIsVisible(true)
