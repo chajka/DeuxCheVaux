@@ -79,6 +79,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 	public var accessToken: String!
 	public var idToken: String!
 	public var user_session: String!
+	public var premium: Bool!
 
 		// MARK: - Computed Properties
 		// MARK: - Outlets
