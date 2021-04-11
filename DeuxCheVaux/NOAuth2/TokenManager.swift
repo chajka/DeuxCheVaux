@@ -223,7 +223,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		// MARK: - Private Methods
 	private func getUserInfo() {
 		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
-		let request:URLRequest =  makeRequestWithAccessToken(url: UserInfoURL)
+		let request: URLRequest =  makeRequestWithAccessToken(url: UserInfoURL)
 		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
 			defer { semaphore.signal() }
 			guard let data: Data = dat else { return }
