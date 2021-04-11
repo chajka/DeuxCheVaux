@@ -45,6 +45,21 @@ fileprivate struct UserInfo: Codable {
 	let updated_at: Int
 }// end struct UserInfo
 
+fileprivate enum UserPremium: String, Codable {
+	case regular = "regular"
+	case premium = "premium"
+}// end enum UserPremium
+
+fileprivate struct PremiumData: Codable {
+	let type: UserPremium
+	let expireTime: String?
+}// end struct PremiumData
+
+fileprivate struct Premium: Codable {
+	let meta: MetaInformation
+	let data: PremiumData
+}// end struct Premium
+
 fileprivate struct URLData: Codable {
 	let url: String
 }// end struct URLData
