@@ -75,11 +75,12 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 
 		// MARK: - Class Methods
 		// MARK: - Properties
-	public var refreshToken: String!
-	public var accessToken: String!
-	public var idToken: String!
-	public var user_session: String!
-	public var premium: Bool!
+	public private(set) var refreshToken: String!
+	public private(set) var accessToken: String!
+	public private(set) var idToken: String!
+	public private(set) var user_session: String!
+	public private(set) var premium: Bool!
+	public private(set) var userIdentifier: String!
 
 		// MARK: - Computed Properties
 		// MARK: - Outlets
