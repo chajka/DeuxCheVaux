@@ -110,6 +110,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		if let session: String = readToken(tokenType: SessionToken) {
 			self.user_session = session
 		}// end optional binding check for user_session in iCloudKeychain or not
+		self.premium = userPremium()
 		verifyUserSession()
 	}// end convinience init
 
