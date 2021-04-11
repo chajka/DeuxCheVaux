@@ -92,7 +92,6 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 	private var refreshQuery: String!
 	private var expire: Int = AccessTokenInterval
 	private let session: URLSession = URLSession(configuration: URLSessionConfiguration.default)
-	private var userIdentifier: String!
 	private var userNickname: String!
 
 	private var watcherCount: Int = 0
