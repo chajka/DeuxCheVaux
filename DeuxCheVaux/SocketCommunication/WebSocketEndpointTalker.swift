@@ -9,7 +9,7 @@
 import Cocoa
 import SwiftWebSocket
 
-fileprivate let StartWatching: String = "{\"type\":\"startWatching\",\"data\":{\"stream\":{\"quality\":\"abr\",\"limit\":\"super_high\",\"latency\":\"low\",\"chasePlay\":false},\"reconnect\":false}}"
+fileprivate let StartWatching: String = "{\"type\":\"startWatching\",\"data\":{}}"
 fileprivate let Pong: String = "{\"type\":\"pong\"}"
 fileprivate let KeepSeat: String = "{\"type\":\"keepSeat\"}"
 fileprivate let PostCommenType: String = "postComment"
