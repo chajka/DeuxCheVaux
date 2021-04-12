@@ -12,7 +12,7 @@ import SwiftWebSocket
 fileprivate let StartWatching: String = "{\"type\":\"startWatching\",\"data\":{}}"
 fileprivate let Pong: String = "{\"type\":\"pong\"}"
 fileprivate let KeepSeat: String = "{\"type\":\"keepSeat\"}"
-fileprivate let PostCommenType: String = "postComment"
+fileprivate let PostCommentType: String = "postComment"
 
 fileprivate enum MessageKind: String {
 	case seat = "seat"
@@ -173,9 +173,9 @@ public final class WebSocketEndpointTalker: NSObject {
 		endpoint.close()
 	}// end close
 
-	public func postComment (comment: String, vpos: Int, isAnoymous: Bool, color: String? = nil, size: String? = nil, position: String? = nil, font: String? = nil) {
-		let commentToPost: PostCommentData = PostCommentData(text: comment, vpos: vpos, isAnonymous: isAnoymous, color: color, size: size, position: position, font: font)
-		let comment: PostComment = PostComment(type: PostCommenType, data: commentToPost)
+	public func postComment (comment: String, vpos: Int, isAnonymous: Bool, color: String? = nil, size: String? = nil, position: String? = nil, font: String? = nil) {
+		let commentToPost: PostCommentData = PostCommentData(text: comment, vpos: vpos, isAnonymous: isAnonymous, color: color, size: size, position: position, font: font)
+		let comment: PostComment = PostComment(type: PostCommentType, data: commentToPost)
 		let encoder: JSONEncoder = JSONEncoder()
 		do {
 			let json: Data = try encoder.encode(comment)
