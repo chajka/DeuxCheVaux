@@ -110,7 +110,6 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		if let session: String = readToken(tokenType: SessionToken) {
 			self.user_session = session
 		}// end optional binding check for user_session in iCloudKeychain or not
-		self.premium = userPremium()
 		verifyUserSession()
 	}// end convinience init
 
@@ -172,6 +171,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 			}// end if optional binding check for refresh token timer
 			Thread.sleep(forTimeInterval: 2)
 			getUserInfo()
+			premium = userPremium()
 		}// end if refresh token timer is not set
 	}// end func start
 
