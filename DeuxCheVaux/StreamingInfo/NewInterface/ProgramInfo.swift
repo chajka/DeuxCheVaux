@@ -27,7 +27,6 @@ public struct XMLSocket {
 }// end struct XMLSocket
 
 public struct MessageServer: Equatable {
-	public let XMLSocket: XMLSocket?
 	public let webSocket: URL?
 	public let thread: String
 	public let name: String?
@@ -194,7 +193,7 @@ public final class ProgramInfo: NSObject {
 		self.thumbnailURL = programInfo.socialGroup.thumbnailUrl
 		for room: Room in programInfo.rooms {
 			let webSocket: URL = room.webSocketUri
-			let server: MessageServer = MessageServer(XMLSocket: nil, webSocket: webSocket, thread: room.threadId, name: room.name, identifier: room.id)
+			let server: MessageServer = MessageServer(webSocket: webSocket, thread: room.threadId, name: room.name, identifier: room.id)
 			servers.append(server)
 		}// end foreach rooms
 	}// end init
@@ -224,7 +223,7 @@ public final class ProgramInfo: NSObject {
 				broadcaster = BroadcasterInfo(name: programInfo.broadcaster.name, identifier: programInfo.broadcaster.id)
 				for room: Room in programInfo.rooms {
 					let webSocket: URL = room.webSocketUri
-					let server: MessageServer = MessageServer(XMLSocket: nil, webSocket: webSocket, thread: room.threadId, name: room.name, identifier: room.id)
+					let server: MessageServer = MessageServer(webSocket: webSocket, thread: room.threadId, name: room.name, identifier: room.id)
 					servers.append(server)
 				}// end foreach rooms
 			}// end if optional check for data
