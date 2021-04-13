@@ -52,11 +52,10 @@ public final class SmileVideoInformation: HTTPCommunicatable {
 	private var stringBuffer: String
 
 		// MARK: - Constructor/Destructor
-	public init (videoNumber video: String, cookies cookie: Array<HTTPCookie>) {
+	public init (videoNumber video: String) {
 		videoNumber = video
 		tags = Array()
 		stringBuffer = String()
-		super.init(cookie)
 	}// end init
 
 		// MARK: - Override

@@ -41,7 +41,6 @@ public final class VideoInformation: HTTPCommunicatable, XMLParserDelegate {
 		self.videoNumber = video
 		tags = Array()
 		stringBuffer = String()
-		super.init(Array())
 	}// end init
 
 		// MARK: - Override

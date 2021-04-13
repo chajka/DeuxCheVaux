@@ -95,27 +95,23 @@ public struct ChatElements: Codable {
 	public let premium: Int?
 	public let mail: String?
 	public let anonymity: Int?
-	public let score: Int?
-	public let origin: String?
 	public let locale: UserLanguage?
 	
 	public static var logHeader: String {
 		get {
 			var message: String = String()
 
-			message += "thread"
-			message += ",vpos"
-			message += ",no"
-			message += ",user_id"
-			message += ",content"
-			message += ",date"
-			message += ",date_usec"
-			message += ",premium"
-			message += ",mail"
-			message += ",anonymity"
-			message += ",score"
-			message += ",origin"
-			message += ",locale"
+			message += "\"thread\""
+			message += ",\"vpos\""
+			message += ",\"no\""
+			message += ",\"user_id\""
+			message += ",\"content\""
+			message += ",\"date\""
+			message += ",\"date_usec\""
+			message += ",\"premium\""
+			message += ",\"mail\""
+			message += ",\"anonymity\""
+			message += ",\"locale\""
 
 			return message
 		}// end get
@@ -125,19 +121,17 @@ public struct ChatElements: Codable {
 		get {
 			var message: String = String()
 
-			message += "\(thread)"
-			message += ",\(vpos)"
-			message += ",\(no)"
-			message += ",\(user_id)"
-			message += ",\(content.replacingOccurrences(of: "\"", with: "\"\""))"
-			message += ",\(date)"
-			message += ",\(date_usec)"
-			message += ",\(String(describing: premium != nil ? premium! : 0))"
-			message += ",\(mail ?? "")"
-			message += ",\(anonymity ?? 0)"
-			message += ",\(score ?? 0)"
-			message += ",\(origin ?? "")"
-			message += ",\(locale?.rawValue ?? UserLanguage.ja.rawValue)"
+			message += "\"\(thread)\""
+			message += ",\"\(vpos)\""
+			message += ",\"\(no)\""
+			message += ",\"\(user_id)\""
+			message += ",\"\(content.replacingOccurrences(of: "\"", with: "\"\""))\""
+			message += ",\"\(date)\""
+			message += ",\"\(date_usec)\""
+			message += ",\"\(String(describing: premium != nil ? premium! : 0))\""
+			message += ",\"\(mail ?? "")\""
+			message += ",\"\(anonymity ?? 0)\""
+			message += ",\"\(locale?.rawValue ?? UserLanguage.ja.rawValue)\""
 
 			return message
 		}// end get
@@ -178,32 +172,27 @@ public final class WebSocketCommentVector: NSObject {
 	private let program: String
 	private let userIdentifier: String
 	private let userLanguage: UserLanguage
-	private let cookies: Array<HTTPCookie>
 	private var ticket: String!
 	private let baseTime: Date
+	private var history: Int = 0
+	private var connecting: Bool = false
 	private let background: DispatchQueue = DispatchQueue(label: "tv.from.chajka.Charleston", qos: DispatchQoS(qosClass: DispatchQoS.QoSClass.background, relativePriority: 0), attributes: DispatchQueue.Attributes.concurrent)
 	private var keepaliveTimer: DispatchSourceTimer? = nil
 
 		// MARK: - Constructor/Destructor
-	public init (url: URL, thread: String, program: String, uid: String, lang: UserLanguage, baseTime: Date, room: String, cookie: Array<HTTPCookie>) {
+	public init (url: URL, thread: String, program: String, uid: String, lang: UserLanguage, baseTime: Date, room: String) {
 		self.url = url
 		self.thread = thread
 		self.program = program
 		userIdentifier = uid
 		userLanguage = lang
-		cookies = cookie
 		self.baseTime = baseTime
 		runLoop = DeuxCheVaux.shared.runLoop
 		let roomPrefix: Substring = room.prefix(1)
 		let prefix = String(roomPrefix)
 		roomLabel = prefix == CommunityChannelPrefix ? Arena : room
 		var request: URLRequest = URLRequest(url: self.url)
-		request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookie)
-		for cookie: HTTPCookie in cookies {
-			if cookie.name == UserSessionName {
-				request.addValue(cookie.value, forHTTPHeaderField: NicoSessionHeaderKey)
-			}// end if found niconico user_session
-		}// end foreach
+		request.addValue(TokenManager.shared.user_session, forHTTPHeaderField: NicoSessionHeaderKey)
 		let userAgent: String = DeuxCheVaux.shared.userAgent
 		request.addValue(userAgent, forHTTPHeaderField: UserAgentKey)
 		if let runLoop: RunLoop = self.runLoop {
@@ -223,6 +212,7 @@ public final class WebSocketCommentVector: NSObject {
 		// MARK: - Actions
 		// MARK: - Public methods
 	public func open (history: Int) {
+		connecting = true
 		setupSocketEventHandler(history: history)
 		socket.open()
 		keepaliveTimer = setupKeepAliveTimer()
@@ -230,101 +220,40 @@ public final class WebSocketCommentVector: NSObject {
 	}// end open
 
 	public func close () {
+		connecting = false
 		cleanupKeepAliveTimer()
 		socket.close()
 	}// end close
 
-	public func comment (comment: String, commands: Array<String>) {
-		guard let baseURL: URL = URL(string: PostCommentURLPrefix) else { return }
-		let postCommentURL = baseURL.appendingPathComponent(program, isDirectory: true).appendingPathComponent(PostCommentURLSuffix)
-		let vpos: Int = -100 * Int(baseTime.timeIntervalSinceNow)
-		let config = URLSessionConfiguration.default
-		let session = URLSession(configuration: config)
-		var request = URLRequest(url: postCommentURL)
-		if !cookies.isEmpty {
-			let cookiesForHeader = HTTPCookie.requestHeaderFields(with: cookies)
-			request.allHTTPHeaderFields = cookiesForHeader
-		}// end if have cookies
-		request.addValue(DeuxCheVaux.shared.userAgent, forHTTPHeaderField: UserAgentKey)
-		request.addValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
-		request.httpMethod = HTTPMethod.post.rawValue
-		let mail: String? = commands.count > 0 ? commands.joined(separator: " ") : nil
-		let body: CommentBody = CommentBody(message: comment, command: mail, vpos: String(vpos))
-		if let json: Data = try? JSONEncoder().encode(body) {
-			request.httpBody = json
-			let task: URLSessionDataTask = session.dataTask(with: request)
-			task.resume()
-		}// end optional binding check for make json data
-	}// end comment
-
-	public func heartbeat (_ callback: @escaping heartbeatCallback) {
-		guard let heartbeatURL = URL(string: (heartbeatFormat + program)) else { return }
-		let config = URLSessionConfiguration.default
-		let session = URLSession(configuration: config)
-		var req = URLRequest(url: heartbeatURL)
-		if !cookies.isEmpty {
-			let cookiesForHeader = HTTPCookie.requestHeaderFields(with: cookies)
-			req.allHTTPHeaderFields = cookiesForHeader
-		}// end if have cookies
-		
-		let task: URLSessionDataTask = session.dataTask(with: req) { (dat, res, err) in
-			guard let data = dat else { return }
-			do {
-				let heartbeat = try XMLDocument(data: data, options: XMLNode.Options.documentTidyXML)
-				let heartbeatStatus = heartbeat.rootElement()?.attribute(forName: "status")
-				if heartbeatStatus?.stringValue == "ok" {
-					guard let children = heartbeat.children?.last?.children else { return }
-					var watch: Int = 0
-					var comment: Int = 0
-					var ticket: String = ""
-					for child: XMLNode in children {
-						guard let name = child.name else { break }
-						switch name {
-							case .watch:
-								guard let watchCount = child.stringValue else { break }
-								watch = Int(watchCount)!
-							case .comment:
-								guard let commentCount = child.stringValue else { break }
-								comment = Int(commentCount)!
-							case .ticket:
-								guard let ticketString = child.stringValue else { break }
-								ticket = ticketString
-							default:
-								break
-						}// end switch child
-					}// end foreach children
-					callback(watch, comment, ticket)
-				}// end if hertbeat status is OK
-			} catch {
-				callback(-1, -1, "")
-			}// end try - catch
-		}// end completion handler
-		task.resume()
-	}// end function heartbeat
-
 		// MARK: - Internal methods
 		// MARK: - Private methods
 	private func setupSocketEventHandler (history: Int) {
+		self.history = history
 		socket.event.open = { [weak self] in
 			guard let weakSelf = self else { return }
-			let threadData: ThreadRequest = ThreadRequest(thread: weakSelf.thread, uid: weakSelf.userIdentifier, resFrom: history)
+			let threadData: ThreadRequest = ThreadRequest(thread: weakSelf.thread, uid: weakSelf.userIdentifier, resFrom: weakSelf.history)
 			let commentRequest: CommentRequest = CommentRequest(thread: threadData)
 			do {
 				let json: Data = try JSONEncoder().encode(commentRequest)
 				if let request: String = String(data: json, encoding: .utf8) {
 					weakSelf.socket.send(text: "\(request)")
+					weakSelf.history = 0
 				}
 			} catch let error {
 				print(error.localizedDescription)
 			}
 		}// end open event
 
-		socket.event.close = { (code: Int, reason: String, clean: Bool) in
-			print("code: \(code), reason: \(reason), clean: \(clean)")
+		socket.event.close = { [weak self] (code: Int, reason: String, clean: Bool) in
+			guard let weakSelf = self else { return }
+			if weakSelf.connecting {
+				weakSelf.socket.open()
+			}// end if connected
+			print("socket \(weakSelf.roomLabel) code: \(code), reason: \(reason), clean: \(clean)")
 		}// end close event
 
 		socket.event.error = { (error: Error) in
-			print("error: \(error)")
+			print("socket \(self.roomLabel) error: \(error)")
 		}// end error event
 
 		socket.event.message = { [weak self] (message: Any) in
@@ -342,6 +271,7 @@ public final class WebSocketCommentVector: NSObject {
 						} else {
 							weakSelf.lastRes = 0
 						}// end optional binding check for last_res
+						print("\(weakSelf.roomLabel) \(String(describing: weakSelf.lastRes!))")
 					} catch let error {
 						Swift.print("Error: \(error.localizedDescription),\nDroped \(message)")
 					}// end do try - catch decode json

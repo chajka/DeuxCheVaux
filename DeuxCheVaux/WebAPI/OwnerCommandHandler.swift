@@ -376,11 +376,10 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 	private let capableVolumeRange: Range<Float> = Range(uncheckedBounds: (lower: 0.0, upper: 1.0))
 
 		// MARK: - Constructor/Destructor
-	public init (program: String, cookies: Array<HTTPCookie>) {
+	public init (program: String) {
 		self.program = program
 		videoPrefixSet = Set(arrayLiteral: SmileVideoPrefix, NicoMoviePrefix, SmileOfficialPrefix)
 		apiBaseString = ApiBase + self.program
-		super.init(cookies)
 	}// end init
 
 		// MARK: - Override

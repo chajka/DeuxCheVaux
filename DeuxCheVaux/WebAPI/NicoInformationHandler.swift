@@ -18,7 +18,7 @@ fileprivate let UnknownNickname = "Unknown User"
 fileprivate let NicknameNodeName: String = "nickname"
 fileprivate let CouldNotParse = "Could not parse"
 
-fileprivate let NicknameAPIFormat: String = "https://api.live2.nicovideo.jp/api/v1/user/nickname?userId="
+internal let NicknameAPIFormat: String = "https://api.live2.nicovideo.jp/api/v1/user/nickname?userId="
 fileprivate let ThumbnailAPIFormat: String = "https://secure-dcdn.cdn.nimg.jp/nicoaccount/usericon/%@/%@.jpg"
 fileprivate let ChannelThumbnailApi: String = "https://secure-dcdn.cdn.nimg.jp/comch/channel-icon/128x128/%@.jpg"
 fileprivate let NicoNicoMyPageURL: String = "https://www.nicovideo.jp/my/top"
@@ -37,17 +37,17 @@ fileprivate enum CurrentLanguage: String {
 
 fileprivate let Premium: String = "premium"
 
-fileprivate struct data: Codable {
+internal struct data: Codable {
 	let id: String
 	let nickname: String
 }// end struct data
 
-fileprivate struct error: Codable {
+internal struct error: Codable {
 	let code: Int
 	let messae: String?
 }// end struct error
 
-fileprivate struct Nickname: Codable {
+internal struct Nickname: Codable {
 	let data: data?
 	let err: error?
 }// end struct Nickname
@@ -117,8 +117,7 @@ public final class NicoInformationHandler: HTTPCommunicatable {
 		// MARK: - Properties
 		// MARK: - Member variables
 		// MARK: - Constructor/Destructor
-	public override init (_ cookie: Array<HTTPCookie>) {
-		super.init(cookie)
+	public override init () {
 	}// end init
 
 		// MARK: - Override
