@@ -9,7 +9,7 @@
 import Cocoa
 
 fileprivate let FrameworkName: String = "DeuxCheVaux"
-fileprivate let FrameworkVersionMajor: Float = 0.3
+fileprivate let FrameworkVersionMajor: Float = 0.4
 fileprivate let FrameworkVersionMinor: Int = 9
 fileprivate let FrameworkVersionFix: Int = 5
 
