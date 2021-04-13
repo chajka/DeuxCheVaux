@@ -11,6 +11,7 @@ import WebKit
 import Security
 
 fileprivate let TokenManagerNibName: String = "TokenManager"
+fileprivate let MyPageURL: URL = URL(string: "https://www.nicovideo.jp/my")!
 fileprivate let AuthorizationBaseURL: URL = URL(string: "https://oauth.nicovideo.jp/")!
 fileprivate let AuthorizedURL: URL = AuthorizationBaseURL.appendingPathComponent("oauth2/authorized")
 fileprivate let UserInfoURL: URL = AuthorizationBaseURL.appendingPathComponent("open_id/userinfo")
@@ -80,7 +81,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 	public private(set) var idToken: String!
 	public private(set) var user_session: String!
 	public private(set) var premium: Bool!
-	public private(set) var userIdentifier: String!
+	public private(set) var userIdentifier: String?
 
 		// MARK: - Computed Properties
 		// MARK: - Outlets
@@ -93,6 +94,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 	private var expire: Int = AccessTokenInterval
 	private let session: URLSession = URLSession(configuration: URLSessionConfiguration.default)
 	private var userNickname: String!
+	private var sessionIsValid: Bool = false
 
 	private var watcherCount: Int = 0
 
@@ -179,10 +181,11 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		watcherCount -= 1
 	}// end func stop
 
-	public func getWSEndPoint (program liveNumber: String) -> URL {
+	public func getWSEndPoint (program liveNumber: String) -> URL? {
 		var wsEndPointURL: URL = URL(string: "https://live.nicovideo.jp")!
 		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
-		let url: URL = URL(string: WSEndPointURLString + WSEndPointProgramKey + liveNumber + WSEndPointUserIDKey + userIdentifier)!
+		guard let id = userIdentifier else { return nil }
+		let url: URL = URL(string: WSEndPointURLString + WSEndPointProgramKey + liveNumber + WSEndPointUserIDKey + id)!
 		let request = makeRequestWithAccessToken(url: url)
 		let task = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
 			defer { semaphore.signal() }
@@ -225,16 +228,19 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 	private func getUserInfo() {
 		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
 		let request: URLRequest =  makeRequestWithAccessToken(url: UserInfoURL)
-		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
+		let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, resp: URLResponse?, err: Error?) in
 			defer { semaphore.signal() }
-			guard let data: Data = dat else { return }
+			guard let weakSelf = self, let data: Data = dat else { return }
 			do {
 				let decoder: JSONDecoder = JSONDecoder()
 				let userInfo: UserInfo = try decoder.decode(UserInfo.self, from: data)
-				self.userIdentifier = userInfo.sub
-				self.userNickname = userInfo.nickname
+				weakSelf.userIdentifier = userInfo.sub
+				weakSelf.userNickname = userInfo.nickname
 			} catch let error {
 				print(error.localizedDescription)
+				DispatchQueue.main.async {
+					weakSelf.authenticate()
+				}
 			}// end do try - catch decode user info
 		}// end completion handler
 		task.resume()
@@ -363,6 +369,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 					if nickname.data?.id != uid {
 						self.authenticate()
 					}// end authenticate if can not get correct user id
+					self.sessionIsValid = true
 				} catch let error {
 					self.authenticate()
 					print(error.localizedDescription)
@@ -376,7 +383,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		// MARK: - Delegate / Protocol clients
 	public func webView (_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
 		if let url: URL = webView.url {
-			if url.absoluteURL == AuthorizedURL {
+			if url.absoluteURL != MyPageURL, url.absoluteURL == AuthorizedURL || (oauthURL != nil && sessionIsValid) {
 				window?.setIsVisible(false)
 			} else {
 				window?.setIsVisible(true)
@@ -392,6 +399,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 						_ = self.updateToken(to: cookie.value, tokenType: SessionToken)
 					}// end if can not save user session
 					self.user_session = cookie.value
+					self.sessionIsValid = true
 				}// end if found user session cookie
 			}// end foreach cookie
 		}// end all cookies handler
