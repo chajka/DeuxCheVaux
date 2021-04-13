@@ -271,7 +271,6 @@ public final class WebSocketCommentVector: NSObject {
 						} else {
 							weakSelf.lastRes = 0
 						}// end optional binding check for last_res
-						print("\(weakSelf.roomLabel) \(String(describing: weakSelf.lastRes!))")
 					} catch let error {
 						Swift.print("Error: \(error.localizedDescription),\nDroped \(message)")
 					}// end do try - catch decode json

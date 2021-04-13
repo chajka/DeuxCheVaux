@@ -376,7 +376,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		// MARK: - Delegate / Protocol clients
 	public func webView (_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
 		if let url: URL = webView.url {
-			if url.absoluteURL == AuthorizedURL || url.absoluteURL == oauthURL {
+			if url.absoluteURL == AuthorizedURL {
 				window?.setIsVisible(false)
 			} else {
 				window?.setIsVisible(true)
