@@ -181,10 +181,11 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		watcherCount -= 1
 	}// end func stop
 
-	public func getWSEndPoint (program liveNumber: String) -> URL {
+	public func getWSEndPoint (program liveNumber: String) -> URL? {
 		var wsEndPointURL: URL = URL(string: "https://live.nicovideo.jp")!
 		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
-		let url: URL = URL(string: WSEndPointURLString + WSEndPointProgramKey + liveNumber + WSEndPointUserIDKey + userIdentifier)!
+		guard let id = userIdentifier else { return nil }
+		let url: URL = URL(string: WSEndPointURLString + WSEndPointProgramKey + liveNumber + WSEndPointUserIDKey + id)!
 		let request = makeRequestWithAccessToken(url: url)
 		let task = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
 			defer { semaphore.signal() }
