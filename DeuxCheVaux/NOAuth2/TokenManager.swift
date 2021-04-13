@@ -81,7 +81,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 	public private(set) var idToken: String!
 	public private(set) var user_session: String!
 	public private(set) var premium: Bool!
-	public private(set) var userIdentifier: String!
+	public private(set) var userIdentifier: String?
 
 		// MARK: - Computed Properties
 		// MARK: - Outlets
