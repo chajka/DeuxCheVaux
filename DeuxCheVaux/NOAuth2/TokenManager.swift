@@ -94,6 +94,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 	private var expire: Int = AccessTokenInterval
 	private let session: URLSession = URLSession(configuration: URLSessionConfiguration.default)
 	private var userNickname: String!
+	private var sessionIsValid: Bool = false
 
 	private var watcherCount: Int = 0
 
