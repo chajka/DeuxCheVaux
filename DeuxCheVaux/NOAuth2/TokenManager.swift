@@ -11,6 +11,7 @@ import WebKit
 import Security
 
 fileprivate let TokenManagerNibName: String = "TokenManager"
+fileprivate let MyPageURL: URL = URL(string: "https://www.nicovideo.jp/my")!
 fileprivate let AuthorizationBaseURL: URL = URL(string: "https://oauth.nicovideo.jp/")!
 fileprivate let AuthorizedURL: URL = AuthorizationBaseURL.appendingPathComponent("oauth2/authorized")
 fileprivate let UserInfoURL: URL = AuthorizationBaseURL.appendingPathComponent("open_id/userinfo")
