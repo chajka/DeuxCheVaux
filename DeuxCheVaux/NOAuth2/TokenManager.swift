@@ -383,7 +383,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		// MARK: - Delegate / Protocol clients
 	public func webView (_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
 		if let url: URL = webView.url {
-			if url.absoluteURL == AuthorizedURL {
+			if url.absoluteURL != MyPageURL, url.absoluteURL == AuthorizedURL || (oauthURL != nil && sessionIsValid) {
 				window?.setIsVisible(false)
 			} else {
 				window?.setIsVisible(true)
@@ -399,6 +399,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 						_ = self.updateToken(to: cookie.value, tokenType: SessionToken)
 					}// end if can not save user session
 					self.user_session = cookie.value
+					self.sessionIsValid = true
 				}// end if found user session cookie
 			}// end foreach cookie
 		}// end all cookies handler
