@@ -228,16 +228,19 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 	private func getUserInfo() {
 		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
 		let request: URLRequest =  makeRequestWithAccessToken(url: UserInfoURL)
-		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
+		let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, resp: URLResponse?, err: Error?) in
 			defer { semaphore.signal() }
-			guard let data: Data = dat else { return }
+			guard let weakSelf = self, let data: Data = dat else { return }
 			do {
 				let decoder: JSONDecoder = JSONDecoder()
 				let userInfo: UserInfo = try decoder.decode(UserInfo.self, from: data)
-				self.userIdentifier = userInfo.sub
-				self.userNickname = userInfo.nickname
+				weakSelf.userIdentifier = userInfo.sub
+				weakSelf.userNickname = userInfo.nickname
 			} catch let error {
 				print(error.localizedDescription)
+				DispatchQueue.main.async {
+					weakSelf.authenticate()
+				}
 			}// end do try - catch decode user info
 		}// end completion handler
 		task.resume()
@@ -366,6 +369,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 					if nickname.data?.id != uid {
 						self.authenticate()
 					}// end authenticate if can not get correct user id
+					self.sessionIsValid = true
 				} catch let error {
 					self.authenticate()
 					print(error.localizedDescription)
