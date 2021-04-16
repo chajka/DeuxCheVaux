@@ -408,6 +408,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 			do {
 				let decoder: JSONDecoder = JSONDecoder()
 				let tokens: Tokens = try decoder.decode(Tokens.self, from: jsonData)
+				self.window?.setIsVisible(false)
 				self.refreshToken = tokens.refresh_token
 				self.accessToken = tokens.access_token
 				if let id_token: String = tokens.id_token {
