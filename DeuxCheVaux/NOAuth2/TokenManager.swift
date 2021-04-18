@@ -484,6 +484,14 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 				if cookie.name == UserSessionName && cookie.domain == UserSessionDomain {
 					if !self.saveStringToKeychain(string: cookie.value, kind: SessionToken) {
 						_ = self.updateStringToKeychain(string: cookie.value, kind: SessionToken)
+						do {
+							let data = try NSKeyedArchiver.archivedData(withRootObject: cookies, requiringSecureCoding: false)
+							if !self.saveDataToKeychain(data: data, kind: SessionCookies) {
+								_ = self.updateDataToKeychain(data: data, kind: SessionCookies)
+							}
+						} catch let error {
+							print("Archive Cookie failed: \(error.localizedDescription)")
+						}// end do try - catch archive cookie
 					}// end if can not save user session
 					self.user_session = cookie.value
 					self.sessionIsValid = true
