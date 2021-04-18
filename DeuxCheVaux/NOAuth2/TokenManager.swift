@@ -103,13 +103,13 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		// MARK: - Constructor / Destructor
 	private convenience init() {
 		self.init(windowNibName: TokenManagerNibName)
-		if let token: String = readToken(tokenType: RefreshToken) {
+		if let token: String = readStringFromKeychain(kind: RefreshToken) {
 			self.refreshToken = token
 		}// end optional binding check for old refresh token in iCloudKeychain or not
-		if let token: String = readToken(tokenType: IDToken) {
+		if let token: String = readStringFromKeychain(kind: IDToken) {
 			self.idToken = token
 		}// end optional binding check for id token in iCloudKeychain or not
-		if let session: String = readToken(tokenType: SessionToken) {
+		if let session: String = readStringFromKeychain(kind: SessionToken) {
 			self.user_session = session
 		}// end optional binding check for user_session in iCloudKeychain or not
 		verifyUserSession()
@@ -160,7 +160,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 								let tokens: Tokens = try decoder.decode(Tokens.self, from: json)
 								self.refreshToken = tokens.refresh_token
 								self.accessToken = tokens.access_token
-								_ = self.updateToken(to: self.refreshToken, tokenType: RefreshToken)
+								_ = self.updateStringToKeychain(string: self.refreshToken, kind: RefreshToken)
 							} catch let error {
 								print(error.localizedDescription)
 							}// end do try - catch decode tokens json
@@ -480,8 +480,8 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		webView.configuration.websiteDataStore.httpCookieStore.getAllCookies { (cookies:Array<HTTPCookie>) in
 			for cookie: HTTPCookie in cookies {
 				if cookie.name == UserSessionName && cookie.domain == UserSessionDomain {
-					if !self.saveToken(refreshToken: cookie.value, tokenType: SessionToken) {
-						_ = self.updateToken(to: cookie.value, tokenType: SessionToken)
+					if !self.saveStringToKeychain(string: cookie.value, kind: SessionToken) {
+						_ = self.updateStringToKeychain(string: cookie.value, kind: SessionToken)
 					}// end if can not save user session
 					self.user_session = cookie.value
 					self.sessionIsValid = true
@@ -500,8 +500,8 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 					self.idToken = id_token
 				}
 				self.expire = tokens.expires_in
-				_ = self.updateToken(to: self.refreshToken, tokenType: RefreshToken)
-				_ = self.updateToken(to: self.idToken, tokenType: IDToken)
+				_ = self.updateStringToKeychain(string: self.refreshToken, kind: RefreshToken)
+				_ = self.updateStringToKeychain(string: self.idToken, kind: IDToken)
 			} catch let error {
 				print(error.localizedDescription)
 			}// end do try - catch decode json
