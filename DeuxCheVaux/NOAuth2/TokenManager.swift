@@ -26,6 +26,7 @@ fileprivate let AuthorizationBearer: String = "Bearer "
 fileprivate let RefreshToken: String = "jp.nicovideo.oauth2-refresh_token"
 fileprivate let IDToken: String = "jp.nicovideo.oauth2-id_token"
 fileprivate let SessionToken: String = "jp.nicovideo.user_session"
+fileprivate let SessionCookies: String = "jp.nicovideo.cookies"
 
 fileprivate struct Tokens: Codable {
 	let access_token: String
