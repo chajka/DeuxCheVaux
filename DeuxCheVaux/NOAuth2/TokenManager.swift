@@ -344,6 +344,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		return resultCode == errSecSuccess
 	}// end update token of keychain
 
+	private func updateDataToKeychain (data: Data, kind: String) -> Bool {
 		let query: Dictionary<String, AnyObject> = [
 			kSecClass as String: kSecClassGenericPassword,
 			kSecMatchLimit as String: kSecMatchLimitAll,
@@ -351,7 +352,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 			kSecReturnData as String: kCFBooleanTrue,
 			kSecAttrSynchronizable as String: kCFBooleanTrue,
 			kSecAttrAccessible as String: kSecAttrAccessibleAlways,
-			kSecAttrService as String: type as NSString
+			kSecAttrService as String: kind as NSString
 		]
 		let itemToUpdate: Dictionary<String, AnyObject> = [
 			kSecClass as String: kSecClassGenericPassword,
@@ -359,8 +360,8 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 			kSecAttrAccessible as String: kSecAttrAccessibleAlways,
 			kSecAttrSynchronizable as String: kCFBooleanTrue,
 			kSecAttrType as String: kSecAttrApplicationLabel,
-			kSecAttrService as String: type as NSString,
-			kSecValueData as String: token.data(using: .utf8)! as NSData
+			kSecAttrService as String: kind as NSString,
+			kSecValueData as String: data as NSData
 		]
 		var result: AnyObject?
 		var resultCode = withUnsafeMutablePointer(to: &result) {
