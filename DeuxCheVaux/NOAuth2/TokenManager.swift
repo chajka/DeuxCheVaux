@@ -288,14 +288,15 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		return resultCode == errSecSuccess
 	}// end func save token into keychain
 
+	private func saveDataToKeychain (data: Data, kind: String) -> Bool {
 		let query: Dictionary<String, AnyObject> = [
 			kSecClass as String: kSecClassGenericPassword,
 			kSecReturnPersistentRef as String: kCFBooleanTrue,
 			kSecAttrAccessible as String: kSecAttrAccessibleAlways,
 			kSecAttrSynchronizable as String: kCFBooleanTrue,
 			kSecAttrType as String: kSecAttrApplicationLabel,
-			kSecAttrService as String: type as NSString,
-			kSecValueData as String: token.data(using: .utf8)! as NSData
+			kSecAttrService as String: kind as NSString,
+			kSecValueData as String: data as NSData
 		]
 		var result: AnyObject?
 		let resultCode: OSStatus = withUnsafeMutablePointer(to: &result) {
