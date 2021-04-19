@@ -97,6 +97,14 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 	private let session: URLSession = URLSession(configuration: URLSessionConfiguration.default)
 	private var userNickname: String!
 	private var sessionIsValid: Bool = false
+	private let defaultQuery: Dictionary<String, AnyObject> = [
+		kSecClass as String: kSecClassGenericPassword,
+		kSecReturnPersistentRef as String: kCFBooleanTrue,
+		kSecAttrAccessible as String: kSecAttrAccessibleAlways,
+		kSecAttrSynchronizable as String: kCFBooleanTrue,
+		kSecAttrType as String: kSecAttrApplicationLabel,
+	]
+
 
 	private var watcherCount: Int = 0
 
@@ -279,15 +287,9 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 	}// end userPremium
 
 	private func saveStringToKeychain (string: String, kind: String) -> Bool {
-		let query: Dictionary<String, AnyObject> = [
-			kSecClass as String: kSecClassGenericPassword,
-			kSecReturnPersistentRef as String: kCFBooleanTrue,
-			kSecAttrAccessible as String: kSecAttrAccessibleAlways,
-			kSecAttrSynchronizable as String: kCFBooleanTrue,
-			kSecAttrType as String: kSecAttrApplicationLabel,
-			kSecAttrService as String: kind as NSString,
-			kSecValueData as String: string.data(using: .utf8)! as NSData
-		]
+		var query: Dictionary<String, AnyObject> = defaultQuery
+		query[kSecAttrService as String] = kind as NSString
+		query[kSecValueData as String] = string.data(using: .utf8)! as NSData
 		var result: AnyObject?
 		let resultCode: OSStatus = withUnsafeMutablePointer(to: &result) {
 			SecItemAdd(query as CFDictionary, $0)
@@ -300,15 +302,9 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 	}// end func save token into keychain
 
 	private func saveDataToKeychain (data: Data, kind: String) -> Bool {
-		let query: Dictionary<String, AnyObject> = [
-			kSecClass as String: kSecClassGenericPassword,
-			kSecReturnPersistentRef as String: kCFBooleanTrue,
-			kSecAttrAccessible as String: kSecAttrAccessibleAlways,
-			kSecAttrSynchronizable as String: kCFBooleanTrue,
-			kSecAttrType as String: kSecAttrApplicationLabel,
-			kSecAttrService as String: kind as NSString,
-			kSecValueData as String: data as NSData
-		]
+		var query: Dictionary<String, AnyObject> = defaultQuery
+		query[kSecAttrService as String] = kind as NSString
+		query[kSecValueData as String] = data as NSData
 		var result: AnyObject?
 		let resultCode: OSStatus = withUnsafeMutablePointer(to: &result) {
 			SecItemAdd(query as CFDictionary, $0)
@@ -321,24 +317,11 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 	}// end func save token into keychain
 
 	private func updateStringToKeychain (string: String, kind: String) -> Bool {
-		let query: Dictionary<String, AnyObject> = [
-			kSecClass as String: kSecClassGenericPassword,
-			kSecMatchLimit as String: kSecMatchLimitAll,
-			kSecReturnPersistentRef as String: kCFBooleanTrue,
-			kSecReturnData as String: kCFBooleanTrue,
-			kSecAttrSynchronizable as String: kCFBooleanTrue,
-			kSecAttrAccessible as String: kSecAttrAccessibleAlways,
-			kSecAttrService as String: kind as NSString
-		]
-		let itemToUpdate: Dictionary<String, AnyObject> = [
-			kSecClass as String: kSecClassGenericPassword,
-			kSecReturnPersistentRef as String: kCFBooleanTrue,
-			kSecAttrAccessible as String: kSecAttrAccessibleAlways,
-			kSecAttrSynchronizable as String: kCFBooleanTrue,
-			kSecAttrType as String: kSecAttrApplicationLabel,
-			kSecAttrService as String: kind as NSString,
-			kSecValueData as String: string.data(using: .utf8)! as NSData
-		]
+		var query: Dictionary<String, AnyObject> = defaultQuery
+		query[kSecAttrService as String] = kind as NSString
+		var itemToUpdate: Dictionary<String, AnyObject> = defaultQuery
+		itemToUpdate[kSecAttrService as String] = kind as NSString
+		itemToUpdate[kSecValueData as String] = string.data(using: .utf8)! as NSData
 		var result: AnyObject?
 		var resultCode = withUnsafeMutablePointer(to: &result) {
 			 SecItemCopyMatching(query as CFDictionary, $0)
@@ -356,24 +339,11 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 	}// end update token of keychain
 
 	private func updateDataToKeychain (data: Data, kind: String) -> Bool {
-		let query: Dictionary<String, AnyObject> = [
-			kSecClass as String: kSecClassGenericPassword,
-			kSecMatchLimit as String: kSecMatchLimitAll,
-			kSecReturnPersistentRef as String: kCFBooleanTrue,
-			kSecReturnData as String: kCFBooleanTrue,
-			kSecAttrSynchronizable as String: kCFBooleanTrue,
-			kSecAttrAccessible as String: kSecAttrAccessibleAlways,
-			kSecAttrService as String: kind as NSString
-		]
-		let itemToUpdate: Dictionary<String, AnyObject> = [
-			kSecClass as String: kSecClassGenericPassword,
-			kSecReturnPersistentRef as String: kCFBooleanTrue,
-			kSecAttrAccessible as String: kSecAttrAccessibleAlways,
-			kSecAttrSynchronizable as String: kCFBooleanTrue,
-			kSecAttrType as String: kSecAttrApplicationLabel,
-			kSecAttrService as String: kind as NSString,
-			kSecValueData as String: data as NSData
-		]
+		var query: Dictionary<String, AnyObject> = defaultQuery
+		query[kSecAttrService as String] = kind as NSString
+		var itemToUpdate: Dictionary<String, AnyObject> = defaultQuery
+		itemToUpdate[kSecAttrService as String] = kind as NSString
+		itemToUpdate[kSecValueData as String] = data as NSData
 		var result: AnyObject?
 		var resultCode = withUnsafeMutablePointer(to: &result) {
 			 SecItemCopyMatching(query as CFDictionary, $0)
@@ -391,15 +361,8 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 	}// end update token of keychain
 
 	private func readStringFromKeychain (kind: String) -> String? {
-		let query: Dictionary<String, AnyObject> = [
-			kSecClass as String: kSecClassGenericPassword,
-			kSecMatchLimit as String: kSecMatchLimitAll,
-			kSecReturnPersistentRef as String: kCFBooleanTrue,
-			kSecReturnData as String: kCFBooleanTrue,
-			kSecAttrSynchronizable as String: kCFBooleanTrue,
-			kSecAttrAccessible as String: kSecAttrAccessibleAlways,
-			kSecAttrService as String: kind as NSString
-		]
+		var query: Dictionary<String, AnyObject> = defaultQuery
+		query[kSecAttrService as String] = kind as NSString
 		var result: AnyObject?
 		let resultCode = withUnsafeMutablePointer(to: &result) {
 			 SecItemCopyMatching(query as CFDictionary, $0)
@@ -420,15 +383,8 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 	}// end func read token from keychain
 
 	private func readDataFromKeychain (kind: String) -> Data? {
-		let query: Dictionary<String, AnyObject> = [
-			kSecClass as String: kSecClassGenericPassword,
-			kSecMatchLimit as String: kSecMatchLimitAll,
-			kSecReturnPersistentRef as String: kCFBooleanTrue,
-			kSecReturnData as String: kCFBooleanTrue,
-			kSecAttrSynchronizable as String: kCFBooleanTrue,
-			kSecAttrAccessible as String: kSecAttrAccessibleAlways,
-			kSecAttrService as String: kind as NSString
-		]
+		var query: Dictionary<String, AnyObject> = defaultQuery
+		query[kSecAttrService as String] = kind as NSString
 		var result: AnyObject?
 		let resultCode = withUnsafeMutablePointer(to: &result) {
 			 SecItemCopyMatching(query as CFDictionary, $0)
