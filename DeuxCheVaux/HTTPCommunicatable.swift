@@ -69,8 +69,10 @@ public class HTTPCommunicatable: NSObject {
 		let userAgent: String = deuxCheVaux.userAgent
 		let userSession: String = TokenManager.shared.user_session
 		var request: URLRequest = URLRequest(url: requestURL, cachePolicy: URLRequest.CachePolicy.reloadIgnoringLocalAndRemoteCacheData, timeoutInterval: Timeout)
-		if let cookies: Array<HTTPCookie> = TokenManager.shared.cookies {
-			request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
+		var properties: Dictionary<HTTPCookiePropertyKey, Any> = cookieProperties
+		properties[.value] = userSession
+		if let cookie: HTTPCookie = HTTPCookie(properties: properties) {
+			request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: [cookie])
 		}// end if cookies are available
 		request.addValue(TokenManager.shared.user_session, forHTTPHeaderField: NicoSessionHeaderKey)
 		request.addValue(userAgent, forHTTPHeaderField: UserAgentKey)
