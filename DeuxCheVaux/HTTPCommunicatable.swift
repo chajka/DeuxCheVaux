@@ -46,6 +46,10 @@ public class HTTPCommunicatable: NSObject {
 		// MARK: Properties
 		// MARK: - Member variables
 	internal let session: URLSession
+	private let cookieProperties: Dictionary<HTTPCookiePropertyKey, Any> = [
+		.domain: UserSessionDomain,
+		.name: UserSessionName
+	]
 
 		// MARK: - Constructor/Destructor
 	public override init () {
