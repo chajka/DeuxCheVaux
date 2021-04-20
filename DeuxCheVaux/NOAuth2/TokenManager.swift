@@ -120,15 +120,6 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		if let session: String = readStringFromKeychain(kind: SessionToken) {
 			self.user_session = session
 		}// end optional binding check for user_session in iCloudKeychain or not
-		if let data: Data = readDataFromKeychain(kind: SessionCookies) {
-			do {
-				if let cookies: Array<HTTPCookie> = try NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(data) as? Array<HTTPCookie> {
-					self.cookies = cookies
-				}// end if decode cookies
-			} catch let error {
-				print("unarchive cookies failed: \(error.localizedDescription)")
-			}// end do try - catch unarchive cookies.
-		}// end optional binding check for read cookies from keychain
 		verifyUserSession()
 	}// end convinience init
 
