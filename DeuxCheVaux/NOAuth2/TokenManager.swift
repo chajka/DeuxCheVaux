@@ -17,7 +17,6 @@ fileprivate let AuthorizedURL: URL = AuthorizationBaseURL.appendingPathComponent
 fileprivate let UserInfoURL: URL = AuthorizationBaseURL.appendingPathComponent("open_id/userinfo")
 fileprivate let PremiumInfoURL: URL = AuthorizationBaseURL.appendingPathComponent("v1/user/premium.json")
 fileprivate let WSEndPointURLString: String = "https://api.live2.nicovideo.jp/api/v1/wsendpoint"
-fileprivate let UserSessionDomain: String = ".nicovideo.jp"
 fileprivate let WSEndPointProgramKey: String = "?nicoliveProgramId="
 fileprivate let WSEndPointUserIDKey: String = "&userId="
 fileprivate let AccessTokenInterval: Int = 60 * 60
@@ -26,7 +25,6 @@ fileprivate let AuthorizationBearer: String = "Bearer "
 fileprivate let RefreshToken: String = "jp.nicovideo.oauth2-refresh_token"
 fileprivate let IDToken: String = "jp.nicovideo.oauth2-id_token"
 fileprivate let SessionToken: String = "jp.nicovideo.user_session"
-fileprivate let SessionCookies: String = "jp.nicovideo.cookies"
 
 fileprivate struct Tokens: Codable {
 	let access_token: String
@@ -122,15 +120,6 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		if let session: String = readStringFromKeychain(kind: SessionToken) {
 			self.user_session = session
 		}// end optional binding check for user_session in iCloudKeychain or not
-		if let data: Data = readDataFromKeychain(kind: SessionCookies) {
-			do {
-				if let cookies: Array<HTTPCookie> = try NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(data) as? Array<HTTPCookie> {
-					self.cookies = cookies
-				}// end if decode cookies
-			} catch let error {
-				print("unarchive cookies failed: \(error.localizedDescription)")
-			}// end do try - catch unarchive cookies.
-		}// end optional binding check for read cookies from keychain
 		verifyUserSession()
 	}// end convinience init
 
@@ -449,14 +438,6 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 				if cookie.name == UserSessionName && cookie.domain == UserSessionDomain {
 					if !self.saveStringToKeychain(string: cookie.value, kind: SessionToken) {
 						_ = self.updateStringToKeychain(string: cookie.value, kind: SessionToken)
-						do {
-							let data = try NSKeyedArchiver.archivedData(withRootObject: cookies, requiringSecureCoding: false)
-							if !self.saveDataToKeychain(data: data, kind: SessionCookies) {
-								_ = self.updateDataToKeychain(data: data, kind: SessionCookies)
-							}
-						} catch let error {
-							print("Archive Cookie failed: \(error.localizedDescription)")
-						}// end do try - catch archive cookie
 					}// end if can not save user session
 					self.user_session = cookie.value
 					self.sessionIsValid = true

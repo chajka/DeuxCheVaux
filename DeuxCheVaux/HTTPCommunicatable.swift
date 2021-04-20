@@ -14,6 +14,7 @@ fileprivate let DataTimeOut: TimeInterval = 2.0
 
 internal let UserSessionName: String = "user_session"
 internal let NicoSessionHeaderKey: String = "X-niconico-session"
+internal let UserSessionDomain: String = ".nicovideo.jp"
 
 public enum HTTPMethod: String {
 	case get = "GET"
@@ -45,6 +46,10 @@ public class HTTPCommunicatable: NSObject {
 		// MARK: Properties
 		// MARK: - Member variables
 	internal let session: URLSession
+	private let cookieProperties: Dictionary<HTTPCookiePropertyKey, Any> = [
+		.domain: UserSessionDomain,
+		.name: UserSessionName
+	]
 
 		// MARK: - Constructor/Destructor
 	public override init () {
@@ -62,11 +67,14 @@ public class HTTPCommunicatable: NSObject {
 	internal func makeRequest (url requestURL: URL, method requestMethod: HTTPMethod, contentsType type: String? = nil) -> URLRequest {
 		let deuxCheVaux: DeuxCheVaux = DeuxCheVaux.shared
 		let userAgent: String = deuxCheVaux.userAgent
+		let userSession: String = TokenManager.shared.user_session
 		var request: URLRequest = URLRequest(url: requestURL, cachePolicy: URLRequest.CachePolicy.reloadIgnoringLocalAndRemoteCacheData, timeoutInterval: Timeout)
-		if let cookies: Array<HTTPCookie> = TokenManager.shared.cookies {
-			request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
+		var properties: Dictionary<HTTPCookiePropertyKey, Any> = cookieProperties
+		properties[.value] = userSession
+		if let cookie: HTTPCookie = HTTPCookie(properties: properties) {
+			request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: [cookie])
 		}// end if cookies are available
-		request.addValue(TokenManager.shared.user_session, forHTTPHeaderField: NicoSessionHeaderKey)
+		request.addValue(userSession, forHTTPHeaderField: NicoSessionHeaderKey)
 		request.addValue(userAgent, forHTTPHeaderField: UserAgentKey)
 		if let contentsType: String = type {
 			request.addValue(contentsType, forHTTPHeaderField: ContentTypeKey)
