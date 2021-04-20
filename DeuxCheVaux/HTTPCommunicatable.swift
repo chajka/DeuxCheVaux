@@ -74,7 +74,7 @@ public class HTTPCommunicatable: NSObject {
 		if let cookie: HTTPCookie = HTTPCookie(properties: properties) {
 			request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: [cookie])
 		}// end if cookies are available
-		request.addValue(TokenManager.shared.user_session, forHTTPHeaderField: NicoSessionHeaderKey)
+		request.addValue(userSession, forHTTPHeaderField: NicoSessionHeaderKey)
 		request.addValue(userAgent, forHTTPHeaderField: UserAgentKey)
 		if let contentsType: String = type {
 			request.addValue(contentsType, forHTTPHeaderField: ContentTypeKey)
