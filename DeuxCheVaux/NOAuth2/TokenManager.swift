@@ -17,7 +17,6 @@ fileprivate let AuthorizedURL: URL = AuthorizationBaseURL.appendingPathComponent
 fileprivate let UserInfoURL: URL = AuthorizationBaseURL.appendingPathComponent("open_id/userinfo")
 fileprivate let PremiumInfoURL: URL = AuthorizationBaseURL.appendingPathComponent("v1/user/premium.json")
 fileprivate let WSEndPointURLString: String = "https://api.live2.nicovideo.jp/api/v1/wsendpoint"
-fileprivate let UserSessionDomain: String = ".nicovideo.jp"
 fileprivate let WSEndPointProgramKey: String = "?nicoliveProgramId="
 fileprivate let WSEndPointUserIDKey: String = "&userId="
 fileprivate let AccessTokenInterval: Int = 60 * 60
@@ -82,6 +81,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 	public private(set) var user_session: String!
 	public private(set) var premium: Bool!
 	public private(set) var userIdentifier: String?
+	public private(set) var cookies: Array<HTTPCookie>?
 
 		// MARK: - Computed Properties
 		// MARK: - Outlets
@@ -95,6 +95,14 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 	private let session: URLSession = URLSession(configuration: URLSessionConfiguration.default)
 	private var userNickname: String!
 	private var sessionIsValid: Bool = false
+	private let defaultQuery: Dictionary<String, AnyObject> = [
+		kSecClass as String: kSecClassGenericPassword,
+		kSecReturnPersistentRef as String: kCFBooleanTrue,
+		kSecAttrAccessible as String: kSecAttrAccessibleAlways,
+		kSecAttrSynchronizable as String: kCFBooleanTrue,
+		kSecAttrType as String: kSecAttrApplicationLabel,
+	]
+
 
 	private var watcherCount: Int = 0
 
@@ -103,13 +111,13 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		// MARK: - Constructor / Destructor
 	private convenience init() {
 		self.init(windowNibName: TokenManagerNibName)
-		if let token: String = readToken(tokenType: RefreshToken) {
+		if let token: String = readStringFromKeychain(kind: RefreshToken) {
 			self.refreshToken = token
 		}// end optional binding check for old refresh token in iCloudKeychain or not
-		if let token: String = readToken(tokenType: IDToken) {
+		if let token: String = readStringFromKeychain(kind: IDToken) {
 			self.idToken = token
 		}// end optional binding check for id token in iCloudKeychain or not
-		if let session: String = readToken(tokenType: SessionToken) {
+		if let session: String = readStringFromKeychain(kind: SessionToken) {
 			self.user_session = session
 		}// end optional binding check for user_session in iCloudKeychain or not
 		verifyUserSession()
@@ -160,7 +168,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 								let tokens: Tokens = try decoder.decode(Tokens.self, from: json)
 								self.refreshToken = tokens.refresh_token
 								self.accessToken = tokens.access_token
-								_ = self.updateToken(to: self.refreshToken, tokenType: RefreshToken)
+								_ = self.updateStringToKeychain(string: self.refreshToken, kind: RefreshToken)
 							} catch let error {
 								print(error.localizedDescription)
 							}// end do try - catch decode tokens json
@@ -184,7 +192,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 	public func getWSEndPoint (program liveNumber: String) -> URL? {
 		var wsEndPointURL: URL = URL(string: "https://live.nicovideo.jp")!
 		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
-		guard let id = userIdentifier else { return nil }
+		guard let id = userIdentifier else { getUserInfo(); return nil }
 		let url: URL = URL(string: WSEndPointURLString + WSEndPointProgramKey + liveNumber + WSEndPointUserIDKey + id)!
 		let request = makeRequestWithAccessToken(url: url)
 		let task = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
@@ -267,16 +275,10 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		return premium
 	}// end userPremium
 
-	private func saveToken (refreshToken token: String, tokenType type: String) -> Bool {
-		let query: Dictionary<String, AnyObject> = [
-			kSecClass as String: kSecClassGenericPassword,
-			kSecReturnPersistentRef as String: kCFBooleanTrue,
-			kSecAttrAccessible as String: kSecAttrAccessibleAlways,
-			kSecAttrSynchronizable as String: kCFBooleanTrue,
-			kSecAttrType as String: kSecAttrApplicationLabel,
-			kSecAttrService as String: type as NSString,
-			kSecValueData as String: token.data(using: .utf8)! as NSData
-		]
+	private func saveStringToKeychain (string: String, kind: String) -> Bool {
+		var query: Dictionary<String, AnyObject> = defaultQuery
+		query[kSecAttrService as String] = kind as NSString
+		query[kSecValueData as String] = string.data(using: .utf8)! as NSData
 		var result: AnyObject?
 		let resultCode: OSStatus = withUnsafeMutablePointer(to: &result) {
 			SecItemAdd(query as CFDictionary, $0)
@@ -288,25 +290,27 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		return resultCode == errSecSuccess
 	}// end func save token into keychain
 
-	private func updateToken (to token: String, tokenType type: String) -> Bool {
-		let query: Dictionary<String, AnyObject> = [
-			kSecClass as String: kSecClassGenericPassword,
-			kSecMatchLimit as String: kSecMatchLimitAll,
-			kSecReturnPersistentRef as String: kCFBooleanTrue,
-			kSecReturnData as String: kCFBooleanTrue,
-			kSecAttrSynchronizable as String: kCFBooleanTrue,
-			kSecAttrAccessible as String: kSecAttrAccessibleAlways,
-			kSecAttrService as String: type as NSString
-		]
-		let itemToUpdate: Dictionary<String, AnyObject> = [
-			kSecClass as String: kSecClassGenericPassword,
-			kSecReturnPersistentRef as String: kCFBooleanTrue,
-			kSecAttrAccessible as String: kSecAttrAccessibleAlways,
-			kSecAttrSynchronizable as String: kCFBooleanTrue,
-			kSecAttrType as String: kSecAttrApplicationLabel,
-			kSecAttrService as String: type as NSString,
-			kSecValueData as String: token.data(using: .utf8)! as NSData
-		]
+	private func saveDataToKeychain (data: Data, kind: String) -> Bool {
+		var query: Dictionary<String, AnyObject> = defaultQuery
+		query[kSecAttrService as String] = kind as NSString
+		query[kSecValueData as String] = data as NSData
+		var result: AnyObject?
+		let resultCode: OSStatus = withUnsafeMutablePointer(to: &result) {
+			SecItemAdd(query as CFDictionary, $0)
+		}
+		if resultCode == errSecDuplicateItem {
+			return false
+		}
+
+		return resultCode == errSecSuccess
+	}// end func save token into keychain
+
+	private func updateStringToKeychain (string: String, kind: String) -> Bool {
+		var query: Dictionary<String, AnyObject> = defaultQuery
+		query[kSecAttrService as String] = kind as NSString
+		var itemToUpdate: Dictionary<String, AnyObject> = defaultQuery
+		itemToUpdate[kSecAttrService as String] = kind as NSString
+		itemToUpdate[kSecValueData as String] = string.data(using: .utf8)! as NSData
 		var result: AnyObject?
 		var resultCode = withUnsafeMutablePointer(to: &result) {
 			 SecItemCopyMatching(query as CFDictionary, $0)
@@ -323,16 +327,31 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		return resultCode == errSecSuccess
 	}// end update token of keychain
 
-	private func readToken (tokenType type: String) -> String? {
-		let query: Dictionary<String, AnyObject> = [
-			kSecClass as String: kSecClassGenericPassword,
-			kSecMatchLimit as String: kSecMatchLimitAll,
-			kSecReturnPersistentRef as String: kCFBooleanTrue,
-			kSecReturnData as String: kCFBooleanTrue,
-			kSecAttrSynchronizable as String: kCFBooleanTrue,
-			kSecAttrAccessible as String: kSecAttrAccessibleAlways,
-			kSecAttrService as String: type as NSString
-		]
+	private func updateDataToKeychain (data: Data, kind: String) -> Bool {
+		var query: Dictionary<String, AnyObject> = defaultQuery
+		query[kSecAttrService as String] = kind as NSString
+		var itemToUpdate: Dictionary<String, AnyObject> = defaultQuery
+		itemToUpdate[kSecAttrService as String] = kind as NSString
+		itemToUpdate[kSecValueData as String] = data as NSData
+		var result: AnyObject?
+		var resultCode = withUnsafeMutablePointer(to: &result) {
+			 SecItemCopyMatching(query as CFDictionary, $0)
+		}
+		if let keychainItems = result as? Array<NSDictionary> {
+			for _ in keychainItems {
+				resultCode = SecItemDelete(query as CFDictionary)
+			}
+		}
+		resultCode = withUnsafeMutablePointer(to: &result) {
+			SecItemAdd(itemToUpdate as CFDictionary, $0)
+		}
+
+		return resultCode == errSecSuccess
+	}// end update token of keychain
+
+	private func readStringFromKeychain (kind: String) -> String? {
+		var query: Dictionary<String, AnyObject> = defaultQuery
+		query[kSecAttrService as String] = kind as NSString
 		var result: AnyObject?
 		let resultCode = withUnsafeMutablePointer(to: &result) {
 			 SecItemCopyMatching(query as CFDictionary, $0)
@@ -344,6 +363,28 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 				for item: NSDictionary in keychainItems {
 					if let data: Data = item[kSecValueData] as? Data {
 						return String(data: data, encoding: .utf8)!
+					}// end if token found
+				}// end foreach keychain item
+			}// end if found keychain items
+		}// end if keychain items found or not
+
+		return nil
+	}// end func read token from keychain
+
+	private func readDataFromKeychain (kind: String) -> Data? {
+		var query: Dictionary<String, AnyObject> = defaultQuery
+		query[kSecAttrService as String] = kind as NSString
+		var result: AnyObject?
+		let resultCode = withUnsafeMutablePointer(to: &result) {
+			 SecItemCopyMatching(query as CFDictionary, $0)
+		}
+		if resultCode == errSecItemNotFound {
+			return nil
+		} else {
+			if let keychainItems = result as? Array<NSDictionary> {
+				for item: NSDictionary in keychainItems {
+					if let data: Data = item[kSecValueData] as? Data {
+						return data
 					}// end if token found
 				}// end foreach keychain item
 			}// end if found keychain items
@@ -395,8 +436,8 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		webView.configuration.websiteDataStore.httpCookieStore.getAllCookies { (cookies:Array<HTTPCookie>) in
 			for cookie: HTTPCookie in cookies {
 				if cookie.name == UserSessionName && cookie.domain == UserSessionDomain {
-					if !self.saveToken(refreshToken: cookie.value, tokenType: SessionToken) {
-						_ = self.updateToken(to: cookie.value, tokenType: SessionToken)
+					if !self.saveStringToKeychain(string: cookie.value, kind: SessionToken) {
+						_ = self.updateStringToKeychain(string: cookie.value, kind: SessionToken)
 					}// end if can not save user session
 					self.user_session = cookie.value
 					self.sessionIsValid = true
@@ -408,14 +449,15 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 			do {
 				let decoder: JSONDecoder = JSONDecoder()
 				let tokens: Tokens = try decoder.decode(Tokens.self, from: jsonData)
+				self.window?.setIsVisible(false)
 				self.refreshToken = tokens.refresh_token
 				self.accessToken = tokens.access_token
 				if let id_token: String = tokens.id_token {
 					self.idToken = id_token
 				}
 				self.expire = tokens.expires_in
-				_ = self.updateToken(to: self.refreshToken, tokenType: RefreshToken)
-				_ = self.updateToken(to: self.idToken, tokenType: IDToken)
+				_ = self.updateStringToKeychain(string: self.refreshToken, kind: RefreshToken)
+				_ = self.updateStringToKeychain(string: self.idToken, kind: IDToken)
 			} catch let error {
 				print(error.localizedDescription)
 			}// end do try - catch decode json
