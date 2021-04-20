@@ -14,6 +14,7 @@ fileprivate let DataTimeOut: TimeInterval = 2.0
 
 internal let UserSessionName: String = "user_session"
 internal let NicoSessionHeaderKey: String = "X-niconico-session"
+internal let UserSessionDomain: String = ".nicovideo.jp"
 
 public enum HTTPMethod: String {
 	case get = "GET"
