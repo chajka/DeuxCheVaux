@@ -109,7 +109,7 @@ fileprivate struct PostComment: Codable {
 	let data: PostCommentData
 }// end struct PostComment
 
-public protocol HeartbeatDelegate: class {
+public protocol HeartbeatDelegate: AnyObject {
 	func heartbeat (viewer: Int, comments: Int, ad: Int?, gift: Int?)
 }// end protocol heartbeatDelegate
 
