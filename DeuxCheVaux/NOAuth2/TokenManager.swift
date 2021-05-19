@@ -22,6 +22,7 @@ fileprivate let WSEndPointUserIDKey: String = "&userId="
 fileprivate let AccessTokenInterval: TimeInterval = 60 * 60
 fileprivate let AuthorizationKey: String = "Authorization"
 fileprivate let AuthorizationBearer: String = "Bearer "
+fileprivate let TokenKey: String = "jp.nicovideo.oauth2-tokens"
 fileprivate let RefreshToken: String = "jp.nicovideo.oauth2-refresh_token"
 fileprivate let IDToken: String = "jp.nicovideo.oauth2-id_token"
 fileprivate let SessionToken: String = "jp.nicovideo.user_session"
