@@ -27,6 +27,15 @@ fileprivate let RefreshToken: String = "jp.nicovideo.oauth2-refresh_token"
 fileprivate let IDToken: String = "jp.nicovideo.oauth2-id_token"
 fileprivate let SessionToken: String = "jp.nicovideo.user_session"
 
+public enum TokenManagerError: Error {
+	case URLError
+	case IdentifierNotFound
+	case TimerDidNotFound
+	case UserNotFound
+	case UserSessionNotFound
+	case TokensDecodeError
+}// end enum TokenManagerError
+
 fileprivate struct Tokens: Codable {
 	let access_token: String
 	let token_type: String
