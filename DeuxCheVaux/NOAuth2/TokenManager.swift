@@ -45,6 +45,11 @@ fileprivate struct Tokens: Codable {
 	let id_token: String?
 }// end struct Tokens
 
+fileprivate struct IDTokenData: Codable {
+	let iss: String
+	let sub: String
+}// end struct IDTokenData
+
 fileprivate struct UserInfo: Codable {
 	let sub: String
 	let nickname: String
@@ -78,6 +83,11 @@ fileprivate struct URLResult: Codable {
 	let meta: MetaInformation
 	let data: URLData
 }// end struct URLResult
+
+fileprivate struct IDInfo: Codable {
+	let meta: MetaInformation
+	let data: IDTokenData
+}// end struct IDInfo
 
 public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		// MARK:   Class Variables
