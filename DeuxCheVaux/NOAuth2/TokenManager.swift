@@ -89,6 +89,33 @@ fileprivate struct IDInfo: Codable {
 	let data: IDTokenData
 }// end struct IDInfo
 
+public struct UserInformations: Codable {
+	let identifier: String
+	let nickname: String
+	let premium: Bool
+	var accessToken: String
+	var refreshToken: String
+	let identifierToken: String
+	let cookies: Data
+	let date: Date
+
+	init (item: UserTokens) {
+		identifier = item.identifier
+		nickname = item.nickname
+		premium = item.premium
+		accessToken = item.accessToken
+		refreshToken = item.refreshToken
+		identifierToken = item.identifierToken
+		date = item.date
+		do {
+			cookies = try NSKeyedArchiver.archivedData(withRootObject: item.cookies, requiringSecureCoding: false)
+		} catch let error {
+			print("User information initialize failed \(error.localizedDescription)")
+			cookies = Data()
+		}// end do try - catch archive cookie
+	}// end init
+}// end struct UserTokens
+
 public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		// MARK:   Class Variables
 	public static let shared: TokenManager = TokenManager()
