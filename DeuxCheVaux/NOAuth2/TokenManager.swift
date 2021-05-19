@@ -19,7 +19,7 @@ fileprivate let PremiumInfoURL: URL = AuthorizationBaseURL.appendingPathComponen
 fileprivate let WSEndPointURLString: String = "https://api.live2.nicovideo.jp/api/v1/wsendpoint"
 fileprivate let WSEndPointProgramKey: String = "?nicoliveProgramId="
 fileprivate let WSEndPointUserIDKey: String = "&userId="
-fileprivate let AccessTokenInterval: Int = 60 * 60
+fileprivate let AccessTokenInterval: TimeInterval = 60 * 60
 fileprivate let AuthorizationKey: String = "Authorization"
 fileprivate let AuthorizationBearer: String = "Bearer "
 fileprivate let RefreshToken: String = "jp.nicovideo.oauth2-refresh_token"
