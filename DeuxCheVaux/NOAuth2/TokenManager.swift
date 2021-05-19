@@ -116,6 +116,44 @@ public struct UserInformations: Codable {
 	}// end init
 }// end struct UserTokens
 
+final class UserTokens {
+	public var identifier: String
+	public var nickname: String
+	public var premium: Bool
+	public var accessToken: String
+	public var refreshToken: String
+	public var identifierToken: String
+	public var cookies: Array<HTTPCookie>
+	public var date: Date
+
+	init (item: UserInformations) {
+		identifier = item.identifier
+		nickname = item.nickname
+		premium = item.premium
+		accessToken = item.accessToken
+		refreshToken = item.refreshToken
+		identifierToken = item.identifierToken
+		date = item.date
+		do {
+			cookies = try NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(item.cookies) as! Array<HTTPCookie>
+		} catch let error {
+			print("User Tokens initialize failed: \(error.localizedDescription)")
+			cookies = Array()
+		}// end do try - catch unarchive cookie
+	}// end init
+
+	init (identifier: String, nickname: String, premium: Bool, accessToken: String, refreshToken: String, identifierToken: String, cookies: Array<HTTPCookie>) {
+		self.identifier = identifier
+		self.nickname = nickname
+		self.premium = premium
+		self.accessToken = accessToken
+		self.refreshToken = refreshToken
+		self.identifierToken = identifierToken
+		self.cookies = cookies
+		date = Date()
+	}
+}// end struct UserTokens
+
 public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		// MARK:   Class Variables
 	public static let shared: TokenManager = TokenManager()
