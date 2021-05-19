@@ -154,6 +154,8 @@ final class UserTokens {
 	}
 }// end struct UserTokens
 
+public typealias AccountsHandler = (_ userIdentifier: String, _ nickname: String?, _ premium: Bool) -> Void
+
 public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		// MARK:   Class Variables
 	public static let shared: TokenManager = TokenManager()
