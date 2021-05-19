@@ -162,14 +162,6 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 
 		// MARK: - Class Methods
 		// MARK: - Properties
-	public private(set) var refreshToken: String!
-	public private(set) var accessToken: String!
-	public private(set) var idToken: String!
-	public private(set) var user_session: String!
-	public private(set) var premium: Bool!
-	public private(set) var userIdentifier: String?
-	public private(set) var cookies: Array<HTTPCookie>?
-
 		// MARK: - Computed Properties
 		// MARK: - Outlets
 	@IBOutlet weak var webView: WKWebView!
@@ -190,6 +182,13 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		kSecAttrType as String: kSecAttrApplicationLabel,
 	]
 
+	private var refreshToken: String!
+	private var accessToken: String!
+	private var idToken: String!
+	private var user_session: String!
+	private var premium: Bool!
+	private var userIdentifier: String?
+	private var cookies: Array<HTTPCookie>?
 
 	private var watcherCount: Int = 0
 
