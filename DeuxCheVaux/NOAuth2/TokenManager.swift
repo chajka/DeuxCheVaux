@@ -163,6 +163,17 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		// MARK: - Class Methods
 		// MARK: - Properties
 		// MARK: - Computed Properties
+	public var allAccounts: Array<(String, String)> {
+		get {
+			var allAccounts: Array<(String, String)> = Array()
+			for tokens: UserTokens in tokens.values {
+				allAccounts.append((tokens.identifier, tokens.nickname))
+			}// end foreach user tokens
+
+			return allAccounts
+		}// end get
+	}// end computed property allAccounts
+
 		// MARK: - Outlets
 	@IBOutlet weak var webView: WKWebView!
 
