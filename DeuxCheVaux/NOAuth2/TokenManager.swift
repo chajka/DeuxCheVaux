@@ -192,6 +192,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		kSecAttrSynchronizable as String: kCFBooleanTrue,
 		kSecAttrType as String: kSecAttrApplicationLabel
 	]
+	private var tokens: Dictionary<String, UserTokens> = Dictionary()
 
 	private var refreshToken: String!
 	private var accessToken: String!
