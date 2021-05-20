@@ -190,7 +190,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		kSecReturnPersistentRef as String: kCFBooleanTrue,
 		kSecAttrAccessible as String: kSecAttrAccessibleAlways,
 		kSecAttrSynchronizable as String: kCFBooleanTrue,
-		kSecAttrType as String: kSecAttrApplicationLabel,
+		kSecAttrType as String: kSecAttrApplicationLabel
 	]
 
 	private var refreshToken: String!
