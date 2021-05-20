@@ -386,31 +386,44 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		}
 	}// end func get user info from oAuth2 server
 
+	private func userPremium (for identifier: String) -> Bool {
+		do {
+			let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
+			var premium: Bool = false
+			let request: URLRequest = try makeRequestWithAccessToken(url: PremiumInfoURL, for: identifier)
+			let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
+				defer { semaphore.signal() }
+				guard let json: Data = dat else { return }
+				do {
+					let premiumInfo: Premium = try JSONDecoder().decode(Premium.self, from: json)
+					premium = premiumInfo.data.type == .premium
+				} catch let error {
+					print("GET Premium decode error: \(error.localizedDescription)")
+				}// end do try - catch decode premium data json
+			}// end closure
+			task.resume()
+			_ = semaphore.wait(timeout: DispatchTime.now() + .seconds(2))
+
+			return premium
+		} catch TokenManagerError.IdentifierNotFound {
+			print("user premium catch identifier error")
+		} catch let error {
+			print("user premium catch error: \(error.localizedDescription)")
+		}
+
+		return false
+	}// end userPremium
+
 		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
 			defer { semaphore.signal() }
 				let decoder: JSONDecoder = JSONDecoder()
 			} catch let error {
 		task.resume()
-
-	private func userPremium () -> Bool {
-		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
-		var premium: Bool = false
-		let request: URLRequest = makeRequestWithAccessToken(url: PremiumInfoURL)
-		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
 			defer { semaphore.signal() }
-			guard let json: Data = dat else { return }
 			do {
-				let premiumInfo: Premium = try JSONDecoder().decode(Premium.self, from: json)
-				premium = premiumInfo.data.type == .premium
 			} catch let error {
-				print("GET Premium decode error: \(error.localizedDescription)")
-			}// end do try - catch decode premium data json
-		}// end closure
 		task.resume()
-		_ = semaphore.wait(timeout: DispatchTime.now() + .seconds(2))
 
-		return premium
-	}// end userPremium
 
 	private func saveStringToKeychain (string: String, kind: String) -> Bool {
 		var query: Dictionary<String, AnyObject> = defaultQuery
