@@ -209,16 +209,17 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		// MARK: - Constructor / Destructor
 	private convenience init() {
 		self.init(windowNibName: TokenManagerNibName)
-		if let token: String = readStringFromKeychain(kind: RefreshToken) {
-			self.refreshToken = token
-		}// end optional binding check for old refresh token in iCloudKeychain or not
-		if let token: String = readStringFromKeychain(kind: IDToken) {
-			self.idToken = token
-		}// end optional binding check for id token in iCloudKeychain or not
-		if let session: String = readStringFromKeychain(kind: SessionToken) {
-			self.user_session = session
-		}// end optional binding check for user_session in iCloudKeychain or not
-		verifyUserSession()
+		let decoder: JSONDecoder = JSONDecoder()
+		let items: Array<Data> = readDataFromKeychain(kind: TokenKey)
+		do {
+			for item: Data in items {
+				let info: UserInformations = try decoder.decode(UserInformations.self, from: item)
+				let token: UserTokens = UserTokens(item: info)
+				self.tokens[token.identifier] = token
+			}// end foreach available tokens
+		} catch let error {
+			print ("Decode tokens in initializer failed: \(error.localizedDescription)")
+		}// end do try - catch
 	}// end convinience init
 
 	deinit {
