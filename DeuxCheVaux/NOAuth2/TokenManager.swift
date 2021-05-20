@@ -181,7 +181,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 	private let concurrentBackground: DispatchQueue = DispatchQueue(label: "tv.from.chajka.DeuxCheVaux", qos: DispatchQoS(qosClass: DispatchQoS.QoSClass.background, relativePriority: 0), attributes: DispatchQueue.Attributes.concurrent)
 	private var oauthURL: URL!
 	private var refreshQuery: String!
-	private var expire: Int = AccessTokenInterval
+	private var expire: TimeInterval = AccessTokenInterval
 	private let session: URLSession = URLSession(configuration: URLSessionConfiguration.default)
 	private var userNickname: String!
 	private var sessionIsValid: Bool = false
