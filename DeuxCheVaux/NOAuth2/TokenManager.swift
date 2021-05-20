@@ -230,7 +230,12 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		}// end if optional binding check for 
 	}// end deinit
 	
-		// MARK: - OVerrides
+		// MARK: - Overrides
+	public override func awakeFromNib () {
+		let store: WKWebsiteDataStore = WKWebsiteDataStore.nonPersistent()
+		webView.configuration.websiteDataStore = store
+	}// end func awake from nib
+
 	public override func windowDidLoad() {
 		super.windowDidLoad()
 	}// end window did load
