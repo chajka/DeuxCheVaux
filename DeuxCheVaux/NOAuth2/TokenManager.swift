@@ -290,6 +290,12 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		}
 	}// end func getWSEndPoint
 
+	public func getCookies (for identifier: String) -> Array<HTTPCookie> {
+		guard let tokens: UserTokens = tokens[identifier] else { return Array() }
+
+		return tokens.cookies
+	}// end func getCookies
+
 	public func makeRequest (url: URL) -> URLRequest {
 		var request: URLRequest = URLRequest(url: url)
 		request.addValue(DeuxCheVaux.shared.userAgent, forHTTPHeaderField: UserAgentKey)
