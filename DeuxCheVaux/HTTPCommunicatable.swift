@@ -52,7 +52,15 @@ public class HTTPCommunicatable: NSObject {
 	]
 
 		// MARK: - Constructor/Destructor
-	public override init () {
+	public init (with identifier: String) {
+		self.identifier = identifier
+		self.cookies = TokenManager.shared.getCookies(for: identifier)
+		self.user_session = identifier
+		for cookie: HTTPCookie in cookies {
+			if cookie.name == UserSessionName && cookie.domain == UserSessionDomain {
+				user_session = cookie.value
+			}// end if cookie is user_session
+		}// end foreach cookies
 		let sessionConfiguration = URLSessionConfiguration.default
 		sessionConfiguration.timeoutIntervalForRequest = RequestTimeOut
 		sessionConfiguration.timeoutIntervalForResource = DataTimeOut
