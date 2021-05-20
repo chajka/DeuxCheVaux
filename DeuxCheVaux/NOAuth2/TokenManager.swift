@@ -631,7 +631,17 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 
 		return nil
 	}// end func read token from keychain
+	@discardableResult
+	private func removeItemFromKeychain (kind: String, account: String? = nil) -> Bool {
+		var query: Dictionary<String, AnyObject> = defaultQuery
+		if let account: String = account {
+			query[kSecAttrAccount as String] = account as NSString
+		}
+		query[kSecAttrService as String] = kind as NSString
+		let resultCode: OSStatus = SecItemDelete(query as CFDictionary)
 
+		return resultCode == errSecSuccess
+	}// end func remove item from keychain
 
 		// MARK: - Delegate / Protocol clients
 	public func webView (_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
