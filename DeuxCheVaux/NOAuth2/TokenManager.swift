@@ -502,20 +502,24 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		return userTokens
 	}// end func updateOldAccount
 
-	private func saveStringToKeychain (string: String, kind: String) -> Bool {
+	private func saveStringToKeychain (string: String, kind: String, account: String? = nil) -> Bool {
 		var query: Dictionary<String, AnyObject> = defaultQuery
 		query[kSecAttrService as String] = kind as NSString
+		if let account: String = account {
+			query[kSecAttrAccount as String] = account as NSString
+		}
 		query[kSecValueData as String] = string.data(using: .utf8)! as NSData
 		var result: AnyObject?
 		let resultCode: OSStatus = withUnsafeMutablePointer(to: &result) {
 			SecItemAdd(query as CFDictionary, $0)
 		}
 		if resultCode == errSecDuplicateItem {
-			return false
+			let resultCode: OSStatus = SecItemUpdate(query as CFDictionary, [kSecValueData as String : string.data(using: .utf8)! as NSData] as CFDictionary)
+			if resultCode == errSecSuccess { return true }
 		}
 
 		return resultCode == errSecSuccess
-	}// end func save token into keychain
+	}// end func save string into keychain
 
 	private func saveDataToKeychain (data: Data, kind: String) -> Bool {
 		var query: Dictionary<String, AnyObject> = defaultQuery
