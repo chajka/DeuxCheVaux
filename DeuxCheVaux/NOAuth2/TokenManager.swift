@@ -363,27 +363,34 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 	}// end make request with id token
 
 		// MARK: - Private Methods
-	private func getUserInfo() {
-		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
-		let request: URLRequest =  makeRequestWithAccessToken(url: UserInfoURL)
-		let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, resp: URLResponse?, err: Error?) in
-			defer { semaphore.signal() }
-			guard let weakSelf = self, let data: Data = dat else { return }
-			do {
-				let decoder: JSONDecoder = JSONDecoder()
-				let userInfo: UserInfo = try decoder.decode(UserInfo.self, from: data)
-				weakSelf.userIdentifier = userInfo.sub
-				weakSelf.userNickname = userInfo.nickname
-			} catch let error {
-				print(error.localizedDescription)
-				DispatchQueue.main.async {
-					weakSelf.authenticate()
-				}
-			}// end do try - catch decode user info
-		}// end completion handler
-		task.resume()
-		_ = semaphore.wait(timeout: DispatchTime.now() + .seconds(2))
+	private func getUserInfo(for identifier: String) {
+		guard let tokens: UserTokens = tokens[identifier] else { return }
+		do {
+			let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
+			let request: URLRequest = try makeRequestWithAccessToken(url: UserInfoURL, for: identifier)
+			let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
+				defer { semaphore.signal() }
+				guard let data: Data = dat else { return }
+				do {
+					let decoder: JSONDecoder = JSONDecoder()
+					let userInfo: UserInfo = try decoder.decode(UserInfo.self, from: data)
+					tokens.nickname = userInfo.nickname
+				} catch let error {
+					print(error.localizedDescription)
+				}// end do try - catch decode user info
+			}// end completion handler
+			task.resume()
+			_ = semaphore.wait(timeout: DispatchTime.now() + .seconds(2))
+		} catch let error {
+			print("get user info error: \(error.localizedDescription)")
+		}
 	}// end func get user info from oAuth2 server
+
+		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
+			defer { semaphore.signal() }
+				let decoder: JSONDecoder = JSONDecoder()
+			} catch let error {
+		task.resume()
 
 	private func userPremium () -> Bool {
 		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
