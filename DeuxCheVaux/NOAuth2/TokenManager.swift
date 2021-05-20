@@ -566,7 +566,6 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		return resultCode == errSecSuccess
 	}// end update data of keychain
 
-	private func updateDataToKeychain (data: Data, kind: String) -> Bool {
 		var query: Dictionary<String, AnyObject> = defaultQuery
 		query[kSecAttrService as String] = kind as NSString
 		var itemToUpdate: Dictionary<String, AnyObject> = defaultQuery
