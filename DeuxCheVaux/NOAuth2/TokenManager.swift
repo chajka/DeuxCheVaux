@@ -314,11 +314,39 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		return request
 	}// end func makeRequest
 
-	public func makeRequestWithAccessToken (url: URL) -> URLRequest {
+	public func makeRequestWithAccessToken (url: URL, for identifier: String) throws -> URLRequest {
+		guard let userTokens: UserTokens = tokens[identifier] else { throw TokenManagerError.IdentifierNotFound }
+		if -userTokens.date.timeIntervalSinceNow > expire {
+			let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
+			guard let query: String = self.refreshQuery else { throw TokenManagerError.URLError }
+			let queryURLString: String = self.oauthURL.absoluteString
+			let queryURL: URL = URL(string: queryURLString + "?" + query + "=" + userTokens.refreshToken)!
+			let request: URLRequest = self.makeRequest(url: queryURL)
+			let task: URLSessionDataTask = URLSession(configuration: URLSessionConfiguration.default).dataTask(with: request) { (dat:Data?, resp: URLResponse?, err: Error?) in
+				defer { semaphore.signal() }
+				guard let data: Data = dat, let html: String = String(data: data, encoding: .utf8) else { return }
+				let body: String = String(html.split(separator: ">",maxSplits: 11).last!)
+				let jsonString: String = String(body.split(separator: "<", maxSplits: 2).first!)
+				if let json: Data = jsonString.data(using: .utf8) {
+					let decoder: JSONDecoder = JSONDecoder()
+					do {
+						let tokens: Tokens = try decoder.decode(Tokens.self, from: json)
+						userTokens.refreshToken = tokens.refresh_token
+						userTokens.accessToken = tokens.access_token
+						userTokens.date = Date()
+						let info: UserInformations = UserInformations(item: userTokens)
+						let dataJSON: Data = try JSONEncoder().encode(info)
+						self.updateDataToKeychain(data: dataJSON, kind: TokenKey, account: userTokens.identifier)
+					} catch let error {
+						print(error.localizedDescription)
+					}// end do try - catch decode tokens json
+				}// end if json to convert data
+			}// end closure
+			task.resume()
+			_ = semaphore.wait(timeout: DispatchTime.now() + .seconds(2))
+		}// end if access token expire time is over
 		var request: URLRequest = URLRequest(url: url)
-		if let token: String = accessToken {
-			request.addValue(AuthorizationBearer + token, forHTTPHeaderField: AuthorizationKey)
-		}// end optional binding check for access token
+		request.addValue(AuthorizationBearer + userTokens.accessToken, forHTTPHeaderField: AuthorizationKey)
 		request.addValue(DeuxCheVaux.shared.userAgent, forHTTPHeaderField: UserAgentKey)
 		request.httpMethod = "GET"
 
