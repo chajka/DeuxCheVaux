@@ -117,7 +117,8 @@ public final class NicoInformationHandler: HTTPCommunicatable {
 		// MARK: - Properties
 		// MARK: - Member variables
 		// MARK: - Constructor/Destructor
-	public override init () {
+	public override init (with identifier: String) {
+		super.init(with: identifier)
 	}// end init
 
 		// MARK: - Override
