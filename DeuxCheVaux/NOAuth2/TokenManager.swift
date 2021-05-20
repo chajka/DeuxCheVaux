@@ -640,12 +640,31 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 
 		return nil
 	}// end func read data from keychain
+
+	private func readDataFromKeychain (kind: String) -> Array<Data> {
+		var items: Array<Data> = Array()
+		var query: Dictionary<String, AnyObject> = defaultQuery
+		query[kSecAttrService as String] = kind as NSString
+		query[kSecMatchLimit as String] = kSecMatchLimitAll as NSString
+		query[kSecReturnData as String] = kCFBooleanTrue
+		var result: AnyObject?
+		let resultCode = withUnsafeMutablePointer(to: &result) {
+			 SecItemCopyMatching(query as CFDictionary, $0)
+		}
+		if resultCode == errSecItemNotFound {
+			return items
 		} else {
 			if let keychainItems = result as? Array<NSDictionary> {
+				for item in keychainItems {
 					if let data: Data = item[kSecValueData] as? Data {
+						items.append(data)
 					}// end if token found
+				}// end foreach keychain items
 			}// end if found keychain items
 		}// end if keychain items found or not
+
+		return items
+	}// end func read datas from keychain
 
 	@discardableResult
 	private func removeItemFromKeychain (kind: String, account: String? = nil) -> Bool {
