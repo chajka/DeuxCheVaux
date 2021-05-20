@@ -540,23 +540,19 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		return resultCode == errSecSuccess
 	}// end func save data into keychain
 
-	private func updateStringToKeychain (string: String, kind: String) -> Bool {
+	@discardableResult
+	private func updateStringToKeychain (string: String, kind: String, account: String? = nil) -> Bool {
 		var query: Dictionary<String, AnyObject> = defaultQuery
 		query[kSecAttrService as String] = kind as NSString
-		var itemToUpdate: Dictionary<String, AnyObject> = defaultQuery
-		itemToUpdate[kSecAttrService as String] = kind as NSString
-		itemToUpdate[kSecValueData as String] = string.data(using: .utf8)! as NSData
-		var result: AnyObject?
-		var resultCode = withUnsafeMutablePointer(to: &result) {
-			 SecItemCopyMatching(query as CFDictionary, $0)
+		if let account: String = account {
+			query[kSecAttrAccount as String] = account as NSString
 		}
-		if let keychainItems = result as? Array<NSDictionary> {
-			for _ in keychainItems {
-				resultCode = SecItemDelete(query as CFDictionary)
-			}
-		}
-		resultCode = withUnsafeMutablePointer(to: &result) {
-			SecItemAdd(itemToUpdate as CFDictionary, $0)
+		let newAttribute: Dictionary<String, AnyObject> = [kSecValueData as String : string.data(using: .utf8)! as NSData]
+		let resultCode: OSStatus = SecItemUpdate(query as CFDictionary, newAttribute as CFDictionary)
+
+		return resultCode == errSecSuccess
+	}// end update string of keychain
+
 		}
 
 		return resultCode == errSecSuccess
