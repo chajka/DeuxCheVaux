@@ -45,6 +45,9 @@ public extension URLRequest {
 public class HTTPCommunicatable: NSObject {
 		// MARK: Properties
 		// MARK: - Member variables
+	internal let identifier: String
+	internal var user_session: String
+	internal let cookies: Array<HTTPCookie>
 	internal let session: URLSession
 	private let cookieProperties: Dictionary<HTTPCookiePropertyKey, Any> = [
 		.domain: UserSessionDomain,
