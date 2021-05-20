@@ -252,10 +252,6 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 	public func start (with oAuthURL: URL, refreshQuery query: String, ofUser identifier: String?, handler: @escaping AccountsHandler) throws {
 		oauthURL = oAuthURL
 		refreshQuery = query
-	public func stop () {
-		watcherCount -= 1
-	}// end func stop
-
 	public func getWSEndPoint (program liveNumber: String) -> URL? {
 		var wsEndPointURL: URL = URL(string: "https://live.nicovideo.jp")!
 		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
