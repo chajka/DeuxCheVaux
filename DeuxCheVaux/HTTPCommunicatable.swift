@@ -78,7 +78,7 @@ public class HTTPCommunicatable: NSObject {
 	internal func makeRequest (url requestURL: URL, method requestMethod: HTTPMethod, contentsType type: String? = nil) -> URLRequest {
 		let deuxCheVaux: DeuxCheVaux = DeuxCheVaux.shared
 		let userAgent: String = deuxCheVaux.userAgent
-		let userSession: String = TokenManager.shared.user_session
+		let userSession: String = user_session
 		var request: URLRequest = URLRequest(url: requestURL, cachePolicy: URLRequest.CachePolicy.reloadIgnoringLocalAndRemoteCacheData, timeoutInterval: Timeout)
 		var properties: Dictionary<HTTPCookiePropertyKey, Any> = cookieProperties
 		properties[.value] = userSession
