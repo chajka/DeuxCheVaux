@@ -353,6 +353,15 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		return request
 	}// end func makeRequest
 
+	public func makeRequestWithCustomToken (url: URL, for token: String) -> URLRequest {
+		var request: URLRequest = URLRequest(url: url)
+		request.addValue(AuthorizationBearer + token, forHTTPHeaderField: AuthorizationKey)
+		request.addValue(DeuxCheVaux.shared.userAgent, forHTTPHeaderField: UserAgentKey)
+		request.httpMethod = "GET"
+
+		return request
+	}// end make request with id token
+
 		// MARK: - Private Methods
 	private func getUserInfo() {
 		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
