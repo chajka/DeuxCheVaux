@@ -364,7 +364,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 	}// end make request with id token
 
 		// MARK: - Private Methods
-	private func getUserInfo(for identifier: String) {
+	private func getUserInfo (for identifier: String) {
 		guard let tokens: UserTokens = tokens[identifier] else { return }
 		do {
 			let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
