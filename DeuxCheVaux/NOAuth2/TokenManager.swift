@@ -503,6 +503,37 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		return userTokens
 	}// end func updateOldAccount
 
+	private func getUserInformation (of token: String, with handler: @escaping AccountsHandler) -> Void {
+		var request: URLRequest = makeRequestWithCustomToken(url: oauthURL, for: token)
+		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
+			guard let data: Data = dat else {
+				handler("", "", false)
+				return
+			}// end guard optional binding check for data
+			do {
+				let decoder: JSONDecoder = JSONDecoder()
+				let information: UserInfo = try decoder.decode(UserInfo.self, from: data)
+				request.url = PremiumInfoURL
+				let task: URLSessionDataTask = self.session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
+					guard let data: Data = dat else {
+						handler("", "", false)
+						return
+					}// end guard optional binding check for data
+					do {
+						let premium: Premium = try decoder.decode(Premium.self, from: data)
+						handler(information.sub, information.nickname, premium.data.type == .premium)
+					} catch let error {
+						print("Get user premium data decde error: \(error.localizedDescription)")
+					}// end do try - catch premium decode error handler
+				}// end closure get premium json
+				task.resume()
+			} catch let error {
+				print("Get user information data decode error: \(error.localizedDescription)")
+			}// end do try - catch decode user information handler
+		}// end closure get user information json
+		task.resume()
+	}// end func get user information
+
 	private func saveStringToKeychain (string: String, kind: String, account: String? = nil) -> Bool {
 		var query: Dictionary<String, AnyObject> = defaultQuery
 		query[kSecAttrService as String] = kind as NSString
