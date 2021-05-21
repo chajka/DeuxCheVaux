@@ -725,28 +725,36 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		webView.configuration.websiteDataStore.httpCookieStore.getAllCookies { (cookies:Array<HTTPCookie>) in
 			for cookie: HTTPCookie in cookies {
 				if cookie.name == UserSessionName && cookie.domain == UserSessionDomain {
-					if !self.saveStringToKeychain(string: cookie.value, kind: SessionToken) {
-						_ = self.updateStringToKeychain(string: cookie.value, kind: SessionToken)
-					}// end if can not save user session
 					self.user_session = cookie.value
 					self.sessionIsValid = true
+					if let id = self.userIdentifier, let token: UserTokens = self.tokens[id] {
+						token.cookies = cookies
+						self.cookies = cookies
+					}
 				}// end if found user session cookie
 			}// end foreach cookie
 		}// end all cookies handler
-		webView.evaluateJavaScript("document.getElementsByTagName('div')[0].innerHTML") { (json: Any?, error: Error?) -> Void in
-			guard let jsonString: String = json as? String, let jsonData: Data = jsonString.data(using: .utf8) else { return }
+
+		webView.evaluateJavaScript("document.getElementsByTagName('div')[0].innerHTML") { (html: Any?, error: Error?) -> Void in
+			guard let jsonString: String = html as? String, let jsonData: Data = jsonString.data(using: .utf8) else { return }
 			do {
 				let decoder: JSONDecoder = JSONDecoder()
 				let tokens: Tokens = try decoder.decode(Tokens.self, from: jsonData)
 				self.window?.setIsVisible(false)
-				self.refreshToken = tokens.refresh_token
-				self.accessToken = tokens.access_token
-				if let id_token: String = tokens.id_token {
-					self.idToken = id_token
+				self.expire = TimeInterval(tokens.expires_in)
+				self.getUserInformation(of: tokens.access_token) { (id: String, nickname: String?, premium: Bool )in
+					guard id != "", let nick: String = nickname, nick != "", let cookies: Array<HTTPCookie> = self.cookies else { return }
+					do {
+						let userTokens: UserTokens = UserTokens(identifier: id, nickname: nick, premium: premium, accessToken: tokens.access_token, refreshToken: tokens.refresh_token, identifierToken: tokens.id_token!, cookies: cookies)
+						let informations: UserInformations = UserInformations(item: userTokens)
+						let data: Data = try JSONEncoder().encode(informations)
+						if !self.saveDataToKeychain(data: data, kind: TokenKey, account: userTokens.identifier) {
+							self.updateDataToKeychain(data: data, kind: TokenKey, account: userTokens.identifier)
+						}
+					} catch let error {
+						print("Encode new account informations error: \(error.localizedDescription)")
+					}
 				}
-				self.expire = tokens.expires_in
-				_ = self.updateStringToKeychain(string: self.refreshToken, kind: RefreshToken)
-				_ = self.updateStringToKeychain(string: self.idToken, kind: IDToken)
 			} catch let error {
 				print(error.localizedDescription)
 			}// end do try - catch decode json
