@@ -29,6 +29,7 @@ fileprivate let SessionToken: String = "jp.nicovideo.user_session"
 
 public enum TokenManagerError: Error {
 	case URLError
+	case DataError
 	case IdentifierNotFound
 	case TimerDidNotFound
 	case UserNotFound
