@@ -51,7 +51,8 @@ public class HTTPCommunicatable: NSObject {
 	internal let session: URLSession
 	private let cookieProperties: Dictionary<HTTPCookiePropertyKey, Any> = [
 		.domain: UserSessionDomain,
-		.name: UserSessionName
+		.name: UserSessionName,
+		.path: "/"
 	]
 
 		// MARK: - Constructor/Destructor
