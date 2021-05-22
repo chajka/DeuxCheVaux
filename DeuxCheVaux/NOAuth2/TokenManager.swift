@@ -26,6 +26,7 @@ fileprivate let TokenKey: String = "jp.nicovideo.oauth2-tokens"
 fileprivate let RefreshToken: String = "jp.nicovideo.oauth2-refresh_token"
 fileprivate let IDToken: String = "jp.nicovideo.oauth2-id_token"
 fileprivate let SessionToken: String = "jp.nicovideo.user_session"
+public let UserAddDoneNotification: String = "User Add Done"
 
 public enum TokenManagerError: Error {
 	case URLError
@@ -750,7 +751,10 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 						let data: Data = try JSONEncoder().encode(informations)
 						if !self.saveDataToKeychain(data: data, kind: TokenKey, account: userTokens.identifier) {
 							self.updateDataToKeychain(data: data, kind: TokenKey, account: userTokens.identifier)
-						}
+						}// end if can not save data to keychain
+						self.tokens[userTokens.identifier] = userTokens
+						let center: NotificationCenter = NotificationCenter()
+						center.post(name: NSNotification.Name(UserAddDoneNotification), object: nil)
 					} catch let error {
 						print("Encode new account informations error: \(error.localizedDescription)")
 					}
