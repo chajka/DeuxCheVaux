@@ -251,6 +251,13 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		webView.load(request)
 	}// end func authenticate
 
+	public func removeAccount (of identifier: String) {
+		tokens[identifier] = nil
+		removeItemFromKeychain(kind: TokenKey, account: identifier)
+		let center: NotificationCenter = NotificationCenter()
+		center.post(name: NSNotification.Name(UserAddDoneNotification), object: nil)
+	}// end func remove
+
 	public func start (with oAuthURL: URL, refreshQuery query: String, ofUser identifier: String?, handler: @escaping AccountsHandler) throws {
 		oauthURL = oAuthURL
 		refreshQuery = query
