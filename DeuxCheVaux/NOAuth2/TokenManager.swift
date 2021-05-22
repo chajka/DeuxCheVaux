@@ -730,7 +730,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 					self.sessionIsValid = true
 					if let id = self.userIdentifier, let token: UserTokens = self.tokens[id] {
 						token.cookies = cookies
-					}
+					}// end if token found
 					self.cookies = cookies
 				}// end if found user session cookie
 			}// end foreach cookie
@@ -757,8 +757,8 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 						center.post(name: NSNotification.Name(UserAddDoneNotification), object: nil)
 					} catch let error {
 						print("Encode new account informations error: \(error.localizedDescription)")
-					}
-				}
+					}// end do try - catch decode json
+				}// end closure
 			} catch let error {
 				print(error.localizedDescription)
 			}// end do try - catch decode json
