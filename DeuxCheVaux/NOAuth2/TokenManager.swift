@@ -26,7 +26,9 @@ fileprivate let TokenKey: String = "jp.nicovideo.oauth2-tokens"
 fileprivate let RefreshToken: String = "jp.nicovideo.oauth2-refresh_token"
 fileprivate let IDToken: String = "jp.nicovideo.oauth2-id_token"
 fileprivate let SessionToken: String = "jp.nicovideo.user_session"
-public let UserAddDoneNotification: String = "User Add Done"
+extension Notification.Name {
+	static let userModificationDone = Notification.Name("User Modification Done")
+}
 
 public enum TokenManagerError: Error {
 	case URLError
