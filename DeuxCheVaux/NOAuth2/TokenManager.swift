@@ -770,8 +770,15 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 							self.updateDataToKeychain(data: data, kind: TokenKey, account: userTokens.identifier)
 						}// end if can not save data to keychain
 						self.tokens[userTokens.identifier] = userTokens
-						let center: NotificationCenter = NotificationCenter()
-						center.post(name: NSNotification.Name(UserAddDoneNotification), object: nil)
+						let center: NotificationCenter = NotificationCenter.default
+						center.post(name: .userModificationDone, object: nil)
+						DispatchQueue.main.async {
+							self.webView.configuration.websiteDataStore.httpCookieStore.getAllCookies { (cookies: Array<HTTPCookie>) in
+								for cookie in cookies {
+									self.webView.configuration.websiteDataStore.httpCookieStore.delete(cookie)
+								}// end foreach
+							}// end closure of getAllCookies
+						}// end main queue task
 					} catch let error {
 						print("Encode new account informations error: \(error.localizedDescription)")
 					}// end do try - catch decode json
