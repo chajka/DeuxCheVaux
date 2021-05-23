@@ -522,7 +522,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 	}// end func updateOldAccount
 
 	private func getUserInformation (of token: String, with handler: @escaping AccountsHandler) -> Void {
-		var request: URLRequest = makeRequestWithCustomToken(url: oauthURL, for: token)
+		var request: URLRequest = makeRequestWithCustomToken(url: UserInfoURL, for: token)
 		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
 			guard let data: Data = dat else {
 				handler("", "", false)
