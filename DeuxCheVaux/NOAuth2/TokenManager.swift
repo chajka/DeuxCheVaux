@@ -238,6 +238,11 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 	public override func awakeFromNib () {
 		let store: WKWebsiteDataStore = WKWebsiteDataStore.nonPersistent()
 		webView.configuration.websiteDataStore = store
+		webView.configuration.websiteDataStore.httpCookieStore.getAllCookies { (cookies: Array<HTTPCookie>) in
+			for cookie in cookies {
+				self.webView.configuration.websiteDataStore.httpCookieStore.delete(cookie)
+			}// end foreach
+		}// end closure of getAllCookies
 	}// end func awake from nib
 
 	public override func windowDidLoad() {
