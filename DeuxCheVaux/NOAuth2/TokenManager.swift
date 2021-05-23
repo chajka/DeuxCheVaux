@@ -251,8 +251,11 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 
 		// MARK: - Actions
 		// MARK: - Public Method
-	public func authenticate () {
+	public func authenticate (with url: URL) {
+		if oauthURL == nil { oauthURL = url }
 		window?.setIsVisible(true)
+		let store: WKWebsiteDataStore = WKWebsiteDataStore.nonPersistent()
+		webView.configuration.websiteDataStore = store
 		var request: URLRequest = URLRequest(url: oauthURL)
 		request.addValue(DeuxCheVaux.shared.userAgent, forHTTPHeaderField: UserAgentKey)
 		webView.load(request)
