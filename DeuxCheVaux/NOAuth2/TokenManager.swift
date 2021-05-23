@@ -265,7 +265,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		tokens[identifier] = nil
 		removeItemFromKeychain(kind: TokenKey, account: identifier)
 		let center: NotificationCenter = NotificationCenter()
-		center.post(name: NSNotification.Name(UserAddDoneNotification), object: nil)
+		center.post(name: .userModificationDone, object: nil)
 	}// end func remove
 
 	public func start (with oAuthURL: URL, refreshQuery query: String, ofUser identifier: String?, handler: @escaping AccountsHandler) throws {
