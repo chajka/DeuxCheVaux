@@ -266,7 +266,7 @@ public final class WebSocketEndpointTalker: NSObject {
 							print("Disconnect decode error \(error.localizedDescription)")
 						}// end do try - catch decode json
 					case .reconnect:
-						print("recsonnect message from ws endpoint")
+						print("reconnect message from ws endpoint")
 					case .postCommentResult:
 						break
 					case .tagUpdated:

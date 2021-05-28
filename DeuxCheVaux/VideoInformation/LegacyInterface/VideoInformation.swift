@@ -37,10 +37,11 @@ public final class VideoInformation: HTTPCommunicatable, XMLParserDelegate {
 	private var stringBuffer: String
 
 		// MARK: - Constructor/Destructor
-	public init (videoNumber video: String) {
+	public init (videoNumber video: String, for identifier: String) {
 		self.videoNumber = video
 		tags = Array()
 		stringBuffer = String()
+		super.init(with: identifier)
 	}// end init
 
 		// MARK: - Override
