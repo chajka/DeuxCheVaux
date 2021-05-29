@@ -261,6 +261,21 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		webView.load(request)
 	}// end func authenticate
 
+	public func reAuthenticate (for identifier: String, with url: URL) {
+		if oauthURL == nil { oauthURL = url }
+		window?.setIsVisible(true)
+		let store: WKWebsiteDataStore = WKWebsiteDataStore.nonPersistent()
+		webView.configuration.websiteDataStore = store
+		if let cookies: Array<HTTPCookie> = tokens[identifier]?.cookies {
+			for cookie: HTTPCookie in cookies {
+				webView.configuration.websiteDataStore.httpCookieStore.setCookie(cookie)
+			}// end foreach cookies
+		}// end if cookies
+		var request: URLRequest = URLRequest(url: oauthURL)
+		request.addValue(DeuxCheVaux.shared.userAgent, forHTTPHeaderField: UserAgentKey)
+		webView.load(request)
+	}// end re authenticate
+
 	public func removeAccount (of identifier: String) {
 		tokens[identifier] = nil
 		removeItemFromKeychain(kind: TokenKey, account: identifier)
