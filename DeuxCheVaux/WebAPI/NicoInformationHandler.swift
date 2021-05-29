@@ -106,6 +106,11 @@ fileprivate struct NotifyContent: Codable {
 	}// end enum CodingKeys
 }// end struct NotifyContent
 
+public struct MetaCodeInformation: Codable {
+	let status: Int
+	let errorCode: Int?
+	let errorMessage: String?
+}// end struct MetaInformation
 
 }// end struct UserPrograms
 
