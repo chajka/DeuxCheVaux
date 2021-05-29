@@ -96,16 +96,17 @@ fileprivate struct UserProgramInfo: Codable {
 fileprivate struct UserPrograms: Codable {
 	let meta: MetaInformation
 	let data: NotifyContent
+fileprivate struct NotifyContent: Codable {
+	let notifyboxContent: Array<UserProgramInfo>
+	let totalPage: Int
 
-	struct NotifyContent: Codable {
-		let notifyboxContent: Array<UserProgramInfo>
-		let totalPage: Int
+	private enum CodingKeys: String, CodingKey {
+		case notifyboxContent = "notifybox_content"
+		case totalPage = "total_page"
+	}// end enum CodingKeys
+}// end struct NotifyContent
 
-		private enum CodingKeys: String, CodingKey {
-			case notifyboxContent = "notifybox_content"
-			case totalPage = "total_page"
-		}// end enum CodingKeys
-	}// end struct NotifyContent
+
 }// end struct UserPrograms
 
 public struct Program {
