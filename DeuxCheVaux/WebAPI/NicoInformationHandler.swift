@@ -301,7 +301,7 @@ public final class NicoInformationHandler: HTTPCommunicatable {
 		task.resume()
 	}// end channelThumbnail
 
-	public func rawData (forURL url: URL, httpMethod method: HTTPMethod, HTTOBody body: Data? = nil, contentsType type: String? = nil) -> Data? {
+	public func rawData (forURL url: URL, httpMethod method: HTTPMethod, HTTPBody body: Data? = nil, contentsType type: String? = nil) -> Data? {
 		var rawData: Data? = nil
 		var request: URLRequest = makeRequest(url: url, method: method)
 		if let body: Data = body, let type: String = type {
