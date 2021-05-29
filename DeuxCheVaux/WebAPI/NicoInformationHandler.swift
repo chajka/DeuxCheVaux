@@ -29,6 +29,10 @@ fileprivate let IdentifierFinderRegex: String = "user\\.user_id = parseInt\\('(\
 fileprivate let PremiumFinderRegex: String = "user.member_status = '(\\w+)';"
 fileprivate let LanguageFinderRegex: String = "user.ui_lang = '(.*?)';"
 
+public enum InformationError: Error {
+	case notLogin
+}// end InformationError
+
 fileprivate enum CurrentLanguage: String {
 	case Japanese = "ja-jp"
 	case Chinese = "zh-tw"
