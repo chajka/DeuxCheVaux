@@ -93,9 +93,6 @@ fileprivate struct UserProgramInfo: Codable {
 	}// end init
 }// end struct UserProgramInfo
 
-fileprivate struct UserPrograms: Codable {
-	let meta: MetaInformation
-	let data: NotifyContent
 fileprivate struct NotifyContent: Codable {
 	let notifyboxContent: Array<UserProgramInfo>
 	let totalPage: Int
@@ -112,6 +109,9 @@ public struct MetaCodeInformation: Codable {
 	let errorMessage: String?
 }// end struct MetaInformation
 
+fileprivate struct UserPrograms: Codable {
+	let meta: MetaCodeInformation
+	let data: NotifyContent?
 }// end struct UserPrograms
 
 public struct Program {
