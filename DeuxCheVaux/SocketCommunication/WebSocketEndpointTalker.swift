@@ -109,7 +109,7 @@ fileprivate struct PostComment: Codable {
 	let data: PostCommentData
 }// end struct PostComment
 
-public protocol HeartbeatDelegate: class {
+public protocol HeartbeatDelegate: AnyObject {
 	func heartbeat (viewer: Int, comments: Int, ad: Int?, gift: Int?)
 }// end protocol heartbeatDelegate
 
@@ -266,7 +266,7 @@ public final class WebSocketEndpointTalker: NSObject {
 							print("Disconnect decode error \(error.localizedDescription)")
 						}// end do try - catch decode json
 					case .reconnect:
-						print("recsonnect message from ws endpoint")
+						print("reconnect message from ws endpoint")
 					case .postCommentResult:
 						break
 					case .tagUpdated:

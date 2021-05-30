@@ -29,6 +29,10 @@ fileprivate let IdentifierFinderRegex: String = "user\\.user_id = parseInt\\('(\
 fileprivate let PremiumFinderRegex: String = "user.member_status = '(\\w+)';"
 fileprivate let LanguageFinderRegex: String = "user.ui_lang = '(.*?)';"
 
+public enum InformationError: Error {
+	case notLogin
+}// end InformationError
+
 fileprivate enum CurrentLanguage: String {
 	case Japanese = "ja-jp"
 	case Chinese = "zh-tw"
@@ -89,19 +93,25 @@ fileprivate struct UserProgramInfo: Codable {
 	}// end init
 }// end struct UserProgramInfo
 
+fileprivate struct NotifyContent: Codable {
+	let notifyboxContent: Array<UserProgramInfo>
+	let totalPage: Int
+
+	private enum CodingKeys: String, CodingKey {
+		case notifyboxContent = "notifybox_content"
+		case totalPage = "total_page"
+	}// end enum CodingKeys
+}// end struct NotifyContent
+
+public struct MetaCodeInformation: Codable {
+	let status: Int
+	let errorCode: Int?
+	let errorMessage: String?
+}// end struct MetaInformation
+
 fileprivate struct UserPrograms: Codable {
-	let meta: MetaInformation
-	let data: NotifyContent
-
-	struct NotifyContent: Codable {
-		let notifyboxContent: Array<UserProgramInfo>
-		let totalPage: Int
-
-		private enum CodingKeys: String, CodingKey {
-			case notifyboxContent = "notifybox_content"
-			case totalPage = "total_page"
-		}// end enum CodingKeys
-	}// end struct NotifyContent
+	let meta: MetaCodeInformation
+	let data: NotifyContent?
 }// end struct UserPrograms
 
 public struct Program {
@@ -117,7 +127,8 @@ public final class NicoInformationHandler: HTTPCommunicatable {
 		// MARK: - Properties
 		// MARK: - Member variables
 		// MARK: - Constructor/Destructor
-	public override init () {
+	public override init (with identifier: String) {
+		super.init(with: identifier)
 	}// end init
 
 		// MARK: - Override
@@ -290,7 +301,7 @@ public final class NicoInformationHandler: HTTPCommunicatable {
 		task.resume()
 	}// end channelThumbnail
 
-	public func rawData (forURL url: URL, httpMethod method: HTTPMethod, HTTOBody body: Data? = nil, contentsType type: String? = nil) -> Data? {
+	public func rawData (forURL url: URL, httpMethod method: HTTPMethod, HTTPBody body: Data? = nil, contentsType type: String? = nil) -> Data? {
 		var rawData: Data? = nil
 		var request: URLRequest = makeRequest(url: url, method: method)
 		if let body: Data = body, let type: String = type {
@@ -322,23 +333,27 @@ public final class NicoInformationHandler: HTTPCommunicatable {
 		task.resume()
 	}// end rawData
 
-	public func currentPrograms (page targetPage: Int = 1) -> (programs: Array<Program>, maxPages: Int) {
-		let url: URL = URL(string: FollowingProgramsFormat + (targetPage != 1 ? FollowingProgramsPage + String(targetPage) : ""))!
+	public func currentPrograms (with handler: @escaping CurrentProgramsHandler) throws -> Void {
 		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
-		let request: URLRequest = makeRequest(url: url, method: .get)
+		var url: URL = URL(string: FollowingProgramsFormat)!
+		var request: URLRequest = makeRequest(url: url, method: .get)
 		var programs: Array<Program> = Array()
-		var maxPages: Int = 0
-		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
-			defer { semaphore.signal() }
-			guard let data: Data = dat, let info: UserPrograms = try? JSONDecoder().decode(UserPrograms.self, from: data) else { return }
-			maxPages = info.data.totalPage
-			let currentPrograms: Array<UserProgramInfo> = info.data.notifyboxContent
-			for prog: UserProgramInfo in currentPrograms {
-				switch prog.providerType {
-				case .official:
-					continue
-				case .channel: fallthrough
-				case .community:
+		var pageCount: Int = 0
+		var maxPage: Int = 0
+		var error: InformationError? = nil
+		repeat {
+			pageCount += 1
+			url = pageCount == 1 ? URL(string: FollowingProgramsFormat)! : URL(string: FollowingProgramsFormat + FollowingProgramsPage + String(pageCount))!
+			request.url = url
+			let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
+				defer { semaphore.signal() }
+				guard let data: Data = dat, let info: UserPrograms = try? JSONDecoder().decode(UserPrograms.self, from: data) else { return }
+				if info.meta.status == 404 { error = InformationError.notLogin }
+				guard info.meta.status != 404, let information: NotifyContent = info.data else { return }
+				maxPage = information.totalPage
+				let currentPrograms: Array<UserProgramInfo> = information.notifyboxContent
+				for prog: UserProgramInfo in currentPrograms {
+					if prog.providerType == .official { continue }
 					let liveNumber: String = URL(string: prog.thumbnailLinkURL)?.lastPathComponent ?? ""
 					let title: String = prog.title
 					let community: String = prog.communityName
@@ -346,62 +361,12 @@ public final class NicoInformationHandler: HTTPCommunicatable {
 					let thumb: NSImage? = NSImage(contentsOf: URL(string: prog.thumnailURL)!)
 					let program: Program = Program(program: liveNumber, title: title, community: community, owner: owner, thumbnail: thumb)
 					programs.append(program)
-				}// end switch case by provider type
-			}// end foreach all program informations
-		}// end current programs completion handler closure
-		task.resume()
-		let _: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
-
-		return (programs, maxPages)
-	}// end currentPrograms
-
-	public func currentPrograms (with handler: @escaping CurrentProgramsHandler) -> Void {
-		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
-		var url: URL = URL(string: FollowingProgramsFormat)!
-		var request: URLRequest = makeRequest(url: url, method: .get)
-		var programs: Array<Program> = Array()
-		var maxPage: Int = 0
-		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
-			defer { semaphore.signal() }
-			guard let data: Data = dat, let info: UserPrograms = try? JSONDecoder().decode(UserPrograms.self, from: data) else { return }
-			maxPage = info.data.totalPage
-			let currentPrograms: Array<UserProgramInfo> = info.data.notifyboxContent
-			for prog: UserProgramInfo in currentPrograms {
-				if prog.providerType == .official { continue }
-				let liveNumber: String = URL(string: prog.thumbnailLinkURL)?.lastPathComponent ?? ""
-				let title: String = prog.title
-				let community: String = prog.communityName
-				let owner: String = prog.ownerIdentifier
-				let thumb: NSImage? = NSImage(contentsOf: URL(string: prog.thumnailURL)!)
-				let program: Program = Program(program: liveNumber, title: title, community: community, owner: owner, thumbnail: thumb)
-				programs.append(program)
-			}// end foreach all program informations
-		}// end current programs completion handler closure
-		task.resume()
-		_ = semaphore.wait(timeout: .now() + Timeout)
-		if maxPage > 1 {
-			for page: Int in 2 ... maxPage {
-				url = URL(string: FollowingProgramsFormat + FollowingProgramsPage + String(page))!
-				request = makeRequest(url: url, method: .get)
-				let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
-					defer { semaphore.signal() }
-					guard let data: Data = dat, let info: UserPrograms = try? JSONDecoder().decode(UserPrograms.self, from: data) else { return }
-					let currentPrograms: Array<UserProgramInfo> = info.data.notifyboxContent
-					for prog: UserProgramInfo in currentPrograms {
-						if prog.providerType == .official { continue }
-						let liveNumber: String = URL(string: prog.thumbnailLinkURL)?.lastPathComponent ?? ""
-						let title: String = prog.title
-						let community: String = prog.communityName
-						let owner: String = prog.ownerIdentifier
-						let thumb: NSImage? = NSImage(contentsOf: URL(string: prog.thumnailURL)!)
-						let program: Program = Program(program: liveNumber, title: title, community: community, owner: owner, thumbnail: thumb)
-						programs.append(program)
-					}// end foreach all program informations
-				}// end handler
-				task.resume()
-				_ = semaphore.wait(timeout: .now() + Timeout)
-			}
-		}// end if total page over 2 or more
+				}// end foreach all program informations
+			}// end current programs completion handler closure
+			task.resume()
+			_ = semaphore.wait(timeout: .now() + .seconds(Int(Timeout)))
+			if error == .notLogin { throw error! }
+		} while pageCount < maxPage
 		handler(programs)
 	}// end currentPrograms
 

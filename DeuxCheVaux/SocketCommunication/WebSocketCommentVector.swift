@@ -152,7 +152,7 @@ fileprivate enum ElementType: String {
 public let Arena: String = "\u{30A2}\u{30EA}\u{30FC}\u{30CA}"
 internal let CommunityChannelPrefix = "c"
 
-public protocol WebSocketCommentVectorDelegate: class  {
+public protocol WebSocketCommentVectorDelegate: AnyObject  {
 	func commentVector (commentVector vector: WebSocketCommentVector, didRecieveComment comment: ChatElements, lastPastComment last: Bool)
 }// end protocol WebSocketCommentVectorDelegate
 
@@ -192,7 +192,11 @@ public final class WebSocketCommentVector: NSObject {
 		let prefix = String(roomPrefix)
 		roomLabel = prefix == CommunityChannelPrefix ? Arena : room
 		var request: URLRequest = URLRequest(url: self.url)
-		request.addValue(TokenManager.shared.user_session, forHTTPHeaderField: NicoSessionHeaderKey)
+		do {
+			request.addValue(try TokenManager.shared.getUserSession(for: uid), forHTTPHeaderField: NicoSessionHeaderKey)
+		} catch let error {
+			print("Comment Vector User session failed \(error.localizedDescription)")
+		}
 		let userAgent: String = DeuxCheVaux.shared.userAgent
 		request.addValue(userAgent, forHTTPHeaderField: UserAgentKey)
 		if let runLoop: RunLoop = self.runLoop {

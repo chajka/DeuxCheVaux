@@ -45,14 +45,26 @@ public extension URLRequest {
 public class HTTPCommunicatable: NSObject {
 		// MARK: Properties
 		// MARK: - Member variables
+	internal let identifier: String
+	internal var user_session: String
+	internal let cookies: Array<HTTPCookie>
 	internal let session: URLSession
 	private let cookieProperties: Dictionary<HTTPCookiePropertyKey, Any> = [
 		.domain: UserSessionDomain,
-		.name: UserSessionName
+		.name: UserSessionName,
+		.path: "/"
 	]
 
 		// MARK: - Constructor/Destructor
-	public override init () {
+	public init (with identifier: String) {
+		self.identifier = identifier
+		self.cookies = TokenManager.shared.getCookies(for: identifier)
+		self.user_session = identifier
+		for cookie: HTTPCookie in cookies {
+			if cookie.name == UserSessionName && cookie.domain == UserSessionDomain {
+				user_session = cookie.value
+			}// end if cookie is user_session
+		}// end foreach cookies
 		let sessionConfiguration = URLSessionConfiguration.default
 		sessionConfiguration.timeoutIntervalForRequest = RequestTimeOut
 		sessionConfiguration.timeoutIntervalForResource = DataTimeOut
@@ -67,7 +79,7 @@ public class HTTPCommunicatable: NSObject {
 	internal func makeRequest (url requestURL: URL, method requestMethod: HTTPMethod, contentsType type: String? = nil) -> URLRequest {
 		let deuxCheVaux: DeuxCheVaux = DeuxCheVaux.shared
 		let userAgent: String = deuxCheVaux.userAgent
-		let userSession: String = TokenManager.shared.user_session
+		let userSession: String = user_session
 		var request: URLRequest = URLRequest(url: requestURL, cachePolicy: URLRequest.CachePolicy.reloadIgnoringLocalAndRemoteCacheData, timeoutInterval: Timeout)
 		var properties: Dictionary<HTTPCookiePropertyKey, Any> = cookieProperties
 		properties[.value] = userSession
