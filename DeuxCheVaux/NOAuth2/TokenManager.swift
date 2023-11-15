@@ -139,7 +139,7 @@ final class UserTokens {
 		identifierToken = item.identifierToken
 		date = item.date
 		do {
-			cookies = try NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(item.cookies) as! Array<HTTPCookie>
+			cookies = try NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(item.cookies) as? Array<HTTPCookie> ?? Array()
 		} catch let error {
 			print("User Tokens initialize failed: \(error.localizedDescription)")
 			cookies = Array()
