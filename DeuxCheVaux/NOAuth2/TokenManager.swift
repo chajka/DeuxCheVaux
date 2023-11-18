@@ -192,7 +192,6 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 	private let defaultQuery: Dictionary<String, AnyObject> = [
 		kSecClass as String: kSecClassGenericPassword,
 		kSecReturnPersistentRef as String: kCFBooleanTrue,
-		kSecAttrAccessible as String: kSecAttrAccessibleAlways,
 		kSecAttrSynchronizable as String: kCFBooleanTrue,
 		kSecAttrType as String: kSecAttrApplicationLabel
 	]
