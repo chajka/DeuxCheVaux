@@ -106,7 +106,7 @@ public struct UserInformations: Codable {
 	var accessToken: String
 	var refreshToken: String
 	let identifierToken: String
-	let cookies: Data
+	let userSession: String
 	let date: Date
 
 	init (item: UserTokens) {
@@ -116,13 +116,8 @@ public struct UserInformations: Codable {
 		accessToken = item.accessToken
 		refreshToken = item.refreshToken
 		identifierToken = item.identifierToken
+		userSession = item.userSession
 		date = item.date
-		do {
-			cookies = try NSKeyedArchiver.archivedData(withRootObject: item.cookies, requiringSecureCoding: false)
-		} catch let error {
-			print("User information initialize failed \(error.localizedDescription)")
-			cookies = Data()
-		}// end do try - catch archive cookie
 	}// end init
 }// end struct UserTokens
 
@@ -133,7 +128,7 @@ final class UserTokens {
 	public var accessToken: String
 	public var refreshToken: String
 	public var identifierToken: String
-	public var cookies: Array<HTTPCookie>
+	public var userSession: String
 	public var date: Date
 
 	init (item: UserInformations) {
@@ -143,13 +138,8 @@ final class UserTokens {
 		accessToken = item.accessToken
 		refreshToken = item.refreshToken
 		identifierToken = item.identifierToken
+		userSession = item.userSession
 		date = item.date
-		do {
-			cookies = try NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(item.cookies) as? Array<HTTPCookie> ?? Array()
-		} catch let error {
-			print("User Tokens initialize failed: \(error.localizedDescription)")
-			cookies = Array()
-		}// end do try - catch unarchive cookie
 	}// end init
 
 	init (identifier: String, nickname: String, premium: Bool, accessToken: String, refreshToken: String, identifierToken: String, cookies: Array<HTTPCookie>) {
@@ -159,7 +149,12 @@ final class UserTokens {
 		self.accessToken = accessToken
 		self.refreshToken = refreshToken
 		self.identifierToken = identifierToken
-		self.cookies = cookies
+		self.userSession = identifier
+		for cookie in cookies {
+			if cookie.name == UserSessionName && cookie.domain == UserSessionDomain {
+				self.userSession = cookie.value
+			}
+		}
 		date = Date()
 	}
 }// end struct UserTokens
