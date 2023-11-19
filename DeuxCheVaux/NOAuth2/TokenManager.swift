@@ -340,11 +340,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 	public func getUserSession (for identifier: String) throws -> String {
 		guard let tokens: UserTokens = tokens[identifier] else { throw TokenManagerError.UserNotFound }
 
-		for cookie: HTTPCookie in tokens.cookies {
-			if cookie.name == UserSessionName && cookie.domain == UserSessionDomain {
-				return cookie.value
-			}// end if cookie is user_session
-		}// end foreach cookies
+		return tokens.userSession
 		throw TokenManagerError.UserSessionNotFound
 	}// end func getUserSession
 
