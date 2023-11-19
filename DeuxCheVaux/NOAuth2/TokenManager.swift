@@ -328,8 +328,13 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 
 	public func getCookies (for identifier: String) -> Array<HTTPCookie> {
 		guard let tokens: UserTokens = tokens[identifier] else { return Array() }
-
-		return tokens.cookies
+		var property: Dictionary<HTTPCookiePropertyKey, Any> = cookieProperties
+		property[.value] = tokens.userSession
+		if let cookie: HTTPCookie = HTTPCookie(properties: property) {
+			return [cookie]
+		} else {
+			return Array()
+		}
 	}// end func getCookies
 
 	public func getUserSession (for identifier: String) throws -> String {
