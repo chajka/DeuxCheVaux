@@ -26,6 +26,12 @@ fileprivate let TokenKey: String = "jp.nicovideo.oauth2-tokens"
 fileprivate let RefreshToken: String = "jp.nicovideo.oauth2-refresh_token"
 fileprivate let IDToken: String = "jp.nicovideo.oauth2-id_token"
 fileprivate let SessionToken: String = "jp.nicovideo.user_session"
+fileprivate let ArchiveKey: String = "cookie"
+private let cookieProperties: Dictionary<HTTPCookiePropertyKey, Any> = [
+	.domain: UserSessionDomain,
+	.name: UserSessionName,
+	.path: "/"
+]
 extension Notification.Name {
 	static let userModificationDone = Notification.Name("User Modification Done")
 }
@@ -100,7 +106,7 @@ public struct UserInformations: Codable {
 	var accessToken: String
 	var refreshToken: String
 	let identifierToken: String
-	let cookies: Data
+	let userSession: String
 	let date: Date
 
 	init (item: UserTokens) {
@@ -110,13 +116,8 @@ public struct UserInformations: Codable {
 		accessToken = item.accessToken
 		refreshToken = item.refreshToken
 		identifierToken = item.identifierToken
+		userSession = item.userSession
 		date = item.date
-		do {
-			cookies = try NSKeyedArchiver.archivedData(withRootObject: item.cookies, requiringSecureCoding: false)
-		} catch let error {
-			print("User information initialize failed \(error.localizedDescription)")
-			cookies = Data()
-		}// end do try - catch archive cookie
 	}// end init
 }// end struct UserTokens
 
@@ -127,7 +128,7 @@ final class UserTokens {
 	public var accessToken: String
 	public var refreshToken: String
 	public var identifierToken: String
-	public var cookies: Array<HTTPCookie>
+	public var userSession: String
 	public var date: Date
 
 	init (item: UserInformations) {
@@ -137,13 +138,8 @@ final class UserTokens {
 		accessToken = item.accessToken
 		refreshToken = item.refreshToken
 		identifierToken = item.identifierToken
+		userSession = item.userSession
 		date = item.date
-		do {
-			cookies = try NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(item.cookies) as? Array<HTTPCookie> ?? Array()
-		} catch let error {
-			print("User Tokens initialize failed: \(error.localizedDescription)")
-			cookies = Array()
-		}// end do try - catch unarchive cookie
 	}// end init
 
 	init (identifier: String, nickname: String, premium: Bool, accessToken: String, refreshToken: String, identifierToken: String, cookies: Array<HTTPCookie>) {
@@ -153,7 +149,12 @@ final class UserTokens {
 		self.accessToken = accessToken
 		self.refreshToken = refreshToken
 		self.identifierToken = identifierToken
-		self.cookies = cookies
+		self.userSession = identifier
+		for cookie in cookies {
+			if cookie.name == UserSessionName && cookie.domain == UserSessionDomain {
+				self.userSession = cookie.value
+			}
+		}
 		date = Date()
 	}
 }// end struct UserTokens
@@ -265,11 +266,11 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		window?.setIsVisible(true)
 		let store: WKWebsiteDataStore = WKWebsiteDataStore.nonPersistent()
 		webView.configuration.websiteDataStore = store
-		if let cookies: Array<HTTPCookie> = tokens[identifier]?.cookies {
-			for cookie: HTTPCookie in cookies {
-				webView.configuration.websiteDataStore.httpCookieStore.setCookie(cookie)
-			}// end foreach cookies
-		}// end if cookies
+		var property: Dictionary<HTTPCookiePropertyKey, Any> = cookieProperties
+		property[.value] = tokens[identifier]?.userSession
+		if let cookie: HTTPCookie = HTTPCookie(properties: property) {
+			webView.configuration.websiteDataStore.httpCookieStore.setCookie(cookie)
+		}// end if cookie
 		var request: URLRequest = URLRequest(url: oauthURL)
 		request.addValue(DeuxCheVaux.shared.userAgent, forHTTPHeaderField: UserAgentKey)
 		webView.load(request)
@@ -327,18 +328,19 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 
 	public func getCookies (for identifier: String) -> Array<HTTPCookie> {
 		guard let tokens: UserTokens = tokens[identifier] else { return Array() }
-
-		return tokens.cookies
+		var property: Dictionary<HTTPCookiePropertyKey, Any> = cookieProperties
+		property[.value] = tokens.userSession
+		if let cookie: HTTPCookie = HTTPCookie(properties: property) {
+			return [cookie]
+		} else {
+			return Array()
+		}
 	}// end func getCookies
 
 	public func getUserSession (for identifier: String) throws -> String {
 		guard let tokens: UserTokens = tokens[identifier] else { throw TokenManagerError.UserNotFound }
 
-		for cookie: HTTPCookie in tokens.cookies {
-			if cookie.name == UserSessionName && cookie.domain == UserSessionDomain {
-				return cookie.value
-			}// end if cookie is user_session
-		}// end foreach cookies
+		return tokens.userSession
 		throw TokenManagerError.UserSessionNotFound
 	}// end func getUserSession
 
@@ -762,7 +764,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 					self.user_session = cookie.value
 					self.sessionIsValid = true
 					if let id = self.userIdentifier, let token: UserTokens = self.tokens[id] {
-						token.cookies = cookies
+						token.userSession = self.user_session
 					}// end if token found
 					self.cookies = cookies
 				}// end if found user session cookie
