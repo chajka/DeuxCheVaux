@@ -26,6 +26,12 @@ fileprivate let TokenKey: String = "jp.nicovideo.oauth2-tokens"
 fileprivate let RefreshToken: String = "jp.nicovideo.oauth2-refresh_token"
 fileprivate let IDToken: String = "jp.nicovideo.oauth2-id_token"
 fileprivate let SessionToken: String = "jp.nicovideo.user_session"
+fileprivate let ArchiveKey: String = "cookie"
+private let cookieProperties: Dictionary<HTTPCookiePropertyKey, Any> = [
+	.domain: UserSessionDomain,
+	.name: UserSessionName,
+	.path: "/"
+]
 extension Notification.Name {
 	static let userModificationDone = Notification.Name("User Modification Done")
 }
