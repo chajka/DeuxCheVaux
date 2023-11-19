@@ -764,7 +764,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 					self.user_session = cookie.value
 					self.sessionIsValid = true
 					if let id = self.userIdentifier, let token: UserTokens = self.tokens[id] {
-						token.cookies = cookies
+						token.userSession = self.user_session
 					}// end if token found
 					self.cookies = cookies
 				}// end if found user session cookie
