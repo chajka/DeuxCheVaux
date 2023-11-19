@@ -266,11 +266,11 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		window?.setIsVisible(true)
 		let store: WKWebsiteDataStore = WKWebsiteDataStore.nonPersistent()
 		webView.configuration.websiteDataStore = store
-		if let cookies: Array<HTTPCookie> = tokens[identifier]?.cookies {
-			for cookie: HTTPCookie in cookies {
-				webView.configuration.websiteDataStore.httpCookieStore.setCookie(cookie)
-			}// end foreach cookies
-		}// end if cookies
+		var property: Dictionary<HTTPCookiePropertyKey, Any> = cookieProperties
+		property[.value] = tokens[identifier]?.userSession
+		if let cookie: HTTPCookie = HTTPCookie(properties: property) {
+			webView.configuration.websiteDataStore.httpCookieStore.setCookie(cookie)
+		}// end if cookie
 		var request: URLRequest = URLRequest(url: oauthURL)
 		request.addValue(DeuxCheVaux.shared.userAgent, forHTTPHeaderField: UserAgentKey)
 		webView.load(request)
