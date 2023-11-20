@@ -333,6 +333,17 @@ public final class NicoInformationHandler: HTTPCommunicatable {
 		task.resume()
 	}// end rawData
 
+	public func rawData (ofURL url: URL, httpMethod method: HTTPMethod = .get, HTTPBody body: Data? = nil, contentsType type: String? = nil) async throws -> Data {
+		var request: URLRequest = makeRequest(url: url, method: method)
+		if let body: Data = body, let type: String = type {
+			request.addValue(type, forHTTPHeaderField: ContentTypeKey)
+			request.httpBody = body
+		}// end optional binding check for body and its content type
+		let result: (dat: Data, ressp: URLResponse) = try await session.data(for: request)
+
+		return result.dat
+	}// end rawData
+
 	public func currentPrograms (with handler: @escaping CurrentProgramsHandler) throws -> Void {
 		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
 		var url: URL = URL(string: FollowingProgramsFormat)!
