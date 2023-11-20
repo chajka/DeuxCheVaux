@@ -302,7 +302,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		do {
 			var wsEndPointURL: URL = URL(string: LiveURLString)!
 			let url: URL = URL(string: WSEndPointURLString + WSEndPointProgramKey + liveNumber + WSEndPointUserIDKey + identifier)!
-			let request = try makeRequestWithAccessToken(url: url, for: identifier)
+			let request = try await makeRequestWithAccessToken(url: url, for: identifier)
 			let result: (data: Data, resp: URLResponse) = try await session.data(for: request)
 			let decoder: JSONDecoder = JSONDecoder()
 			let urlData: URLResult = try decoder.decode(URLResult.self, from: result.data)
@@ -388,7 +388,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 	private func getUserInfo (for identifier: String) async {
 		guard let tokens: UserTokens = tokens[identifier] else { return }
 		do {
-			let request: URLRequest = try makeRequestWithAccessToken(url: UserInfoURL, for: identifier)
+			let request: URLRequest = try await makeRequestWithAccessToken(url: UserInfoURL, for: identifier)
 			let result: (data: Data, rest: URLResponse) = try await session.data(for: request)
 			do {
 				let decoder: JSONDecoder = JSONDecoder()
@@ -405,7 +405,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 	private func userPremium (for identifier: String) async -> Bool {
 		do {
 			var premium: Bool = false
-			let request: URLRequest = try makeRequestWithAccessToken(url: PremiumInfoURL, for: identifier)
+			let request: URLRequest = try await makeRequestWithAccessToken(url: PremiumInfoURL, for: identifier)
 			let result: (data: Data, resp: URLResponse) = try await session.data(for: request)
 				do {
 					let premiumInfo: Premium = try JSONDecoder().decode(Premium.self, from: result.data)
