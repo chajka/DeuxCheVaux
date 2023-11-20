@@ -210,21 +210,20 @@ public final class NicoInformationHandler: HTTPCommunicatable {
 		task.resume()
 	}// end fetchNickname
 
-	public func thumbnail (identifier userIdentifier: String, whenNoImage insteadImage: NSImage) -> NSImage {
+	public func thumbnail (identifier userIdentifier: String) async -> NSImage? {
 		let prefix: String = String(userIdentifier.prefix(userIdentifier.count - 4))
 		let urlString: String = String(format: ThumbnailAPIFormat, prefix, userIdentifier)
-		guard let url: URL = URL(string: urlString) else { return insteadImage }
+		var thumbnail: NSImage? = nil
+		guard let url: URL = URL(string: urlString) else { return thumbnail }
 		let request: URLRequest = makeRequest(url: url, method: .get)
-		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
-		var thumbnail: NSImage = insteadImage
-		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
-			defer { semaphore.signal() }
-			guard let data: Data = dat, let image: NSImage = NSImage(data: data) else { return }
-			thumbnail = image
-		}// end closure
-		task.resume()
-		let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
-		if timeout == .timedOut { thumbnail = insteadImage }
+		do {
+			let result: (data: Data, resp: URLResponse) = try await session.data(for: request)
+				if let image: NSImage = NSImage(data: result.data) {
+					thumbnail = image
+				}
+		} catch let error {
+			Swift.print(error.localizedDescription)
+		}// end do - try - catch
 
 		return thumbnail
 	}// end thumbnail
