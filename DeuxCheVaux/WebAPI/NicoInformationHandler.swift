@@ -270,35 +270,21 @@ public final class NicoInformationHandler: HTTPCommunicatable {
 		task.resume()
 	}// end communityThumbnail
 
-	public func channelThumbnail (channel: String, whenNoImage insteadImage: NSImage) -> NSImage {
-		let urlString: String = String(format: ChannelThumbnailApi, channel)
-		guard let url: URL = URL(string: urlString) else { return insteadImage }
-		let request: URLRequest = makeRequest(url: url, method: .get)
-		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
-		var thumbnail: NSImage = insteadImage
-		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
-			defer { semaphore.signal() }
-			guard let data: Data = dat, let image: NSImage = NSImage(data: data) else { return }
-			thumbnail = image
-		}// end closure
-		task.resume()
-		let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
-		if timeout == .timedOut { thumbnail = insteadImage }
-
-		return thumbnail
-	}// end channelThumbnail
-
-	public func channelThumbnail (of channel: String, with handler: @escaping ThumbnailHandler) -> Void {
-		let urlString: String = String(format: ChannelThumbnailApi, channel)
-		guard let url: URL = URL(string: urlString) else { handler(nil); return }
-		let request: URLRequest = makeRequest(url: url, method: .get)
+	public func channelThumbnail (of channel: String) async -> NSImage? {
 		var thumbnail: NSImage? = nil
-		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
-			defer { handler(thumbnail) }
-			guard let data: Data = dat, let image: NSImage = NSImage(data: data) else { return }
+		let urlString: String = String(format: ChannelThumbnailApi, channel)
+		guard let url: URL = URL(string: urlString) else { return thumbnail }
+		let request: URLRequest = makeRequest(url: url, method: .get)
+		do {
+			let result: (data: Data, resp: URLResponse) = try await session.data(for: request)
+			let image: NSImage? = NSImage(data: result.data)
 			thumbnail = image
-		}// end completion handler closure
-		task.resume()
+
+			return thumbnail
+		} catch let error {
+			print(error.localizedDescription)
+			return thumbnail
+		}
 	}// end channelThumbnail
 
 	public func rawData (ofURL url: URL, httpMethod method: HTTPMethod = .get, HTTPBody body: Data? = nil, contentsType type: String? = nil) async throws -> Data {
