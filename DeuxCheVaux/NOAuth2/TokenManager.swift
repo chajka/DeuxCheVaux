@@ -332,7 +332,6 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		guard let tokens: UserTokens = tokens[identifier] else { throw TokenManagerError.UserNotFound }
 
 		return tokens.userSession
-		throw TokenManagerError.UserSessionNotFound
 	}// end func getUserSession
 
 	public func makeRequest (url: URL) -> URLRequest {
