@@ -301,26 +301,6 @@ public final class NicoInformationHandler: HTTPCommunicatable {
 		task.resume()
 	}// end channelThumbnail
 
-	public func rawData (forURL url: URL, httpMethod method: HTTPMethod, HTTPBody body: Data? = nil, contentsType type: String? = nil) -> Data? {
-		var rawData: Data? = nil
-		var request: URLRequest = makeRequest(url: url, method: method)
-		if let body: Data = body, let type: String = type {
-			request.addValue(type, forHTTPHeaderField: ContentTypeKey)
-			request.httpBody = body
-		}// end optional binding for
-		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
-		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
-			defer { semaphore.signal() }
-			guard let data: Data = dat else { return }
-			rawData = data
-		}// end closure
-		task.resume()
-		let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
-		if timeout == .timedOut { rawData = nil }
-
-		return rawData
-	}// end rawData
-
 	public func rawData (ofURL url: URL, httpMethod method: HTTPMethod = .get, HTTPBody body: Data? = nil, contentsType type: String? = nil) async throws -> Data {
 		var request: URLRequest = makeRequest(url: url, method: method)
 		if let body: Data = body, let type: String = type {
