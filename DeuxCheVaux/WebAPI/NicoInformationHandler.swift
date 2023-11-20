@@ -243,31 +243,19 @@ public final class NicoInformationHandler: HTTPCommunicatable {
 		task.resume()
 	}// end thumbnail
 
-	public func communityThumbnail (_ url: URL, whenNoImage insteadImage: NSImage) -> NSImage {
-		let request: URLRequest = makeRequest(url: url, method: .get)
-		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
-		var thumbnail: NSImage = insteadImage
-		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
-			defer { semaphore.signal() }
-			guard let data: Data = dat, let image: NSImage = NSImage(data: data) else { return }
-			thumbnail = image
-		}// end closure
-		task.resume()
-		let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
-		if timeout == .timedOut { thumbnail = insteadImage }
-
-		return thumbnail
-	}// end communityThumbnail
-
-	public func communityThumbnail (_ url: URL, with handler: @escaping ThumbnailHandler) -> Void {
+	public func communityThumbnail (_ url: URL) async -> NSImage? {
 		let request: URLRequest = makeRequest(url: url, method: .get)
 		var thumbnail: NSImage? = nil
-		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
-			defer { handler(thumbnail) }
-			guard let data: Data = dat, let image: NSImage = NSImage(data: data) else { return }
-			thumbnail = image
+		do {
+			let result: (data: Data, resp: URLResponse) = try await session.data(for: request)
+			if let image: NSImage = NSImage(data: result.data) {
+				thumbnail = image
+			}
+		} catch let error {
+			print(error.localizedDescription)
 		}// end completion handler closure
-		task.resume()
+
+		return thumbnail
 	}// end communityThumbnail
 
 	public func channelThumbnail (of channel: String) async -> NSImage? {
