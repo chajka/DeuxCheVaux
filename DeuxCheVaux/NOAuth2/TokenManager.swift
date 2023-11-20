@@ -390,24 +390,18 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 	}// end make request with id token
 
 		// MARK: - Private Methods
-	private func getUserInfo (for identifier: String) {
+	private func getUserInfo (for identifier: String) async {
 		guard let tokens: UserTokens = tokens[identifier] else { return }
 		do {
-			let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
 			let request: URLRequest = try makeRequestWithAccessToken(url: UserInfoURL, for: identifier)
-			let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
-				defer { semaphore.signal() }
-				guard let data: Data = dat else { return }
-				do {
-					let decoder: JSONDecoder = JSONDecoder()
-					let userInfo: UserInfo = try decoder.decode(UserInfo.self, from: data)
-					tokens.nickname = userInfo.nickname
-				} catch let error {
-					print(error.localizedDescription)
-				}// end do try - catch decode user info
-			}// end completion handler
-			task.resume()
-			_ = semaphore.wait(timeout: DispatchTime.now() + .seconds(2))
+			let result: (data: Data, rest: URLResponse) = try await session.data(for: request)
+			do {
+				let decoder: JSONDecoder = JSONDecoder()
+				let userInfo: UserInfo = try decoder.decode(UserInfo.self, from: result.data)
+				tokens.nickname = userInfo.nickname
+			} catch let error {
+				print(error.localizedDescription)
+			}// end do try - catch decode user info
 		} catch let error {
 			print("get user info error: \(error.localizedDescription)")
 		}
