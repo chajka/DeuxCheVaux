@@ -321,18 +321,6 @@ public final class NicoInformationHandler: HTTPCommunicatable {
 		return rawData
 	}// end rawData
 
-	public func rawData (ofURL url: URL, httpMethod method: HTTPMethod = .get, HTTPBody body: Data? = nil, contentsType type: String? = nil, with handler: @escaping RawDataHandler) -> Void {
-		var request: URLRequest = makeRequest(url: url, method: method)
-		if let body: Data = body, let type: String = type {
-			request.addValue(type, forHTTPHeaderField: ContentTypeKey)
-			request.httpBody = body
-		}// end optional binding check for body and its content type
-		let task: URLSessionDataTask = session.dataTask(with: request) { (data: Data?, resp: URLResponse?, err: Error?) in
-			handler(data, resp, err)
-		}// end completion handler closure
-		task.resume()
-	}// end rawData
-
 	public func rawData (ofURL url: URL, httpMethod method: HTTPMethod = .get, HTTPBody body: Data? = nil, contentsType type: String? = nil) async throws -> Data {
 		var request: URLRequest = makeRequest(url: url, method: method)
 		if let body: Data = body, let type: String = type {
