@@ -283,7 +283,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		center.post(name: .userModificationDone, object: nil)
 	}// end func remove
 
-	public func start (with oAuthURL: URL, refreshQuery query: String, ofUser identifier: String?, handler: @escaping AccountsHandler) throws {
+	public func start (with oAuthURL: URL, refreshQuery query: String, ofUser identifier: String?) throws -> (String, String?, Bool) {
 		oauthURL = oAuthURL
 		refreshQuery = query
 		var id: String
@@ -294,7 +294,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 			id = identifier!
 		}// end update old account
 		guard let userTokens: UserTokens = tokens[id] else { throw TokenManagerError.UserNotFound }
-		handler(userTokens.identifier, userTokens.nickname, userTokens.premium)
+		return (userTokens.identifier, userTokens.nickname, userTokens.premium)
 	}// end start
 
 	public func getWSEndPoint (program liveNumber: String, for identifier: String) -> URL? {
