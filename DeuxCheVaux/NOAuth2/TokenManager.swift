@@ -413,23 +413,17 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		}
 	}// end func get user info from oAuth2 server
 
-	private func userPremium (for identifier: String) -> Bool {
+	private func userPremium (for identifier: String) async -> Bool {
 		do {
-			let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
 			var premium: Bool = false
 			let request: URLRequest = try makeRequestWithAccessToken(url: PremiumInfoURL, for: identifier)
-			let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
-				defer { semaphore.signal() }
-				guard let json: Data = dat else { return }
+			let result: (data: Data, resp: URLResponse) = try await session.data(for: request)
 				do {
-					let premiumInfo: Premium = try JSONDecoder().decode(Premium.self, from: json)
+					let premiumInfo: Premium = try JSONDecoder().decode(Premium.self, from: result.data)
 					premium = premiumInfo.data.type == .premium
 				} catch let error {
 					print("GET Premium decode error: \(error.localizedDescription)")
 				}// end do try - catch decode premium data json
-			}// end closure
-			task.resume()
-			_ = semaphore.wait(timeout: DispatchTime.now() + .seconds(2))
 
 			return premium
 		} catch TokenManagerError.IdentifierNotFound {
