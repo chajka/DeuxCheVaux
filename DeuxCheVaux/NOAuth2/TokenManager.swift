@@ -298,27 +298,17 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		return (userTokens.identifier, userTokens.nickname, userTokens.premium)
 	}// end start
 
-	public func getWSEndPoint (program liveNumber: String, for identifier: String) -> URL? {
+	public func getWSEndPoint (program liveNumber: String, for identifier: String) async -> URL? {
 		do {
 			var wsEndPointURL: URL = URL(string: LiveURLString)!
-			let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
 			let url: URL = URL(string: WSEndPointURLString + WSEndPointProgramKey + liveNumber + WSEndPointUserIDKey + identifier)!
 			let request = try makeRequestWithAccessToken(url: url, for: identifier)
-			let task = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
-				defer { semaphore.signal() }
-				guard let data: Data = dat else { return }
-				do {
-					let decoder: JSONDecoder = JSONDecoder()
-					let urlData: URLResult = try decoder.decode(URLResult.self, from: data)
-					if urlData.meta.status == 200 {
-						wsEndPointURL = URL(string: urlData.data.url)!
-					}// end if no error
-				} catch let error {
-					print(error.localizedDescription)
-				}// end do try - catch decode URL JSON
-			}// end completion handler
-			task.resume()
-			_ = semaphore.wait(timeout: DispatchTime.now() + .seconds(200))
+			let result: (data: Data, resp: URLResponse) = try await session.data(for: request)
+			let decoder: JSONDecoder = JSONDecoder()
+			let urlData: URLResult = try decoder.decode(URLResult.self, from: result.data)
+			if urlData.meta.status == 200 {
+				wsEndPointURL = URL(string: urlData.data.url)!
+			}// end if no error
 
 			return wsEndPointURL
 		} catch let error {
