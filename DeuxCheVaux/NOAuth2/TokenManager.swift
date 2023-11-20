@@ -12,6 +12,7 @@ import Security
 
 fileprivate let TokenManagerNibName: String = "TokenManager"
 fileprivate let MyPageURL: URL = URL(string: "https://www.nicovideo.jp/my")!
+fileprivate let LiveURLString: String = "https://live.nicovideo.jp"
 fileprivate let AuthorizationBaseURL: URL = URL(string: "https://oauth.nicovideo.jp/")!
 fileprivate let AuthorizedURL: URL = AuthorizationBaseURL.appendingPathComponent("oauth2/authorized")
 fileprivate let UserInfoURL: URL = AuthorizationBaseURL.appendingPathComponent("open_id/userinfo")
@@ -299,7 +300,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 
 	public func getWSEndPoint (program liveNumber: String, for identifier: String) -> URL? {
 		do {
-			var wsEndPointURL: URL = URL(string: "https://live.nicovideo.jp")!
+			var wsEndPointURL: URL = URL(string: LiveURLString)!
 			let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
 			let url: URL = URL(string: WSEndPointURLString + WSEndPointProgramKey + liveNumber + WSEndPointUserIDKey + identifier)!
 			let request = try makeRequestWithAccessToken(url: url, for: identifier)
