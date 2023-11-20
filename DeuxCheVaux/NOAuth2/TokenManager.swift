@@ -284,12 +284,12 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		center.post(name: .userModificationDone, object: nil)
 	}// end func remove
 
-	public func start (with oAuthURL: URL, refreshQuery query: String, ofUser identifier: String?) throws -> (String, String?, Bool) {
+	public func start (with oAuthURL: URL, refreshQuery query: String, ofUser identifier: String?) async throws -> (String, String?, Bool) {
 		oauthURL = oAuthURL
 		refreshQuery = query
 		var id: String
 		if tokens.count == 0 || identifier == nil {
-			let tokens: UserTokens = try updateOldAccount()
+			let tokens: UserTokens = try await updateOldAccount()
 			id = tokens.identifier
 		} else {
 			id = identifier!
