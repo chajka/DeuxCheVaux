@@ -319,17 +319,15 @@ public final class NicoInformationHandler: HTTPCommunicatable {
 
 		// MARK: - Internal methods
 		// MARK: - Private methods
-	private func fetchMyUserID () -> (identifier: String, premium: Bool, language: UserLanguage) {
+	private func fetchMyUserID () async -> (identifier: String, premium: Bool, language: UserLanguage) {
 		guard let url = URL(string: NicoNicoMyPageURL) else { return ("", false, .ja) }
 		let request: URLRequest = makeRequest(url: url, method: .get)
-		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
 		var userIdentifier: String? = nil
 		var userIsPremium: Bool = false
 		var userLanguage: UserLanguage = .ja
-		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
-			defer { semaphore.signal() }
-			guard let data: Data = dat else { return }
-			if let htmlSource: String = String(data: data, encoding: .utf8) {
+		do {
+			let res: (data: Data, resp: URLResponse) = try await session.data(for: request)
+			if let htmlSource: String = String(data: res.data, encoding: .utf8) {
 				let htmlRange: NSRange = NSRange(location: 0, length: htmlSource.count)
 				if let regex: NSRegularExpression = try? NSRegularExpression(pattern: IdentifierFinderRegex, options: NSRegularExpression.Options.caseInsensitive) {
 					if let result: NSTextCheckingResult = regex.firstMatch(in: htmlSource, options: NSRegularExpression.MatchingOptions.withTransparentBounds, range: htmlRange) {
@@ -350,21 +348,21 @@ public final class NicoInformationHandler: HTTPCommunicatable {
 						let range: NSRange = result.range(at: 1)
 						if let currentLanguage: CurrentLanguage = CurrentLanguage(rawValue: (htmlSource as NSString).substring(with: range)) {
 							switch currentLanguage {
-								case .Japanese:
-									userLanguage = .ja
-								case .Chinese:
-									userLanguage = .zh
-								case .English:
-									userLanguage = .en
+							case .Japanese:
+								userLanguage = .ja
+							case .Chinese:
+								userLanguage = .zh
+							case .English:
+								userLanguage = .en
 							}// end switch case by current language
 						}// end optional binding check of String is member of CurrentLanguage enum
 					}// end optional binding check of found regex
 				}// end optional binding check for compile regex
 			}// end optional binding check for fetch html source successed ?
-		}// end completion handler
-		task.resume()
-		let timeout: DispatchTimeoutResult = semaphore.wait(wallTimeout: DispatchWallTime.now() + Timeout)
-		if timeout == .timedOut { return ("", false, .ja) }
+		} catch let error {
+			print(error.localizedDescription)
+		}
+
 		if let identifier: String = userIdentifier { return (identifier, userIsPremium, userLanguage) }
 		return ("", false, .ja)
 	}// end fetchMyUserID
