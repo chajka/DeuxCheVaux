@@ -445,7 +445,7 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 	}// end clearOwnerComment
 
 		// MARK: questionary
-	public func questionary (title question: String, choices items: Array<String>) -> ResultStatus {
+	public func questionary (title question: String, choices items: Array<String>) async -> ResultStatus {
 		let capableItemSount: Set<Int> = Set(2...9)
 		let itemCount: Int = items.count
 		if !capableItemSount.contains(itemCount) { return .argumentError }
@@ -453,32 +453,20 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 
 		var status: ResultStatus = .unknownError
 		var request: URLRequest = makeRequest(url: url, method: .post, contentsType: ContentTypeJSON)
-		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
 		let enquete: Enquete = Enquete(question: question, items: items)
 		do {
 			let encoder: JSONEncoder = JSONEncoder()
 			let data: Data = try encoder.encode(enquete)
 			request.httpBody = data
-			let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, req: URLResponse?, err: Error?) in
-				defer { semaphore.signal() } // must increment semaphore when exit from closure
-				guard let weakSelf = self, let data: Data = dat else {
-					status = .receivedDataNilError
-					return
-				}// end guard
-				do {
-					let decoder: JSONDecoder = JSONDecoder()
-					let result: EnqueteResult = try decoder.decode(EnqueteResult.self, from: data)
-					status = weakSelf.checkMetaInformation(result.meta)
-				} catch let error {
-					status = .decodeResultError
-					print(error.localizedDescription)
-				}// end do try - catch decode result data
-			}// end closure
-			task.resume()
-			let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
-			if timeout == .timedOut {
-				status = .timeout
-			}// end if timeout
+			let result: (data: Data, resp: URLResponse) = try await session.data(for: request)
+			do {
+				let decoder: JSONDecoder = JSONDecoder()
+				let result: EnqueteResult = try decoder.decode(EnqueteResult.self, from: result.data)
+				status = checkMetaInformation(result.meta)
+			} catch let error {
+				status = .decodeResultError
+				print(error.localizedDescription)
+			}// end do try - catch decode result data
 		} catch let error {
 			status = .encodeRequestError
 			print(error.localizedDescription)
