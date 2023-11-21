@@ -1101,41 +1101,6 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 	}// end stopQuotation
 
 		// MARK: end time extension
-	public func extendableTimes () -> (times: Array<String>, status: ResultStatus) {
-		guard let url: URL = URL(string: apiBaseString + programExtension) else { return (Array(), .apiAddressError) }
-		var status: ResultStatus = .unknownError
-		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
-		var extendableMinutes: Array<String> = Array()
-		let request: URLRequest = makeRequest(url: url, method: .get)
-		let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, rest: URLResponse?, err: Error?) in
-			defer { semaphore.signal() } // must increment semaphore when exit from closure
-			guard let weakSelf = self, let data: Data = dat else {
-				status = .receivedDataNilError
-				return
-			}// end guard
-			do {
-				let decoder: JSONDecoder = JSONDecoder()
-				let extendableList: TimeExtension = try decoder.decode(TimeExtension.self, from: data)
-				status = weakSelf.checkMetaInformation(extendableList.meta)
-				if let methods: Array<ExtendMethod> = extendableList.data?.methods {
-					for method: ExtendMethod in methods {
-						extendableMinutes.append(String(method.minutes))
-					}// end foreach methods
-				}// end optional binding for
-			} catch let error {
-				status = .decodeResultError
-				print(error.localizedDescription)
-			}// end do try - catch decode recived json to struct
-		}// end closure of request completion handler
-		task.resume()
-		let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
-		if timeout == .timedOut {
-			status = .timeout
-		}// end if timeout
-
-		return (extendableMinutes, status)
-	}// end extendableTimes
-
 	public func extendableTimes (with handler: @escaping ExtendalbeTimesHandler) -> Void {
 		var completionHandler: ExtendalbeTimesHandler? = handler
 		var extendableTimes: Array<String> = Array()
