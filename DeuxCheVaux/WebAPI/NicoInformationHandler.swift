@@ -285,8 +285,7 @@ public final class NicoInformationHandler: HTTPCommunicatable {
 		return result.dat
 	}// end rawData
 
-	public func currentPrograms (with handler: @escaping CurrentProgramsHandler) throws -> Void {
-		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
+	public func currentPrograms (with handler: @escaping CurrentProgramsHandler) async throws -> Void {
 		var url: URL = URL(string: FollowingProgramsFormat)!
 		var request: URLRequest = makeRequest(url: url, method: .get)
 		var programs: Array<Program> = Array()
@@ -297,26 +296,22 @@ public final class NicoInformationHandler: HTTPCommunicatable {
 			pageCount += 1
 			url = pageCount == 1 ? URL(string: FollowingProgramsFormat)! : URL(string: FollowingProgramsFormat + FollowingProgramsPage + String(pageCount))!
 			request.url = url
-			let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
-				defer { semaphore.signal() }
-				guard let data: Data = dat, let info: UserPrograms = try? JSONDecoder().decode(UserPrograms.self, from: data) else { return }
-				if info.meta.status == 404 { error = InformationError.notLogin }
-				guard info.meta.status != 404, let information: NotifyContent = info.data else { return }
-				maxPage = information.totalPage
-				let currentPrograms: Array<UserProgramInfo> = information.notifyboxContent
-				for prog: UserProgramInfo in currentPrograms {
-					if prog.providerType == .official { continue }
-					let liveNumber: String = URL(string: prog.thumbnailLinkURL)?.lastPathComponent ?? ""
-					let title: String = prog.title
-					let community: String = prog.communityName
-					let owner: String = prog.ownerIdentifier
-					let thumb: NSImage? = NSImage(contentsOf: URL(string: prog.thumnailURL)!)
-					let program: Program = Program(program: liveNumber, title: title, community: community, owner: owner, thumbnail: thumb)
-					programs.append(program)
-				}// end foreach all program informations
-			}// end current programs completion handler closure
-			task.resume()
-			_ = semaphore.wait(timeout: .now() + .seconds(Int(Timeout)))
+			let result: (data: Data, resp: URLResponse) = try await session.data(for: request)
+			guard let info: UserPrograms = try? JSONDecoder().decode(UserPrograms.self, from: result.data) else { return }
+			if info.meta.status == 404 { error = InformationError.notLogin }
+			guard info.meta.status != 404, let information: NotifyContent = info.data else { return }
+			maxPage = information.totalPage
+			let currentPrograms: Array<UserProgramInfo> = information.notifyboxContent
+			for prog: UserProgramInfo in currentPrograms {
+				if prog.providerType == .official { continue }
+				let liveNumber: String = URL(string: prog.thumbnailLinkURL)?.lastPathComponent ?? ""
+				let title: String = prog.title
+				let community: String = prog.communityName
+				let owner: String = prog.ownerIdentifier
+				let thumb: NSImage? = NSImage(contentsOf: URL(string: prog.thumnailURL)!)
+				let program: Program = Program(program: liveNumber, title: title, community: community, owner: owner, thumbnail: thumb)
+				programs.append(program)
+			}// end foreach all program informations
 			if error == .notLogin { throw error! }
 		} while pageCount < maxPage
 		handler(programs)
