@@ -722,32 +722,20 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 		return status
 	}// end layoutQuotation
 
-	public func stopQuotation () -> ResultStatus {
+	public func stopQuotation () async -> ResultStatus {
 		guard let url: URL = URL(string: QuoteAPIBase + program + QuoteSuffix) else { return .apiAddressError }
 
 		let request: URLRequest = makeRequest(url: url, method: .delete)
 		var status: ResultStatus = .unknownError
-		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
-		let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, req:  URLResponse?, err:  Error?) in
-			defer { semaphore.signal() } // must increment semaphore when exit from closure
-			guard let weakSelf = self, let data: Data = dat else {
-				status = .receivedDataNilError
-				return
-			}// end guard is not satisfied
 			do {
+				let result: (data: Data, resp: URLResponse) = try await session.data(for: request)
 				let decoder: JSONDecoder = JSONDecoder()
-				let meta: MetaResult = try decoder.decode(MetaResult.self, from: data)
-				status = weakSelf.checkMetaInformation(meta.meta)
+				let meta: MetaResult = try decoder.decode(MetaResult.self, from: result.data)
+				status = checkMetaInformation(meta.meta)
 			} catch let error {
 				status = .decodeResultError
 				print(error.localizedDescription)
 			}// end do try - catch decode reesult data to meta information
-		}// end closure completion handler
-		task.resume()
-		let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
-		if timeout == .timedOut {
-			status = .timeout
-		}// end if timeout
 
 		return status
 	}// end stopQuotation
