@@ -134,8 +134,8 @@ public final class NicoInformationHandler: HTTPCommunicatable {
 		// MARK: - Override
 		// MARK: - Actions
 		// MARK: - Public methods
-	public func myUserIdentifier () -> (identifier: String, premium: Bool, language: UserLanguage) {
-		return fetchMyUserID()
+	public func myUserIdentifier () async -> (identifier: String, premium: Bool, language: UserLanguage) {
+		return await fetchMyUserID()
 	}// end myUserIdentifier
 
 	public func myUserIdentifier (with handler: @escaping IdentifierHandler) -> Void {
