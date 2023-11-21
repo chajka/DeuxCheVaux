@@ -652,7 +652,7 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 		return (quotable, status)
 	}// end checkQuotable
 
-	public func startQuotation (quote quoteContent: String, mode mixingMode: MixingMode, mainVolume main: Float, quoteVolume quote: Float) -> ResultStatus {
+	public func startQuotation (quote quoteContent: String, mode mixingMode: MixingMode, mainVolume main: Float, quoteVolume quote: Float) async -> ResultStatus {
 		var type: ContentType? = nil
 		let quoteContentPrefix: String = String(quoteContent.prefix(2))
 		if videoPrefixSet.contains(quoteContentPrefix) { type = .video }
@@ -673,27 +673,15 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 			quotationJSON = try encoder.encode(quotation)
 			var request: URLRequest = makeRequest(url: url, method: .post, contentsType: ContentTypeJSON)
 			request.httpBody = quotationJSON
-			let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
-			let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, req:  URLResponse?, err:  Error?) in
-				defer { semaphore.signal() } // must increment semaphore when exit from closure
-				guard let weakSelf = self, let data: Data = dat else {
-					status = .receivedDataNilError
-					return
-				}// end guard is not satisfied
-				do {
-					let decoder: JSONDecoder = JSONDecoder()
-					let result: MetaResult = try decoder.decode(MetaResult.self, from: data)
-					status = weakSelf.checkMetaInformation(result.meta)
-				} catch let error {
-					status = .decodeResultError
-					print(error.localizedDescription)
-				}// end do try - catch decode result data to meta information
-			}// end closure completion handler
-			task.resume()
-			let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
-			if timeout == .timedOut {
-				status = .timeout
-			}// end if timeout
+			let res: (data: Data, resp: URLResponse) = try await session.data(for: request)
+			do {
+				let decoder: JSONDecoder = JSONDecoder()
+				let result: MetaResult = try decoder.decode(MetaResult.self, from: res.data)
+				status = checkMetaInformation(result.meta)
+			} catch let error {
+				status = .decodeResultError
+				print(error.localizedDescription)
+			}// end do try - catch decode result data to meta information
 		} catch let error {
 			print(error.localizedDescription)
 			return .encodeRequestError
