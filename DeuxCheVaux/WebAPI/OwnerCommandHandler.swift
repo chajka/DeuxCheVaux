@@ -631,36 +631,23 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 	}// end removeNGWords
 
 		// MARK: quote
-	public func checkQuotable (_ video: String) -> (quotable: Bool, status: ResultStatus) {
+	public func checkQuotable (_ video: String) async -> (quotable: Bool, status: ResultStatus) {
 		guard let url: URL = URL(string: QuptableAPIBase + video) else { return (false, .apiAddressError) }
 
 		let request: URLRequest = makeRequest(url: url, method: .get)
 		var status: ResultStatus = .unknownError
 		var quotable: Bool = false
-		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
-		let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, resp: URLResponse?, err: Error?) in
-			defer { semaphore.signal() } // must increment semaphore when exit from closure
-			guard let weakSelf = self, let data: Data = dat else {
-				status = .receivedDataNilError
-				return
-			}// end guard check data is not nil
-			do {
-				let decoder: JSONDecoder = JSONDecoder()
-				let result: QuotableResult = try decoder.decode(QuotableResult.self, from: data)
-				status = weakSelf.checkMetaInformation(result.meta)
-				if let info: MovieInfo = result.data {
-					quotable = info.quotable
-				}// end optional binding check for have data section from decoded json structure
-			} catch let error {
-				print(error.localizedDescription)
-			}// end do try - catch decode received json
-		}// end closure for url request result data handler
-		task.resume()
-		let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
-		if timeout == .timedOut {
-			quotable = false
-			status = .timeout
-		}// end if timeout
+		do {
+			let res: (data: Data, resp: URLResponse) = try await session.data(for: request)
+			let decoder: JSONDecoder = JSONDecoder()
+			let result: QuotableResult = try decoder.decode(QuotableResult.self, from: res.data)
+			status = checkMetaInformation(result.meta)
+			if let info: MovieInfo = result.data {
+				quotable = info.quotable
+			}// end optional binding check for have data section from decoded json structure
+		} catch let error {
+			print(error.localizedDescription)
+		}// end do try - catch decode received json
 
 		return (quotable, status)
 	}// end checkQuotable
