@@ -386,48 +386,6 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 		// MARK: - Override
 		// MARK: - Actions
 		// MARK: - Public methods
-	public func postOwnerComment (comment: String, name: String?, color: Color.premium?, isPerm: Bool? = false, link: String? = nil) -> ResultStatus {
-		if comment.isEmpty { return .argumentError }
-		if (comment.starts(with: clear)) {
-			return clearOwnerComment()
-		}// end if comment is clear command
-		guard let url = URL(string: apiBaseString + operatorComment) else { return .argumentError }
-		let commentToPost: OperatorComment = OperatorComment(text: comment, userName: name, color: color, isPermanent: isPerm, link: link)
-
-		var status: ResultStatus = .unknownError
-		var request: URLRequest = makeRequest(url: url, method: .put, contentsType: ContentTypeJSON)
-		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
-		do {
-			let encoder: JSONEncoder = JSONEncoder()
-			request.httpBody = try encoder.encode(commentToPost)
-			let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, resp: URLResponse?, err: Error?) in
-				defer { semaphore.signal() } // must increment semaphore when exit from closure
-				guard let weakSelf = self, let data: Data = dat else {
-					status = .receivedDataNilError
-					return
-				}// end guard
-				do {
-					let decoder: JSONDecoder = JSONDecoder()
-					let meta: MetaResult = try decoder.decode(MetaResult.self, from: data)
-					status = weakSelf.checkMetaInformation(meta.meta)
-				} catch let error {
-					status = .decodeResultError
-					print(error.localizedDescription)
-				}// end do try - catch decode received data
-			}// end closure of request completion handler
-			task.resume()
-			let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
-			if timeout == .timedOut {
-				status = .timeout
-			}// end if timeout
-		} catch let error {
-			status = .encodeRequestError
-			print(error.localizedDescription)
-		}// end try - catch JSONSerialization
-
-		return status
-	}// end func owner comment
-
 	public func postOwnerComment (comment: String, name: String?, color: Color.premium?, isPerm: Bool? = false, link: String? = nil, with handler: @escaping OwnerOperationHandler) -> Void {
 		var completionHandler: OwnerOperationHandler? = handler
 		var status: ResultStatus = .unknownError
@@ -463,35 +421,6 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 		}// end try - catch JSONSerialization
 	}// end postOwnerComment
 
-	public func clearOwnerComment () -> ResultStatus {
-		guard let url = URL(string: apiBaseString + operatorComment) else { return .apiAddressError }
-		var status: ResultStatus = .unknownError
-		let request: URLRequest = makeRequest(url: url, method: .delete)
-		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
-		let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, resp: URLResponse?, err: Error?) in
-			defer { semaphore.signal() } // must increment semaphore when exit from closure
-			guard let weakSelf = self, let data: Data = dat else {
-				status = .receivedDataNilError
-				return
-			}// end guard
-			do {
-				let decoder: JSONDecoder = JSONDecoder()
-				let meta: MetaResult = try decoder.decode(MetaResult.self, from: data)
-				status = weakSelf.checkMetaInformation(meta.meta)
-			} catch let error {
-				status = .decodeResultError
-				print(error.localizedDescription)
-			}// end do try - catch decode recieved data
-		}// end closure of request completion handler
-		task.resume()
-		let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
-		if timeout == .timedOut {
-			status = .timeout
-		}// end if timeout
-
-		return status
-	}// end clearOwnerComment
-
 	public func clearOwnerComment (with handler: @escaping OwnerOperationHandler) -> Void {
 		var completionHandler: OwnerOperationHandler? = handler
 		var status: ResultStatus = .apiAddressError
@@ -516,7 +445,7 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 	}// end clearOwnerComment
 
 		// MARK: questionary
-	public func questionary (title question: String, choices items: Array<String>) -> ResultStatus {
+	public func questionary (title question: String, choices items: Array<String>) async -> ResultStatus {
 		let capableItemSount: Set<Int> = Set(2...9)
 		let itemCount: Int = items.count
 		if !capableItemSount.contains(itemCount) { return .argumentError }
@@ -524,32 +453,20 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 
 		var status: ResultStatus = .unknownError
 		var request: URLRequest = makeRequest(url: url, method: .post, contentsType: ContentTypeJSON)
-		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
 		let enquete: Enquete = Enquete(question: question, items: items)
 		do {
 			let encoder: JSONEncoder = JSONEncoder()
 			let data: Data = try encoder.encode(enquete)
 			request.httpBody = data
-			let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, req: URLResponse?, err: Error?) in
-				defer { semaphore.signal() } // must increment semaphore when exit from closure
-				guard let weakSelf = self, let data: Data = dat else {
-					status = .receivedDataNilError
-					return
-				}// end guard
-				do {
-					let decoder: JSONDecoder = JSONDecoder()
-					let result: EnqueteResult = try decoder.decode(EnqueteResult.self, from: data)
-					status = weakSelf.checkMetaInformation(result.meta)
-				} catch let error {
-					status = .decodeResultError
-					print(error.localizedDescription)
-				}// end do try - catch decode result data
-			}// end closure
-			task.resume()
-			let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
-			if timeout == .timedOut {
-				status = .timeout
-			}// end if timeout
+			let result: (data: Data, resp: URLResponse) = try await session.data(for: request)
+			do {
+				let decoder: JSONDecoder = JSONDecoder()
+				let result: EnqueteResult = try decoder.decode(EnqueteResult.self, from: result.data)
+				status = checkMetaInformation(result.meta)
+			} catch let error {
+				status = .decodeResultError
+				print(error.localizedDescription)
+			}// end do try - catch decode result data
 		} catch let error {
 			status = .encodeRequestError
 			print(error.localizedDescription)
@@ -558,180 +475,44 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 		return status
 	}// end questionary
 
-	public func questionary (title question: String, choices items: Array<String>, with handler: @escaping OwnerOperationHandler) -> Void {
-		var completionHandler: OwnerOperationHandler? = handler
-		var status: ResultStatus = .argumentError
-		let capableItemSount: Set<Int> = Set(2...9)
-		defer { if let completionHandler: OwnerOperationHandler = completionHandler { completionHandler(status) } }
-		guard capableItemSount.contains(items.count) else { return }
-		status = .apiAddressError
-		guard let url: URL = URL(string: UserNamaAPIBase + program + Questionary) else { return }
-		var request: URLRequest = makeRequest(url: url, method: .post)
-		let enquete: Enquete = Enquete(question: question, items: items)
-		do {
-			let encoder: JSONEncoder = JSONEncoder()
-			let data: Data = try encoder.encode(enquete)
-			request.httpBody = data
-			let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, req: URLResponse?, err: Error?) in
-				defer { handler(status) } // must increment semaphore when exit from closure
-				status = .receivedDataNilError
-				guard let data: Data = dat else { return }// end guard
-				do {
-					let decoder: JSONDecoder = JSONDecoder()
-					let result: EnqueteResult = try decoder.decode(EnqueteResult.self, from: data)
-					status = self.checkMetaInformation(result.meta)
-				} catch let error {
-					status = .decodeResultError
-					print(error.localizedDescription)
-				}// end do try - catch decode result data
-			}// end closure
-			completionHandler = nil
-			task.resume()
-		} catch let error {
-			status = .encodeRequestError
-			print(error.localizedDescription)
-		}// end do try - catch encode Enquete struct to JSON string data
-	}// end questionary
-
-	public func displayQuestionaryResult () -> (answers: Array<EnqueteItem>?, status: ResultStatus) {
+	public func displayQuestionaryResult () async -> (answers: Array<EnqueteItem>?, status: ResultStatus) {
 		guard let url: URL = URL(string: UserNamaAPIBase + program + QuestionaryResult) else { return (nil, .apiAddressError) }
 
 		var status: ResultStatus = .unknownError
 		let request: URLRequest = makeRequest(url: url, method: .post)
-		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
 		let decoder: JSONDecoder = JSONDecoder()
 		var answers: Array<EnqueteItem>?
-		let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, req: URLResponse?, err: Error?) in
-			defer { semaphore.signal() } // must increment semaphore when exit from closure
-			guard let weakSelf = self, let data: Data = dat else {
-				return
-			}// end guard
-			do {
-				let result: EnqueteResult = try decoder.decode(EnqueteResult.self, from: data)
-				status = weakSelf.checkMetaInformation(result.meta)
-				answers = result.data?.items
-			} catch let error {
-				print(error.localizedDescription)
-			}// end do try - catch decode result
-		}// end closure
-		task.resume()
-		let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
-		if timeout == .timedOut {
-			status = .timeout
-		}// end if timeout
+		do {
+			let res: (data: Data, resp: URLResponse) = try await session.data(for: request)
+			let result: EnqueteResult = try decoder.decode(EnqueteResult.self, from: res.data)
+			status = checkMetaInformation(result.meta)
+			answers = result.data?.items
+		} catch let error {
+			print(error.localizedDescription)
+		}// end do try - catch decode result
 
 		return (answers, status)
 	}// end displayQuestionaryResult
 
-	public func displayQuestionaryResult (with handler: @escaping QuestionaryResultHandler) -> Void {
-		var completionHandler: QuestionaryResultHandler? = handler
-		var status: ResultStatus = .apiAddressError
-		var answers: Array<EnqueteItem>? = nil
-		defer { if let completionHandler: QuestionaryResultHandler = completionHandler { completionHandler(status, answers) } }
-		guard let url: URL = URL(string: UserNamaAPIBase + program + QuestionaryResult) else { return }
-		let decoder: JSONDecoder = JSONDecoder()
-		let request: URLRequest = makeRequest(url: url, method: .post)
-		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, req: URLResponse?, err: Error?) in
-			defer { handler(status, answers) } // must increment semaphore when exit from closure
-			guard let data: Data = dat else { return }// end guard
-			do {
-				let result: EnqueteResult = try decoder.decode(EnqueteResult.self, from: data)
-				status = self.checkMetaInformation(result.meta)
-				answers = result.data?.items
-			} catch let error {
-				print(error.localizedDescription)
-			}// end do try - catch decode result
-		}// end closure
-		completionHandler = nil
-		task.resume()
-	}// end displayQuestionaryResult
-
-	public func endQuestionary () -> ResultStatus {
+	public func endQuestionary () async -> ResultStatus {
 		guard let url: URL = URL(string: UserNamaAPIBase + program + Questionary) else { return .apiAddressError }
 
 		let request: URLRequest = makeRequest(url: url, method: .delete)
 		var status: ResultStatus = .unknownError
-		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
 		let decoder: JSONDecoder = JSONDecoder()
-		let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, req: URLResponse?, err: Error?) in
-			defer { semaphore.signal() } // must increment semaphore when exit from closure
-			guard let weakSelf = self, let data: Data = dat else {
-				status = .receivedDataNilError
-				return
-			}// end guard
-			do {
-				let result: EnqueteResult = try decoder.decode(EnqueteResult.self, from: data)
-				status = weakSelf.checkMetaInformation(result.meta)
-			} catch let error {
-				status = .decodeResultError
-				print(error.localizedDescription)
-			}// end do try - catch decode result
-		}// end closure
-		task.resume()
-		let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
-		if timeout == .timedOut {
-			status = .timeout
-		}// end if timeout
+		do {
+			let res: (data: Data, resp: URLResponse) = try await session.data(for: request)
+			let result: EnqueteResult = try decoder.decode(EnqueteResult.self, from: res.data)
+			status = checkMetaInformation(result.meta)
+		} catch let error {
+			status = .decodeResultError
+			print(error.localizedDescription)
+		}// end do try - catch decode result
 
 		return status
 	}// end endQuestionary
 
-	public func endQuestionary (with handler: @escaping OwnerOperationHandler) -> Void {
-		var completionHandler: OwnerOperationHandler? = handler
-		var status: ResultStatus = .apiAddressError
-		defer { if let completionHandler: OwnerOperationHandler = completionHandler { completionHandler(status) } }
-		guard let url: URL = URL(string: UserNamaAPIBase + program + Questionary) else { return }
-		let decoder: JSONDecoder = JSONDecoder()
-		let request: URLRequest = makeRequest(url: url, method: .delete)
-		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, req: URLResponse?, err: Error?) in
-			defer { handler(status) } // must increment semaphore when exit from closure
-			status = .receivedDataNilError
-			guard let data: Data = dat else { return }// end guard
-			do {
-				let result: EnqueteResult = try decoder.decode(EnqueteResult.self, from: data)
-				status = self.checkMetaInformation(result.meta)
-			} catch let error {
-				status = .decodeResultError
-				print(error.localizedDescription)
-			}// end do try - catch decode result
-		}// end closure
-		completionHandler = nil
-		task.resume()
-	}// end endQuestionary
-
 		// MARK: NG Word Handling
-	public func addNGWord (_ word: String, type: NGType) -> Bool {
-		guard let baseURL = URL(string: UserNamaAPITool) else { return false }
-		let url = baseURL.appendingPathComponent(program, isDirectory: false).appendingPathComponent(NGWordSetting)
-		let encoder: JSONEncoder = JSONEncoder()
-		let wordToAppend: NGRequest = NGRequest(type: type, body: word)
-		let wordList: Array<NGRequest> = Array(arrayLiteral: wordToAppend)
-		guard let wordToAppendJson: Data = try? encoder.encode(wordList) else { return false }
-		var success: Bool = false
-
-		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
-		var request: URLRequest = makeRequest(url: url, method: .post)
-		request.addValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
-		request.httpBody = wordToAppendJson
-		let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, resp: URLResponse?, err: Error?) in
-			defer { semaphore.signal() } // must increment semaphore when exit from closure
-			guard let weakSelf = self, let data: Data = dat else { return }
-			do {
-				let decoder: JSONDecoder = JSONDecoder()
-				let result: MetaResult = try decoder.decode(MetaResult.self, from: data)
-				if .success == weakSelf.checkMetaInformation(result.meta) {
-					success = true
-				}// end if check meta information
-			} catch let error {
-				print(error.localizedDescription)
-			}// end do try - catch decode result JSON structure
-		}// end closure for request set NG Word owner command
-		task.resume()
-		_ = semaphore.wait(timeout: DispatchTime.now() + Timeout)	// no need action from timeout or success
-
-		return success
-	}// end addNGWord
-
 	public func addNGWord (_ word: String, type: NGType, with handler: @escaping OwnerOperationBoolHandler) -> Void {
 		var completionHandler: OwnerOperationBoolHandler? = handler
 		var success: Bool = false
@@ -761,41 +542,6 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 		completionHandler = nil
 		task.resume()
 	}// end addNGWord
-
-	public func addNGWords (words: Array<(word: String, type: NGType)>) -> Bool {
-		guard let baseURL = URL(string: UserNamaAPITool) else { return false }
-		let url = baseURL.appendingPathComponent(program, isDirectory: false).appendingPathComponent(NGWordSetting)
-		let encoder: JSONEncoder = JSONEncoder()
-		var wordsList: Array<NGRequest> = Array()
-		for word: (word: String, type: NGType) in words {
-			let enry: NGRequest = NGRequest(type: word.type, body: word.word)
-			wordsList.append(enry)
-		}// end foreach make Array of NGRequest
-		guard let wordsToAppenJson: Data = try? encoder.encode(wordsList) else { return false }
-		var success: Bool = false
-
-		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
-		var request: URLRequest = makeRequest(url: url, method: .post)
-		request.addValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
-		request.httpBody = wordsToAppenJson
-		let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, req: URLResponse?, err: Error?) in
-			defer { semaphore.signal() } // must increment semaphore when exit from closure
-			guard let weakSelf = self, let data: Data = dat else { return }
-			do {
-				let decoder: JSONDecoder = JSONDecoder()
-				let result: MetaResult = try decoder.decode(MetaResult.self, from: data)
-				if .success == weakSelf.checkMetaInformation(result.meta) {
-					success = true
-				}// end if check meta information result
-			} catch let error {
-				print(error.localizedDescription)
-			}// end do try - catch decode result JSON strult
-		}// end closure for request set NG Words owner command
-		task.resume()
-		_ = semaphore.wait(timeout: DispatchTime.now() + Timeout)
-
-		return success
-	}// end addNGWords
 
 	public func addNGWords (words: Array<(word: String, type: NGType)>, with handler: @escaping OwnerOperationBoolHandler) -> Void {
 		var completionHandler: OwnerOperationBoolHandler? = handler
@@ -830,33 +576,6 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 		task.resume()
 	}// end addNGWords
 
-	public func allNGWords () -> Array<NGData> {
-		guard let baseURL = URL(string: UserNamaAPITool) else { return Array() }
-		let url = baseURL.appendingPathComponent(program, isDirectory: false).appendingPathComponent(NGWordSetting)
-		var wordsList: Array<NGData> = Array()
-
-		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
-		let request: URLRequest = makeRequest(url: url, method: .get)
-		let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, resp: URLResponse?, err: Error?) in
-			defer { semaphore.signal() } // must increment semaphore when exit from closure
-			guard let weakSelf = self, let data: Data = dat else { return }
-			do {
-				let decoder: JSONDecoder = JSONDecoder()
-				let list: NGWordList = try decoder.decode(NGWordList.self, from: data)
-				guard .success == weakSelf.checkMetaInformation(list.meta) else { return }
-				for foundWord: NGData in list.data {
-					wordsList.append(foundWord)
-				}// end foreach found word
-			} catch let error {
-				print(error.localizedDescription)
-			}// end do try - catch
-		}// end closure
-		task.resume()
-		_ = semaphore.wait(timeout: DispatchTime.now() + Timeout)
-
-		return wordsList
-	}// end allNGWords
-
 	public func allNGWords (with handler: @escaping NGWordsHandler) -> Void {
 		var completionHandler: NGWordsHandler? = handler
 		var wordsList: Array<NGData> = Array()
@@ -881,37 +600,6 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 		completionHandler = nil
 		task.resume()
 	}// end allNGWords
-
-	public func removeNGWords (identifiers: Array<Int>) -> Bool {
-		guard identifiers.count > 0, let baseURL = URL(string: UserNamaAPITool) else { return false }
-		let url = baseURL.appendingPathComponent(program, isDirectory: false).appendingPathComponent(NGWordSetting)
-		let encoder: JSONEncoder = JSONEncoder()
-		let removeNGWords: NGWordIdentifiers = NGWordIdentifiers(id: identifiers)
-		guard let identifiersForRemove: Data = try? encoder.encode(removeNGWords) else { return false }
-		var success = false
-
-		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
-		var request: URLRequest = makeRequest(url: url, method: .delete)
-		request.addValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
-		request.httpBody = identifiersForRemove
-		let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, resp: URLResponse?, err: Error?) in
-			defer { semaphore.signal() } // must increment semaphore when exit from closure
-			guard let weakSelf = self, let data: Data = dat else { return }
-			do {
-				let decoder = JSONDecoder()
-				let result: MetaResult = try decoder.decode(MetaResult.self, from: data)
-				if .success == weakSelf.checkMetaInformation(result.meta) {
-					success = true
-				}// end if result status is success
-			} catch let error {
-				print(error.localizedDescription)
-			}// end do try - catch decode result JSON structure
-		}// end closure for request remove NG words by array of identifiers
-		task.resume()
-		_ = semaphore.wait(timeout: DispatchTime.now() + Timeout)
-
-		return success
-	}// end removeNGWords
 
 	public func removeNGWords (identifiers: Array<Int>, with handler: @escaping OwnerOperationBoolHandler) -> Void {
 		var completionHandler: OwnerOperationBoolHandler? = handler
@@ -943,41 +631,28 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 	}// end removeNGWords
 
 		// MARK: quote
-	public func checkQuotable (_ video: String) -> (quotable: Bool, status: ResultStatus) {
+	public func checkQuotable (_ video: String) async -> (quotable: Bool, status: ResultStatus) {
 		guard let url: URL = URL(string: QuptableAPIBase + video) else { return (false, .apiAddressError) }
 
 		let request: URLRequest = makeRequest(url: url, method: .get)
 		var status: ResultStatus = .unknownError
 		var quotable: Bool = false
-		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
-		let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, resp: URLResponse?, err: Error?) in
-			defer { semaphore.signal() } // must increment semaphore when exit from closure
-			guard let weakSelf = self, let data: Data = dat else {
-				status = .receivedDataNilError
-				return
-			}// end guard check data is not nil
-			do {
-				let decoder: JSONDecoder = JSONDecoder()
-				let result: QuotableResult = try decoder.decode(QuotableResult.self, from: data)
-				status = weakSelf.checkMetaInformation(result.meta)
-				if let info: MovieInfo = result.data {
-					quotable = info.quotable
-				}// end optional binding check for have data section from decoded json structure
-			} catch let error {
-				print(error.localizedDescription)
-			}// end do try - catch decode received json
-		}// end closure for url request result data handler
-		task.resume()
-		let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
-		if timeout == .timedOut {
-			quotable = false
-			status = .timeout
-		}// end if timeout
+		do {
+			let res: (data: Data, resp: URLResponse) = try await session.data(for: request)
+			let decoder: JSONDecoder = JSONDecoder()
+			let result: QuotableResult = try decoder.decode(QuotableResult.self, from: res.data)
+			status = checkMetaInformation(result.meta)
+			if let info: MovieInfo = result.data {
+				quotable = info.quotable
+			}// end optional binding check for have data section from decoded json structure
+		} catch let error {
+			print(error.localizedDescription)
+		}// end do try - catch decode received json
 
 		return (quotable, status)
 	}// end checkQuotable
 
-	public func startQuotation (quote quoteContent: String, mode mixingMode: MixingMode, mainVolume main: Float, quoteVolume quote: Float) -> ResultStatus {
+	public func startQuotation (quote quoteContent: String, mode mixingMode: MixingMode, mainVolume main: Float, quoteVolume quote: Float) async -> ResultStatus {
 		var type: ContentType? = nil
 		let quoteContentPrefix: String = String(quoteContent.prefix(2))
 		if videoPrefixSet.contains(quoteContentPrefix) { type = .video }
@@ -998,27 +673,15 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 			quotationJSON = try encoder.encode(quotation)
 			var request: URLRequest = makeRequest(url: url, method: .post, contentsType: ContentTypeJSON)
 			request.httpBody = quotationJSON
-			let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
-			let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, req:  URLResponse?, err:  Error?) in
-				defer { semaphore.signal() } // must increment semaphore when exit from closure
-				guard let weakSelf = self, let data: Data = dat else {
-					status = .receivedDataNilError
-					return
-				}// end guard is not satisfied
-				do {
-					let decoder: JSONDecoder = JSONDecoder()
-					let result: MetaResult = try decoder.decode(MetaResult.self, from: data)
-					status = weakSelf.checkMetaInformation(result.meta)
-				} catch let error {
-					status = .decodeResultError
-					print(error.localizedDescription)
-				}// end do try - catch decode result data to meta information
-			}// end closure completion handler
-			task.resume()
-			let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
-			if timeout == .timedOut {
-				status = .timeout
-			}// end if timeout
+			let res: (data: Data, resp: URLResponse) = try await session.data(for: request)
+			do {
+				let decoder: JSONDecoder = JSONDecoder()
+				let result: MetaResult = try decoder.decode(MetaResult.self, from: res.data)
+				status = checkMetaInformation(result.meta)
+			} catch let error {
+				status = .decodeResultError
+				print(error.localizedDescription)
+			}// end do try - catch decode result data to meta information
 		} catch let error {
 			print(error.localizedDescription)
 			return .encodeRequestError
@@ -1027,7 +690,7 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 		return status
 	}// end startQuotation
 
-	public func layoutQuotation (mode mixingMode: MixingMode, mainVolume main: Float, quoteVolume quote: Float, repeat enableRepeat: Bool) -> ResultStatus {
+	public func layoutQuotation (mode mixingMode: MixingMode, mainVolume main: Float, quoteVolume quote: Float, repeat enableRepeat: Bool) async -> ResultStatus {
 		guard let url: URL = URL(string: QuoteAPIBase + program + QuoteLayout) else { return .apiAddressError }
 
 		var mainSource: Source
@@ -1042,26 +705,15 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 			layoutJSON = try encoder.encode(newLayout)
 			var request: URLRequest = makeRequest(url: url, method: .patch, contentsType: ContentTypeJSON)
 			request.httpBody = layoutJSON
-			let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
-			let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, req:  URLResponse?, err:  Error?) in
-				defer { semaphore.signal() } // must increment semaphore when exit from closure
-				guard let weakSelf = self, let data: Data = dat else {
-					return
-				}// end guard is not satisfied
+			let res: (data: Data, resp: URLResponse) = try await session.data(for: request)
 				do {
 					let decoder: JSONDecoder = JSONDecoder()
-					let result: MetaResult = try decoder.decode(MetaResult.self, from: data)
-					status = weakSelf.checkMetaInformation(result.meta)
+					let result: MetaResult = try decoder.decode(MetaResult.self, from: res.data)
+					status = checkMetaInformation(result.meta)
 				} catch let error {
 					status = .decodeResultError
 					print(error.localizedDescription)
 				}// end do try - catch decode reesult data to meta information
-			}// end closure completion handler
-			task.resume()
-			let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
-			if timeout == .timedOut {
-				status = .timeout
-			}// end if timeout
 		} catch let error {
 			status = .encodeRequestError
 			print(error.localizedDescription)
@@ -1070,72 +722,25 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 		return status
 	}// end layoutQuotation
 
-	public func stopQuotation () -> ResultStatus {
+	public func stopQuotation () async -> ResultStatus {
 		guard let url: URL = URL(string: QuoteAPIBase + program + QuoteSuffix) else { return .apiAddressError }
 
 		let request: URLRequest = makeRequest(url: url, method: .delete)
 		var status: ResultStatus = .unknownError
-		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
-		let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, req:  URLResponse?, err:  Error?) in
-			defer { semaphore.signal() } // must increment semaphore when exit from closure
-			guard let weakSelf = self, let data: Data = dat else {
-				status = .receivedDataNilError
-				return
-			}// end guard is not satisfied
 			do {
+				let result: (data: Data, resp: URLResponse) = try await session.data(for: request)
 				let decoder: JSONDecoder = JSONDecoder()
-				let meta: MetaResult = try decoder.decode(MetaResult.self, from: data)
-				status = weakSelf.checkMetaInformation(meta.meta)
+				let meta: MetaResult = try decoder.decode(MetaResult.self, from: result.data)
+				status = checkMetaInformation(meta.meta)
 			} catch let error {
 				status = .decodeResultError
 				print(error.localizedDescription)
 			}// end do try - catch decode reesult data to meta information
-		}// end closure completion handler
-		task.resume()
-		let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
-		if timeout == .timedOut {
-			status = .timeout
-		}// end if timeout
 
 		return status
 	}// end stopQuotation
 
 		// MARK: end time extension
-	public func extendableTimes () -> (times: Array<String>, status: ResultStatus) {
-		guard let url: URL = URL(string: apiBaseString + programExtension) else { return (Array(), .apiAddressError) }
-		var status: ResultStatus = .unknownError
-		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
-		var extendableMinutes: Array<String> = Array()
-		let request: URLRequest = makeRequest(url: url, method: .get)
-		let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, rest: URLResponse?, err: Error?) in
-			defer { semaphore.signal() } // must increment semaphore when exit from closure
-			guard let weakSelf = self, let data: Data = dat else {
-				status = .receivedDataNilError
-				return
-			}// end guard
-			do {
-				let decoder: JSONDecoder = JSONDecoder()
-				let extendableList: TimeExtension = try decoder.decode(TimeExtension.self, from: data)
-				status = weakSelf.checkMetaInformation(extendableList.meta)
-				if let methods: Array<ExtendMethod> = extendableList.data?.methods {
-					for method: ExtendMethod in methods {
-						extendableMinutes.append(String(method.minutes))
-					}// end foreach methods
-				}// end optional binding for
-			} catch let error {
-				status = .decodeResultError
-				print(error.localizedDescription)
-			}// end do try - catch decode recived json to struct
-		}// end closure of request completion handler
-		task.resume()
-		let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
-		if timeout == .timedOut {
-			status = .timeout
-		}// end if timeout
-
-		return (extendableMinutes, status)
-	}// end extendableTimes
-
 	public func extendableTimes (with handler: @escaping ExtendalbeTimesHandler) -> Void {
 		var completionHandler: ExtendalbeTimesHandler? = handler
 		var extendableTimes: Array<String> = Array()
@@ -1164,48 +769,6 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 		completionHandler = nil
 		task.resume()
 	}// end extendableTimes
-
-	public func extendTime (minutes min: String) -> (newEndTime: Date?, status: ResultStatus) {
-		guard let url: URL = URL(string: apiBaseString + programExtension), let minutesToExtend: Int = Int(min) else { return (nil, .apiAddressError) }
-		let extend: ExtendTime = ExtendTime(minutes: minutesToExtend)
-		var newEndTime: Date? = nil
-		var status: ResultStatus = .unknownError
-		do {
-			let encoder: JSONEncoder = JSONEncoder()
-			let extendTimeData: Data = try encoder.encode(extend)
-			var request: URLRequest = makeRequest(url: url, method: .post, contentsType: ContentTypeJSON)
-			request.httpBody = extendTimeData
-			let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
-			let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, resp: URLResponse?, err: Error?) in
-				defer { semaphore.signal() } // must increment semaphore when exit from closure
-				guard let weakSelf = self, let data: Data = dat else {
-					status = .receivedDataNilError
-					return
-				}// end guard
-				do {
-					let decoder: JSONDecoder = JSONDecoder()
-					let extendResult: TimeExtendResult = try decoder.decode(TimeExtendResult.self, from: data)
-					status = weakSelf.checkMetaInformation(extendResult.meta)
-					if let newEnd: TimeInterval = extendResult.data?.end_time {
-						newEndTime = Date(timeIntervalSince1970: newEnd)
-					}// end optional binding check for
-				} catch let error {
-					print(error)
-					status = .decodeResultError
-				}// end do try - catch decode json data to result
-			}// end closure of request completion handler
-			task.resume()
-			let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
-			if timeout == .timedOut {
-				status = .timeout
-			}// end if timeout
-		} catch let error {
-			print(error)
-			return (nil, .encodeRequestError)
-		}// end do try - catch json encode
-
-		return (newEndTime, status)
-	}// end extendTime
 
 	public func extendTime (minutes min: String, with handler: @escaping NewEndTimeHandler) -> Void {
 		var completionHandler: NewEndTimeHandler? = handler
