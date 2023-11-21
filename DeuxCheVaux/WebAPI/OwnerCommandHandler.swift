@@ -1243,48 +1243,35 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 		}// end do try - catch json encode
 	}// end extendTime
 
-	public func updateProgramState (newState state: NextProgramStatus) -> (startTime: Date, endTime: Date, status: ResultStatus) {
+	public func updateProgramState (newState state: NextProgramStatus) async -> (status: ResultStatus, startTime: Date, endTime: Date) {
 		let nextState = ProgramState(state: state)
 		var startTime = Date()
 		var endTime = startTime
-		guard let url: URL = URL(string: apiBaseString + StartStopStream) else { return (startTime, endTime, .apiAddressError) }
+		guard let url: URL = URL(string: apiBaseString + StartStopStream) else { return (.apiAddressError, startTime, endTime) }
 		var status: ResultStatus = .unknownError
 		do {
 			let encoder: JSONEncoder = JSONEncoder()
 			let extendTimeData: Data = try encoder.encode(nextState)
 			var request: URLRequest = makeRequest(url: url, method: .put, contentsType: ContentTypeJSON)
 			request.httpBody = extendTimeData
-			let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
-			let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, resp: URLResponse?, err: Error?) in
-				defer { semaphore.signal() } // must increment semaphore when exit from closure
-				guard let weakSelf = self, let data: Data = dat else {
-					status = .receivedDataNilError
-					return
-				}// end guard
-				do {
-					let decoder: JSONDecoder = JSONDecoder()
-					let updateStatedResult: UpdateStateResult = try decoder.decode(UpdateStateResult.self, from: data)
-					status = weakSelf.checkMetaInformation(updateStatedResult.meta)
-					if let newStart: TimeInterval = updateStatedResult.data?.start_time, let newEnd: TimeInterval = updateStatedResult.data?.end_time {
-						startTime = Date(timeIntervalSince1970: newStart)
-						endTime = Date(timeIntervalSince1970: newEnd)
-					}// end optional binding
-				} catch let error {
-					print(error)
-					status = .decodeResultError
-				}// end do try - catch decode json data to result
-			}// end closure of request completion handler
-			task.resume()
-			let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
-			if timeout == .timedOut {
-				status = .timeout
-			}// end if timeout
-		} catch let error {
-			print(error)
+			let result: (data: Data, resp: URLResponse) = try await session.data(for: request)
+			let decoder: JSONDecoder = JSONDecoder()
+			let updateStatedResult: UpdateStateResult = try decoder.decode(UpdateStateResult.self, from: result.data)
+			status = checkMetaInformation(updateStatedResult.meta)
+			if let newStart: TimeInterval = updateStatedResult.data?.start_time, let newEnd: TimeInterval = updateStatedResult.data?.end_time {
+				startTime = Date(timeIntervalSince1970: newStart)
+				endTime = Date(timeIntervalSince1970: newEnd)
+			}// end optional binding
+		} catch is EncodingError {
 			status = .encodeRequestError
+		} catch is DecodingError {
+			status = .decodeResultError
+		} catch let error {
+			print(error.localizedDescription)
+			status = .receivedDataNilError
 		}// end do try - catch json encode
 
-		return (startTime, endTime, status)
+		return (status, startTime, endTime)
 	}// eend updateProgramState
 
 	public func updateProgramState (newState state: NextProgramStatus, with handler: @escaping UpdateProgramStateHandler) -> Void {
