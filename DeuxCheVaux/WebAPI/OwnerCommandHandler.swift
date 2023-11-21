@@ -830,33 +830,6 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 		task.resume()
 	}// end addNGWords
 
-	public func allNGWords () -> Array<NGData> {
-		guard let baseURL = URL(string: UserNamaAPITool) else { return Array() }
-		let url = baseURL.appendingPathComponent(program, isDirectory: false).appendingPathComponent(NGWordSetting)
-		var wordsList: Array<NGData> = Array()
-
-		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
-		let request: URLRequest = makeRequest(url: url, method: .get)
-		let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, resp: URLResponse?, err: Error?) in
-			defer { semaphore.signal() } // must increment semaphore when exit from closure
-			guard let weakSelf = self, let data: Data = dat else { return }
-			do {
-				let decoder: JSONDecoder = JSONDecoder()
-				let list: NGWordList = try decoder.decode(NGWordList.self, from: data)
-				guard .success == weakSelf.checkMetaInformation(list.meta) else { return }
-				for foundWord: NGData in list.data {
-					wordsList.append(foundWord)
-				}// end foreach found word
-			} catch let error {
-				print(error.localizedDescription)
-			}// end do try - catch
-		}// end closure
-		task.resume()
-		_ = semaphore.wait(timeout: DispatchTime.now() + Timeout)
-
-		return wordsList
-	}// end allNGWords
-
 	public func allNGWords (with handler: @escaping NGWordsHandler) -> Void {
 		var completionHandler: NGWordsHandler? = handler
 		var wordsList: Array<NGData> = Array()
