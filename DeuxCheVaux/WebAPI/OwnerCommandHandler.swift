@@ -690,7 +690,7 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 		return status
 	}// end startQuotation
 
-	public func layoutQuotation (mode mixingMode: MixingMode, mainVolume main: Float, quoteVolume quote: Float, repeat enableRepeat: Bool) -> ResultStatus {
+	public func layoutQuotation (mode mixingMode: MixingMode, mainVolume main: Float, quoteVolume quote: Float, repeat enableRepeat: Bool) async -> ResultStatus {
 		guard let url: URL = URL(string: QuoteAPIBase + program + QuoteLayout) else { return .apiAddressError }
 
 		var mainSource: Source
@@ -705,26 +705,15 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 			layoutJSON = try encoder.encode(newLayout)
 			var request: URLRequest = makeRequest(url: url, method: .patch, contentsType: ContentTypeJSON)
 			request.httpBody = layoutJSON
-			let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
-			let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, req:  URLResponse?, err:  Error?) in
-				defer { semaphore.signal() } // must increment semaphore when exit from closure
-				guard let weakSelf = self, let data: Data = dat else {
-					return
-				}// end guard is not satisfied
+			let res: (data: Data, resp: URLResponse) = try await session.data(for: request)
 				do {
 					let decoder: JSONDecoder = JSONDecoder()
-					let result: MetaResult = try decoder.decode(MetaResult.self, from: data)
-					status = weakSelf.checkMetaInformation(result.meta)
+					let result: MetaResult = try decoder.decode(MetaResult.self, from: res.data)
+					status = checkMetaInformation(result.meta)
 				} catch let error {
 					status = .decodeResultError
 					print(error.localizedDescription)
 				}// end do try - catch decode reesult data to meta information
-			}// end closure completion handler
-			task.resume()
-			let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
-			if timeout == .timedOut {
-				status = .timeout
-			}// end if timeout
 		} catch let error {
 			status = .encodeRequestError
 			print(error.localizedDescription)
