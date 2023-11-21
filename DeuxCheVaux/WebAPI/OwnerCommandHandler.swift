@@ -494,32 +494,20 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 		return (answers, status)
 	}// end displayQuestionaryResult
 
-	public func endQuestionary () -> ResultStatus {
+	public func endQuestionary () async -> ResultStatus {
 		guard let url: URL = URL(string: UserNamaAPIBase + program + Questionary) else { return .apiAddressError }
 
 		let request: URLRequest = makeRequest(url: url, method: .delete)
 		var status: ResultStatus = .unknownError
-		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
 		let decoder: JSONDecoder = JSONDecoder()
-		let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, req: URLResponse?, err: Error?) in
-			defer { semaphore.signal() } // must increment semaphore when exit from closure
-			guard let weakSelf = self, let data: Data = dat else {
-				status = .receivedDataNilError
-				return
-			}// end guard
-			do {
-				let result: EnqueteResult = try decoder.decode(EnqueteResult.self, from: data)
-				status = weakSelf.checkMetaInformation(result.meta)
-			} catch let error {
-				status = .decodeResultError
-				print(error.localizedDescription)
-			}// end do try - catch decode result
-		}// end closure
-		task.resume()
-		let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
-		if timeout == .timedOut {
-			status = .timeout
-		}// end if timeout
+		do {
+			let res: (data: Data, resp: URLResponse) = try await session.data(for: request)
+			let result: EnqueteResult = try decoder.decode(EnqueteResult.self, from: res.data)
+			status = checkMetaInformation(result.meta)
+		} catch let error {
+			status = .decodeResultError
+			print(error.localizedDescription)
+		}// end do try - catch decode result
 
 		return status
 	}// end endQuestionary
