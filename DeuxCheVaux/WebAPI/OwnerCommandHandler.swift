@@ -762,41 +762,6 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 		task.resume()
 	}// end addNGWord
 
-	public func addNGWords (words: Array<(word: String, type: NGType)>) -> Bool {
-		guard let baseURL = URL(string: UserNamaAPITool) else { return false }
-		let url = baseURL.appendingPathComponent(program, isDirectory: false).appendingPathComponent(NGWordSetting)
-		let encoder: JSONEncoder = JSONEncoder()
-		var wordsList: Array<NGRequest> = Array()
-		for word: (word: String, type: NGType) in words {
-			let enry: NGRequest = NGRequest(type: word.type, body: word.word)
-			wordsList.append(enry)
-		}// end foreach make Array of NGRequest
-		guard let wordsToAppenJson: Data = try? encoder.encode(wordsList) else { return false }
-		var success: Bool = false
-
-		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
-		var request: URLRequest = makeRequest(url: url, method: .post)
-		request.addValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
-		request.httpBody = wordsToAppenJson
-		let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, req: URLResponse?, err: Error?) in
-			defer { semaphore.signal() } // must increment semaphore when exit from closure
-			guard let weakSelf = self, let data: Data = dat else { return }
-			do {
-				let decoder: JSONDecoder = JSONDecoder()
-				let result: MetaResult = try decoder.decode(MetaResult.self, from: data)
-				if .success == weakSelf.checkMetaInformation(result.meta) {
-					success = true
-				}// end if check meta information result
-			} catch let error {
-				print(error.localizedDescription)
-			}// end do try - catch decode result JSON strult
-		}// end closure for request set NG Words owner command
-		task.resume()
-		_ = semaphore.wait(timeout: DispatchTime.now() + Timeout)
-
-		return success
-	}// end addNGWords
-
 	public func addNGWords (words: Array<(word: String, type: NGType)>, with handler: @escaping OwnerOperationBoolHandler) -> Void {
 		var completionHandler: OwnerOperationBoolHandler? = handler
 		var success: Bool = false
