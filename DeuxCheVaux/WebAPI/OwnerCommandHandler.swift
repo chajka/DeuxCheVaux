@@ -421,35 +421,6 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 		}// end try - catch JSONSerialization
 	}// end postOwnerComment
 
-	public func clearOwnerComment () -> ResultStatus {
-		guard let url = URL(string: apiBaseString + operatorComment) else { return .apiAddressError }
-		var status: ResultStatus = .unknownError
-		let request: URLRequest = makeRequest(url: url, method: .delete)
-		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
-		let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, resp: URLResponse?, err: Error?) in
-			defer { semaphore.signal() } // must increment semaphore when exit from closure
-			guard let weakSelf = self, let data: Data = dat else {
-				status = .receivedDataNilError
-				return
-			}// end guard
-			do {
-				let decoder: JSONDecoder = JSONDecoder()
-				let meta: MetaResult = try decoder.decode(MetaResult.self, from: data)
-				status = weakSelf.checkMetaInformation(meta.meta)
-			} catch let error {
-				status = .decodeResultError
-				print(error.localizedDescription)
-			}// end do try - catch decode recieved data
-		}// end closure of request completion handler
-		task.resume()
-		let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
-		if timeout == .timedOut {
-			status = .timeout
-		}// end if timeout
-
-		return status
-	}// end clearOwnerComment
-
 	public func clearOwnerComment (with handler: @escaping OwnerOperationHandler) -> Void {
 		var completionHandler: OwnerOperationHandler? = handler
 		var status: ResultStatus = .apiAddressError
