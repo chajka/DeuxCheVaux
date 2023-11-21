@@ -676,29 +676,6 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 		return status
 	}// end endQuestionary
 
-	public func endQuestionary (with handler: @escaping OwnerOperationHandler) -> Void {
-		var completionHandler: OwnerOperationHandler? = handler
-		var status: ResultStatus = .apiAddressError
-		defer { if let completionHandler: OwnerOperationHandler = completionHandler { completionHandler(status) } }
-		guard let url: URL = URL(string: UserNamaAPIBase + program + Questionary) else { return }
-		let decoder: JSONDecoder = JSONDecoder()
-		let request: URLRequest = makeRequest(url: url, method: .delete)
-		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, req: URLResponse?, err: Error?) in
-			defer { handler(status) } // must increment semaphore when exit from closure
-			status = .receivedDataNilError
-			guard let data: Data = dat else { return }// end guard
-			do {
-				let result: EnqueteResult = try decoder.decode(EnqueteResult.self, from: data)
-				status = self.checkMetaInformation(result.meta)
-			} catch let error {
-				status = .decodeResultError
-				print(error.localizedDescription)
-			}// end do try - catch decode result
-		}// end closure
-		completionHandler = nil
-		task.resume()
-	}// end endQuestionary
-
 		// MARK: NG Word Handling
 	public func addNGWord (_ word: String, type: NGType, with handler: @escaping OwnerOperationBoolHandler) -> Void {
 		var completionHandler: OwnerOperationBoolHandler? = handler
