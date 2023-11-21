@@ -1165,48 +1165,6 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 		task.resume()
 	}// end extendableTimes
 
-	public func extendTime (minutes min: String) -> (newEndTime: Date?, status: ResultStatus) {
-		guard let url: URL = URL(string: apiBaseString + programExtension), let minutesToExtend: Int = Int(min) else { return (nil, .apiAddressError) }
-		let extend: ExtendTime = ExtendTime(minutes: minutesToExtend)
-		var newEndTime: Date? = nil
-		var status: ResultStatus = .unknownError
-		do {
-			let encoder: JSONEncoder = JSONEncoder()
-			let extendTimeData: Data = try encoder.encode(extend)
-			var request: URLRequest = makeRequest(url: url, method: .post, contentsType: ContentTypeJSON)
-			request.httpBody = extendTimeData
-			let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
-			let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (dat: Data?, resp: URLResponse?, err: Error?) in
-				defer { semaphore.signal() } // must increment semaphore when exit from closure
-				guard let weakSelf = self, let data: Data = dat else {
-					status = .receivedDataNilError
-					return
-				}// end guard
-				do {
-					let decoder: JSONDecoder = JSONDecoder()
-					let extendResult: TimeExtendResult = try decoder.decode(TimeExtendResult.self, from: data)
-					status = weakSelf.checkMetaInformation(extendResult.meta)
-					if let newEnd: TimeInterval = extendResult.data?.end_time {
-						newEndTime = Date(timeIntervalSince1970: newEnd)
-					}// end optional binding check for
-				} catch let error {
-					print(error)
-					status = .decodeResultError
-				}// end do try - catch decode json data to result
-			}// end closure of request completion handler
-			task.resume()
-			let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
-			if timeout == .timedOut {
-				status = .timeout
-			}// end if timeout
-		} catch let error {
-			print(error)
-			return (nil, .encodeRequestError)
-		}// end do try - catch json encode
-
-		return (newEndTime, status)
-	}// end extendTime
-
 	public func extendTime (minutes min: String, with handler: @escaping NewEndTimeHandler) -> Void {
 		var completionHandler: NewEndTimeHandler? = handler
 		var newEndTime: Date? = nil
