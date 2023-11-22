@@ -47,8 +47,8 @@ public final class VideoInformation: HTTPCommunicatable, XMLParserDelegate {
 		// MARK: - Override
 		// MARK: - Actions
 		// MARK: - Public methods\
-	public func parse () -> Bool {
-		loadData()
+	public func parse () async -> Bool {
+		await loadData()
 		parser.delegate = self
 		let result: Bool = parser.parse()
 
