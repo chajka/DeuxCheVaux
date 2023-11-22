@@ -62,8 +62,8 @@ public final class SmileVideoInformation: HTTPCommunicatable {
 		// MARK: - Override
 		// MARK: - Actions
 		// MARK: - Public methods\
-	public func parse () -> Bool {
-		let result: Bool = checkContents()
+	public func parse () async -> Bool {
+		let result: Bool = await checkContents()
 
 		return result
 	}// end parse
