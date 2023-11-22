@@ -69,30 +69,23 @@ public final class SmileVideoInformation: HTTPCommunicatable {
 	}// end parse
 
 		// MARK: - Private methods
-	private func checkContents () -> Bool {
+	private func checkContents () async -> Bool {
 		if let contentsAPIURL: URL = URL(string: ContentsAPI) {
 			let contentsAPIforcurrentVideo: URL = contentsAPIURL.appendingPathComponent(videoNumber)
 			let request: URLRequest = makeRequest(url: contentsAPIforcurrentVideo, method: .get)
-			let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
-			let task: URLSessionDataTask = session.dataTask(with: request) { [unowned self] (dat, resp, err) in
-				guard let data: Data = dat else { return }
-				do {
-					let description: MovieInformation = try JSONDecoder().decode(MovieInformation.self, from: data)
-					if description.meta.errorCode == "OK" {
-						if let desc: MovieDescription = description.data {
-							self.title = desc.title
-							let length: String = String(format: "%4.2f", Float(desc.length / 60))
-							self.time = "\(length) min"
-						}// end optional binding check for data
-					}// end if
-				} catch let error {
-					print(error.localizedDescription)
-				}// end do try - catch json serializatioon
-				semaphore.signal()
-			}// end closure
-			task.resume()
-			let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + ContentsTimeout)
-			if timeout == DispatchTimeoutResult.success { return true }
+			do {
+				let result: (data: Data, resp: URLResponse) = try await session.data(for: request)
+				let description: MovieInformation = try JSONDecoder().decode(MovieInformation.self, from: result.data)
+				if description.meta.errorCode == "OK" {
+					if let desc: MovieDescription = description.data {
+						self.title = desc.title
+						let length: String = String(format: "%4.2f", Float(desc.length / 60))
+						self.time = "\(length) min"
+					}// end optional binding check for data
+				}// end if
+			} catch let error {
+				print(error.localizedDescription)
+			}// end do try - catch json serializatioon
 		}// end optional binding check for make contents api base url
 
 		return false
