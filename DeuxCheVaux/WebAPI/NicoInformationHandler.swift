@@ -134,8 +134,8 @@ public final class NicoInformationHandler: HTTPCommunicatable {
 		// MARK: - Override
 		// MARK: - Actions
 		// MARK: - Public methods
-	public func myUserIdentifier () -> (identifier: String, premium: Bool, language: UserLanguage) {
-		return fetchMyUserID()
+	public func myUserIdentifier () async -> (identifier: String, premium: Bool, language: UserLanguage) {
+		return await fetchMyUserID()
 	}// end myUserIdentifier
 
 	public func myUserIdentifier (with handler: @escaping IdentifierHandler) -> Void {
@@ -210,21 +210,20 @@ public final class NicoInformationHandler: HTTPCommunicatable {
 		task.resume()
 	}// end fetchNickname
 
-	public func thumbnail (identifier userIdentifier: String, whenNoImage insteadImage: NSImage) -> NSImage {
+	public func thumbnail (identifier userIdentifier: String) async -> NSImage? {
 		let prefix: String = String(userIdentifier.prefix(userIdentifier.count - 4))
 		let urlString: String = String(format: ThumbnailAPIFormat, prefix, userIdentifier)
-		guard let url: URL = URL(string: urlString) else { return insteadImage }
+		var thumbnail: NSImage? = nil
+		guard let url: URL = URL(string: urlString) else { return thumbnail }
 		let request: URLRequest = makeRequest(url: url, method: .get)
-		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
-		var thumbnail: NSImage = insteadImage
-		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
-			defer { semaphore.signal() }
-			guard let data: Data = dat, let image: NSImage = NSImage(data: data) else { return }
-			thumbnail = image
-		}// end closure
-		task.resume()
-		let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
-		if timeout == .timedOut { thumbnail = insteadImage }
+		do {
+			let result: (data: Data, resp: URLResponse) = try await session.data(for: request)
+				if let image: NSImage = NSImage(data: result.data) {
+					thumbnail = image
+				}
+		} catch let error {
+			Swift.print(error.localizedDescription)
+		}// end do - try - catch
 
 		return thumbnail
 	}// end thumbnail
@@ -243,98 +242,50 @@ public final class NicoInformationHandler: HTTPCommunicatable {
 		task.resume()
 	}// end thumbnail
 
-	public func communityThumbnail (_ url: URL, whenNoImage insteadImage: NSImage) -> NSImage {
+	public func communityThumbnail (_ url: URL) async -> NSImage? {
 		let request: URLRequest = makeRequest(url: url, method: .get)
-		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
-		var thumbnail: NSImage = insteadImage
-		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
-			defer { semaphore.signal() }
-			guard let data: Data = dat, let image: NSImage = NSImage(data: data) else { return }
-			thumbnail = image
-		}// end closure
-		task.resume()
-		let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
-		if timeout == .timedOut { thumbnail = insteadImage }
+		var thumbnail: NSImage? = nil
+		do {
+			let result: (data: Data, resp: URLResponse) = try await session.data(for: request)
+			if let image: NSImage = NSImage(data: result.data) {
+				thumbnail = image
+			}
+		} catch let error {
+			print(error.localizedDescription)
+		}// end completion handler closure
 
 		return thumbnail
 	}// end communityThumbnail
 
-	public func communityThumbnail (_ url: URL, with handler: @escaping ThumbnailHandler) -> Void {
-		let request: URLRequest = makeRequest(url: url, method: .get)
+	public func channelThumbnail (of channel: String) async -> NSImage? {
 		var thumbnail: NSImage? = nil
-		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
-			defer { handler(thumbnail) }
-			guard let data: Data = dat, let image: NSImage = NSImage(data: data) else { return }
-			thumbnail = image
-		}// end completion handler closure
-		task.resume()
-	}// end communityThumbnail
-
-	public func channelThumbnail (channel: String, whenNoImage insteadImage: NSImage) -> NSImage {
 		let urlString: String = String(format: ChannelThumbnailApi, channel)
-		guard let url: URL = URL(string: urlString) else { return insteadImage }
+		guard let url: URL = URL(string: urlString) else { return thumbnail }
 		let request: URLRequest = makeRequest(url: url, method: .get)
-		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
-		var thumbnail: NSImage = insteadImage
-		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
-			defer { semaphore.signal() }
-			guard let data: Data = dat, let image: NSImage = NSImage(data: data) else { return }
+		do {
+			let result: (data: Data, resp: URLResponse) = try await session.data(for: request)
+			let image: NSImage? = NSImage(data: result.data)
 			thumbnail = image
-		}// end closure
-		task.resume()
-		let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
-		if timeout == .timedOut { thumbnail = insteadImage }
 
-		return thumbnail
+			return thumbnail
+		} catch let error {
+			print(error.localizedDescription)
+			return thumbnail
+		}
 	}// end channelThumbnail
 
-	public func channelThumbnail (of channel: String, with handler: @escaping ThumbnailHandler) -> Void {
-		let urlString: String = String(format: ChannelThumbnailApi, channel)
-		guard let url: URL = URL(string: urlString) else { handler(nil); return }
-		let request: URLRequest = makeRequest(url: url, method: .get)
-		var thumbnail: NSImage? = nil
-		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
-			defer { handler(thumbnail) }
-			guard let data: Data = dat, let image: NSImage = NSImage(data: data) else { return }
-			thumbnail = image
-		}// end completion handler closure
-		task.resume()
-	}// end channelThumbnail
-
-	public func rawData (forURL url: URL, httpMethod method: HTTPMethod, HTTPBody body: Data? = nil, contentsType type: String? = nil) -> Data? {
-		var rawData: Data? = nil
-		var request: URLRequest = makeRequest(url: url, method: method)
-		if let body: Data = body, let type: String = type {
-			request.addValue(type, forHTTPHeaderField: ContentTypeKey)
-			request.httpBody = body
-		}// end optional binding for
-		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
-		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
-			defer { semaphore.signal() }
-			guard let data: Data = dat else { return }
-			rawData = data
-		}// end closure
-		task.resume()
-		let timeout: DispatchTimeoutResult = semaphore.wait(timeout: DispatchTime.now() + Timeout)
-		if timeout == .timedOut { rawData = nil }
-
-		return rawData
-	}// end rawData
-
-	public func rawData (ofURL url: URL, httpMethod method: HTTPMethod = .get, HTTPBody body: Data? = nil, contentsType type: String? = nil, with handler: @escaping RawDataHandler) -> Void {
+	public func rawData (ofURL url: URL, httpMethod method: HTTPMethod = .get, HTTPBody body: Data? = nil, contentsType type: String? = nil) async throws -> Data {
 		var request: URLRequest = makeRequest(url: url, method: method)
 		if let body: Data = body, let type: String = type {
 			request.addValue(type, forHTTPHeaderField: ContentTypeKey)
 			request.httpBody = body
 		}// end optional binding check for body and its content type
-		let task: URLSessionDataTask = session.dataTask(with: request) { (data: Data?, resp: URLResponse?, err: Error?) in
-			handler(data, resp, err)
-		}// end completion handler closure
-		task.resume()
+		let result: (dat: Data, ressp: URLResponse) = try await session.data(for: request)
+
+		return result.dat
 	}// end rawData
 
-	public func currentPrograms (with handler: @escaping CurrentProgramsHandler) throws -> Void {
-		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
+	public func currentPrograms (with handler: @escaping CurrentProgramsHandler) async throws -> Void {
 		var url: URL = URL(string: FollowingProgramsFormat)!
 		var request: URLRequest = makeRequest(url: url, method: .get)
 		var programs: Array<Program> = Array()
@@ -345,26 +296,22 @@ public final class NicoInformationHandler: HTTPCommunicatable {
 			pageCount += 1
 			url = pageCount == 1 ? URL(string: FollowingProgramsFormat)! : URL(string: FollowingProgramsFormat + FollowingProgramsPage + String(pageCount))!
 			request.url = url
-			let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
-				defer { semaphore.signal() }
-				guard let data: Data = dat, let info: UserPrograms = try? JSONDecoder().decode(UserPrograms.self, from: data) else { return }
-				if info.meta.status == 404 { error = InformationError.notLogin }
-				guard info.meta.status != 404, let information: NotifyContent = info.data else { return }
-				maxPage = information.totalPage
-				let currentPrograms: Array<UserProgramInfo> = information.notifyboxContent
-				for prog: UserProgramInfo in currentPrograms {
-					if prog.providerType == .official { continue }
-					let liveNumber: String = URL(string: prog.thumbnailLinkURL)?.lastPathComponent ?? ""
-					let title: String = prog.title
-					let community: String = prog.communityName
-					let owner: String = prog.ownerIdentifier
-					let thumb: NSImage? = NSImage(contentsOf: URL(string: prog.thumnailURL)!)
-					let program: Program = Program(program: liveNumber, title: title, community: community, owner: owner, thumbnail: thumb)
-					programs.append(program)
-				}// end foreach all program informations
-			}// end current programs completion handler closure
-			task.resume()
-			_ = semaphore.wait(timeout: .now() + .seconds(Int(Timeout)))
+			let result: (data: Data, resp: URLResponse) = try await session.data(for: request)
+			guard let info: UserPrograms = try? JSONDecoder().decode(UserPrograms.self, from: result.data) else { return }
+			if info.meta.status == 404 { error = InformationError.notLogin }
+			guard info.meta.status != 404, let information: NotifyContent = info.data else { return }
+			maxPage = information.totalPage
+			let currentPrograms: Array<UserProgramInfo> = information.notifyboxContent
+			for prog: UserProgramInfo in currentPrograms {
+				if prog.providerType == .official { continue }
+				let liveNumber: String = URL(string: prog.thumbnailLinkURL)?.lastPathComponent ?? ""
+				let title: String = prog.title
+				let community: String = prog.communityName
+				let owner: String = prog.ownerIdentifier
+				let thumb: NSImage? = NSImage(contentsOf: URL(string: prog.thumnailURL)!)
+				let program: Program = Program(program: liveNumber, title: title, community: community, owner: owner, thumbnail: thumb)
+				programs.append(program)
+			}// end foreach all program informations
 			if error == .notLogin { throw error! }
 		} while pageCount < maxPage
 		handler(programs)
@@ -372,17 +319,15 @@ public final class NicoInformationHandler: HTTPCommunicatable {
 
 		// MARK: - Internal methods
 		// MARK: - Private methods
-	private func fetchMyUserID () -> (identifier: String, premium: Bool, language: UserLanguage) {
+	private func fetchMyUserID () async -> (identifier: String, premium: Bool, language: UserLanguage) {
 		guard let url = URL(string: NicoNicoMyPageURL) else { return ("", false, .ja) }
 		let request: URLRequest = makeRequest(url: url, method: .get)
-		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
 		var userIdentifier: String? = nil
 		var userIsPremium: Bool = false
 		var userLanguage: UserLanguage = .ja
-		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
-			defer { semaphore.signal() }
-			guard let data: Data = dat else { return }
-			if let htmlSource: String = String(data: data, encoding: .utf8) {
+		do {
+			let res: (data: Data, resp: URLResponse) = try await session.data(for: request)
+			if let htmlSource: String = String(data: res.data, encoding: .utf8) {
 				let htmlRange: NSRange = NSRange(location: 0, length: htmlSource.count)
 				if let regex: NSRegularExpression = try? NSRegularExpression(pattern: IdentifierFinderRegex, options: NSRegularExpression.Options.caseInsensitive) {
 					if let result: NSTextCheckingResult = regex.firstMatch(in: htmlSource, options: NSRegularExpression.MatchingOptions.withTransparentBounds, range: htmlRange) {
@@ -403,21 +348,21 @@ public final class NicoInformationHandler: HTTPCommunicatable {
 						let range: NSRange = result.range(at: 1)
 						if let currentLanguage: CurrentLanguage = CurrentLanguage(rawValue: (htmlSource as NSString).substring(with: range)) {
 							switch currentLanguage {
-								case .Japanese:
-									userLanguage = .ja
-								case .Chinese:
-									userLanguage = .zh
-								case .English:
-									userLanguage = .en
+							case .Japanese:
+								userLanguage = .ja
+							case .Chinese:
+								userLanguage = .zh
+							case .English:
+								userLanguage = .en
 							}// end switch case by current language
 						}// end optional binding check of String is member of CurrentLanguage enum
 					}// end optional binding check of found regex
 				}// end optional binding check for compile regex
 			}// end optional binding check for fetch html source successed ?
-		}// end completion handler
-		task.resume()
-		let timeout: DispatchTimeoutResult = semaphore.wait(wallTimeout: DispatchWallTime.now() + Timeout)
-		if timeout == .timedOut { return ("", false, .ja) }
+		} catch let error {
+			print(error.localizedDescription)
+		}
+
 		if let identifier: String = userIdentifier { return (identifier, userIsPremium, userLanguage) }
 		return ("", false, .ja)
 	}// end fetchMyUserID
