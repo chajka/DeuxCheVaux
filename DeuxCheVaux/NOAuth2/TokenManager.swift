@@ -12,6 +12,7 @@ import Security
 
 fileprivate let TokenManagerNibName: String = "TokenManager"
 fileprivate let MyPageURL: URL = URL(string: "https://www.nicovideo.jp/my")!
+fileprivate let LiveURLString: String = "https://live.nicovideo.jp"
 fileprivate let AuthorizationBaseURL: URL = URL(string: "https://oauth.nicovideo.jp/")!
 fileprivate let AuthorizedURL: URL = AuthorizationBaseURL.appendingPathComponent("oauth2/authorized")
 fileprivate let UserInfoURL: URL = AuthorizationBaseURL.appendingPathComponent("open_id/userinfo")
@@ -283,41 +284,31 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		center.post(name: .userModificationDone, object: nil)
 	}// end func remove
 
-	public func start (with oAuthURL: URL, refreshQuery query: String, ofUser identifier: String?, handler: @escaping AccountsHandler) throws {
+	public func start (with oAuthURL: URL, refreshQuery query: String, ofUser identifier: String?) async throws -> (String, String?, Bool) {
 		oauthURL = oAuthURL
 		refreshQuery = query
 		var id: String
 		if tokens.count == 0 || identifier == nil {
-			let tokens: UserTokens = try updateOldAccount()
+			let tokens: UserTokens = try await updateOldAccount()
 			id = tokens.identifier
 		} else {
 			id = identifier!
 		}// end update old account
 		guard let userTokens: UserTokens = tokens[id] else { throw TokenManagerError.UserNotFound }
-		handler(userTokens.identifier, userTokens.nickname, userTokens.premium)
+		return (userTokens.identifier, userTokens.nickname, userTokens.premium)
 	}// end start
 
-	public func getWSEndPoint (program liveNumber: String, for identifier: String) -> URL? {
+	public func getWSEndPoint (program liveNumber: String, for identifier: String) async -> URL? {
 		do {
-			var wsEndPointURL: URL = URL(string: "https://live.nicovideo.jp")!
-			let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
+			var wsEndPointURL: URL = URL(string: LiveURLString)!
 			let url: URL = URL(string: WSEndPointURLString + WSEndPointProgramKey + liveNumber + WSEndPointUserIDKey + identifier)!
-			let request = try makeRequestWithAccessToken(url: url, for: identifier)
-			let task = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
-				defer { semaphore.signal() }
-				guard let data: Data = dat else { return }
-				do {
-					let decoder: JSONDecoder = JSONDecoder()
-					let urlData: URLResult = try decoder.decode(URLResult.self, from: data)
-					if urlData.meta.status == 200 {
-						wsEndPointURL = URL(string: urlData.data.url)!
-					}// end if no error
-				} catch let error {
-					print(error.localizedDescription)
-				}// end do try - catch decode URL JSON
-			}// end completion handler
-			task.resume()
-			_ = semaphore.wait(timeout: DispatchTime.now() + .seconds(200))
+			let request = try await makeRequestWithAccessToken(url: url, for: identifier)
+			let result: (data: Data, resp: URLResponse) = try await session.data(for: request)
+			let decoder: JSONDecoder = JSONDecoder()
+			let urlData: URLResult = try decoder.decode(URLResult.self, from: result.data)
+			if urlData.meta.status == 200 {
+				wsEndPointURL = URL(string: urlData.data.url)!
+			}// end if no error
 
 			return wsEndPointURL
 		} catch let error {
@@ -341,7 +332,6 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		guard let tokens: UserTokens = tokens[identifier] else { throw TokenManagerError.UserNotFound }
 
 		return tokens.userSession
-		throw TokenManagerError.UserSessionNotFound
 	}// end func getUserSession
 
 	public func makeRequest (url: URL) -> URLRequest {
@@ -351,36 +341,31 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		return request
 	}// end func makeRequest
 
-	public func makeRequestWithAccessToken (url: URL, for identifier: String) throws -> URLRequest {
+	public func makeRequestWithAccessToken (url: URL, for identifier: String) async throws -> URLRequest {
 		guard let userTokens: UserTokens = tokens[identifier] else { throw TokenManagerError.IdentifierNotFound }
 		if -userTokens.date.timeIntervalSinceNow > expire {
-			let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
 			guard let query: String = self.refreshQuery else { throw TokenManagerError.URLError }
 			let queryURLString: String = self.oauthURL.absoluteString
 			let queryURL: URL = URL(string: queryURLString + "?" + query + "=" + userTokens.refreshToken)!
 			let request: URLRequest = self.makeRequest(url: queryURL)
-			let task: URLSessionDataTask = URLSession(configuration: URLSessionConfiguration.default).dataTask(with: request) { (dat:Data?, resp: URLResponse?, err: Error?) in
-				defer { semaphore.signal() }
-				guard let data: Data = dat, let html: String = String(data: data, encoding: .utf8) else { return }
-				let body: String = String(html.split(separator: ">",maxSplits: 11).last!)
-				let jsonString: String = String(body.split(separator: "<", maxSplits: 2).first!)
-				if let json: Data = jsonString.data(using: .utf8) {
-					let decoder: JSONDecoder = JSONDecoder()
-					do {
-						let tokens: Tokens = try decoder.decode(Tokens.self, from: json)
-						userTokens.refreshToken = tokens.refresh_token
-						userTokens.accessToken = tokens.access_token
-						userTokens.date = Date()
-						let info: UserInformations = UserInformations(item: userTokens)
-						let dataJSON: Data = try JSONEncoder().encode(info)
-						self.updateDataToKeychain(data: dataJSON, kind: TokenKey, account: userTokens.identifier)
-					} catch let error {
-						print(error.localizedDescription)
-					}// end do try - catch decode tokens json
-				}// end if json to convert data
-			}// end closure
-			task.resume()
-			_ = semaphore.wait(timeout: DispatchTime.now() + .seconds(2))
+			let result: (data: Data, resp: URLResponse) = try await URLSession(configuration: URLSessionConfiguration.default).data(for: request)
+			guard let html: String = String(data: result.data, encoding: .utf8) else { throw TokenManagerError.DataError }
+			let body: String = String(html.split(separator: ">",maxSplits: 11).last!)
+			let jsonString: String = String(body.split(separator: "<", maxSplits: 2).first!)
+			if let json: Data = jsonString.data(using: .utf8) {
+				let decoder: JSONDecoder = JSONDecoder()
+				do {
+					let tokens: Tokens = try decoder.decode(Tokens.self, from: json)
+					userTokens.refreshToken = tokens.refresh_token
+					userTokens.accessToken = tokens.access_token
+					userTokens.date = Date()
+					let info: UserInformations = UserInformations(item: userTokens)
+					let dataJSON: Data = try JSONEncoder().encode(info)
+					self.updateDataToKeychain(data: dataJSON, kind: TokenKey, account: userTokens.identifier)
+				} catch let error {
+					print(error.localizedDescription)
+				}// end do try - catch decode tokens json
+			}// end if json to convert data
 		}// end if access token expire time is over
 		var request: URLRequest = URLRequest(url: url)
 		request.addValue(AuthorizationBearer + userTokens.accessToken, forHTTPHeaderField: AuthorizationKey)
@@ -400,46 +385,34 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 	}// end make request with id token
 
 		// MARK: - Private Methods
-	private func getUserInfo (for identifier: String) {
+	private func getUserInfo (for identifier: String) async {
 		guard let tokens: UserTokens = tokens[identifier] else { return }
 		do {
-			let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
-			let request: URLRequest = try makeRequestWithAccessToken(url: UserInfoURL, for: identifier)
-			let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
-				defer { semaphore.signal() }
-				guard let data: Data = dat else { return }
-				do {
-					let decoder: JSONDecoder = JSONDecoder()
-					let userInfo: UserInfo = try decoder.decode(UserInfo.self, from: data)
-					tokens.nickname = userInfo.nickname
-				} catch let error {
-					print(error.localizedDescription)
-				}// end do try - catch decode user info
-			}// end completion handler
-			task.resume()
-			_ = semaphore.wait(timeout: DispatchTime.now() + .seconds(2))
+			let request: URLRequest = try await makeRequestWithAccessToken(url: UserInfoURL, for: identifier)
+			let result: (data: Data, rest: URLResponse) = try await session.data(for: request)
+			do {
+				let decoder: JSONDecoder = JSONDecoder()
+				let userInfo: UserInfo = try decoder.decode(UserInfo.self, from: result.data)
+				tokens.nickname = userInfo.nickname
+			} catch let error {
+				print(error.localizedDescription)
+			}// end do try - catch decode user info
 		} catch let error {
 			print("get user info error: \(error.localizedDescription)")
 		}
 	}// end func get user info from oAuth2 server
 
-	private func userPremium (for identifier: String) -> Bool {
+	private func userPremium (for identifier: String) async -> Bool {
 		do {
-			let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
 			var premium: Bool = false
-			let request: URLRequest = try makeRequestWithAccessToken(url: PremiumInfoURL, for: identifier)
-			let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
-				defer { semaphore.signal() }
-				guard let json: Data = dat else { return }
+			let request: URLRequest = try await makeRequestWithAccessToken(url: PremiumInfoURL, for: identifier)
+			let result: (data: Data, resp: URLResponse) = try await session.data(for: request)
 				do {
-					let premiumInfo: Premium = try JSONDecoder().decode(Premium.self, from: json)
+					let premiumInfo: Premium = try JSONDecoder().decode(Premium.self, from: result.data)
 					premium = premiumInfo.data.type == .premium
 				} catch let error {
 					print("GET Premium decode error: \(error.localizedDescription)")
 				}// end do try - catch decode premium data json
-			}// end closure
-			task.resume()
-			_ = semaphore.wait(timeout: DispatchTime.now() + .seconds(2))
 
 			return premium
 		} catch TokenManagerError.IdentifierNotFound {
@@ -451,7 +424,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		return false
 	}// end userPremium
 
-	private func updateOldAccount () throws -> UserTokens {
+	private func updateOldAccount () async throws -> UserTokens {
 		guard let refreshToken: String = readStringFromKeychain(kind: RefreshToken), let identifierToken: String = readStringFromKeychain(kind: IDToken), let sessionToken = readStringFromKeychain(kind: SessionToken) else { throw TokenManagerError.UserNotFound}
 		self.refreshToken = refreshToken
 		removeItemFromKeychain(kind: RefreshToken)
@@ -469,59 +442,43 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		let userTokens: UserTokens = UserTokens(identifier: "", nickname: "", premium: false, accessToken: "", refreshToken: refreshToken, identifierToken: idToken, cookies: [cookie])
 		let queryURLString: String = self.oauthURL.absoluteString
 		guard let query: String = self.refreshQuery, let token: String = self.refreshToken else { throw TokenManagerError.TokensDecodeError }
-		let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
 		let queryURL: URL = URL(string: queryURLString + "?" + query + "=" + token)!
 		var request: URLRequest = self.makeRequest(url: queryURL)
-		var task: URLSessionDataTask = URLSession(configuration: URLSessionConfiguration.default).dataTask(with: request) { (dat:Data?, resp: URLResponse?, err: Error?) in
-			defer { semaphore.signal() }
-			guard let data: Data = dat, let html: String = String(data: data, encoding: .utf8) else { return }
-			let body: String = String(html.split(separator: ">",maxSplits: 11).last!)
-			let jsonString: String = String(body.split(separator: "<", maxSplits: 2).first!)
-			if let json: Data = jsonString.data(using: .utf8) {
-				let decoder: JSONDecoder = JSONDecoder()
-				do {
-					let tokens: Tokens = try decoder.decode(Tokens.self, from: json)
-					userTokens.refreshToken = tokens.refresh_token
-					userTokens.accessToken = tokens.access_token
-					if userTokens.identifier != "" {
-						self.updateDataToKeychain(data: data, kind: TokenKey, account: userTokens.identifier)
-					}
-				} catch let error {
-					print(error.localizedDescription)
-				}// end do try - catch decode tokens json
-			}// end if json to convert data
-		}// end closure
-		task.resume()
-		_ = semaphore.wait(timeout: DispatchTime.now() + .seconds(5))
-		request = makeRequestWithCustomToken(url: UserInfoURL, for: userTokens.accessToken)
-		task = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
-			defer { semaphore.signal() }
-			guard let data: Data = dat else { return }
+		var result: (data: Data, resp: URLResponse) = try await URLSession(configuration: URLSessionConfiguration.default).data(for: request)
+		guard let html: String = String(data: result.data, encoding: .utf8) else { throw TokenManagerError.DataError }
+		let body: String = String(html.split(separator: ">",maxSplits: 11).last!)
+		let jsonString: String = String(body.split(separator: "<", maxSplits: 2).first!)
+		if let json: Data = jsonString.data(using: .utf8) {
 			let decoder: JSONDecoder = JSONDecoder()
 			do {
-				let info: UserInfo = try decoder.decode(UserInfo.self, from: data)
-				userTokens.identifier = info.sub
-				userTokens.nickname = info.nickname
+				let tokens: Tokens = try decoder.decode(Tokens.self, from: json)
+				userTokens.refreshToken = tokens.refresh_token
+				userTokens.accessToken = tokens.access_token
+				if userTokens.identifier != "" {
+					self.updateDataToKeychain(data: result.data, kind: TokenKey, account: userTokens.identifier)
+				}
 			} catch let error {
-				print("Decode ID token information error: \(error.localizedDescription)")
-			}// end do try - catch JSON Decode error
-		}// end decode id information request completion handler
-		task.resume()
-		_ = semaphore.wait(timeout: DispatchTime.now() + .seconds(10))
+				print(error.localizedDescription)
+			}// end do try - catch decode tokens json
+		}// end if json to convert data
+		request = makeRequestWithCustomToken(url: UserInfoURL, for: userTokens.accessToken)
+		result = try await session.data(for: request)
+		let decoder: JSONDecoder = JSONDecoder()
+		do {
+			let info: UserInfo = try decoder.decode(UserInfo.self, from: result.data)
+			userTokens.identifier = info.sub
+			userTokens.nickname = info.nickname
+		} catch let error {
+			print("Decode ID token information error: \(error.localizedDescription)")
+		}// end do try - catch JSON Decode error
 		request.url = PremiumInfoURL
-		task = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
-			defer { semaphore.signal() }
-			guard let data: Data = dat else { return }
-			let decoder = JSONDecoder()
-			do {
-				let premium: Premium = try decoder.decode(Premium.self, from: data)
-				userTokens.premium = premium.data.type == .premium
-			} catch let error {
-				print("premium data decode error \(error.localizedDescription)")
-			}
+		result = try await session.data(for: request)
+		do {
+			let premium: Premium = try decoder.decode(Premium.self, from: result.data)
+			userTokens.premium = premium.data.type == .premium
+		} catch let error {
+			print("premium data decode error \(error.localizedDescription)")
 		}
-		task.resume()
-		_ = semaphore.wait(timeout: DispatchTime.now() + .seconds(10))
 		let id = userTokens.identifier
 		tokens[id] = userTokens
 

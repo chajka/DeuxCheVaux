@@ -47,8 +47,8 @@ public final class VideoInformation: HTTPCommunicatable, XMLParserDelegate {
 		// MARK: - Override
 		// MARK: - Actions
 		// MARK: - Public methods\
-	public func parse () -> Bool {
-		loadData()
+	public func parse () async -> Bool {
+		await loadData()
 		parser.delegate = self
 		let result: Bool = parser.parse()
 
@@ -56,18 +56,16 @@ public final class VideoInformation: HTTPCommunicatable, XMLParserDelegate {
 	}// end parse
 
 		// MARK: - Private methods
-	private func loadData () {
+	private func loadData () async {
 		if let url = URL(string: InfoQueryAPI + videoNumber) {
 			request = URLRequest(url: url)
 			request.method = .get
-			let semaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
-			let task: URLSessionDataTask = session.dataTask(with: request) { (dat, resp, err) in
-				guard let data: Data = dat else { return }
-				self.parser = XMLParser(data: data)
-				semaphore.signal()
-			}// end closure
-			task.resume()
-			_ = semaphore.wait(timeout: DispatchTime.now() + Timeout)
+			do {
+				let result: (data: Data, resp: URLResponse) = try await session.data(for: request)
+				self.parser = XMLParser(data: result.data)
+			} catch let error {
+				print(error.localizedDescription)
+			}
 		}// end optional checking
 	}// end load data
 
