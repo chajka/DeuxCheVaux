@@ -28,6 +28,7 @@ fileprivate let FollowingProgramsPage: String = "?page="
 fileprivate let IdentifierFinderRegex: String = "user\\.user_id = parseInt\\('(\\d+)', 10\\)"
 fileprivate let PremiumFinderRegex: String = "user.member_status = '(\\w+)';"
 fileprivate let LanguageFinderRegex: String = "user.ui_lang = '(.*?)';"
+fileprivate let UserLevelRegex: String = "<span class=\"UserDetailsHeader-levelLabelValue\">(\\d+)</span>"
 
 public enum InformationError: Error {
 	case notLogin
