@@ -24,6 +24,7 @@ fileprivate let ChannelThumbnailApi: String = "https://secure-dcdn.cdn.nimg.jp/c
 fileprivate let NicoNicoMyPageURL: String = "https://www.nicovideo.jp/my/top"
 fileprivate let FollowingProgramsFormat: String = "https://live.nicovideo.jp/api/relive/notifybox.content"
 fileprivate let FollowingProgramsPage: String = "?page="
+fileprivate let UserInformationPage: String = "https://www.nicovideo.jp/user/"
 
 fileprivate let IdentifierFinderRegex: String = "user\\.user_id = parseInt\\('(\\d+)', 10\\)"
 fileprivate let PremiumFinderRegex: String = "user.member_status = '(\\w+)';"
