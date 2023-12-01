@@ -29,7 +29,7 @@ fileprivate let UserInformationPage: String = "https://www.nicovideo.jp/user/"
 fileprivate let IdentifierFinderRegex: String = "user\\.user_id = parseInt\\('(\\d+)', 10\\)"
 fileprivate let PremiumFinderRegex: String = "user.member_status = '(\\w+)';"
 fileprivate let LanguageFinderRegex: String = "user.ui_lang = '(.*?)';"
-fileprivate let UserLevelRegex: String = "<span class=\"UserDetailsHeader-levelLabelValue\">(\\d+)</span>"
+fileprivate let UserLevelRegex: String = "&quot;currentLevel&quot;:(\\d+),&quot;"
 
 public enum InformationError: Error {
 	case notLogin
