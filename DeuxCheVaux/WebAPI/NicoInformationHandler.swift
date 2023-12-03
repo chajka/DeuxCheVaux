@@ -24,10 +24,12 @@ fileprivate let ChannelThumbnailApi: String = "https://secure-dcdn.cdn.nimg.jp/c
 fileprivate let NicoNicoMyPageURL: String = "https://www.nicovideo.jp/my/top"
 fileprivate let FollowingProgramsFormat: String = "https://live.nicovideo.jp/api/relive/notifybox.content"
 fileprivate let FollowingProgramsPage: String = "?page="
+fileprivate let UserInformationPage: String = "https://www.nicovideo.jp/user/"
 
 fileprivate let IdentifierFinderRegex: String = "user\\.user_id = parseInt\\('(\\d+)', 10\\)"
 fileprivate let PremiumFinderRegex: String = "user.member_status = '(\\w+)';"
 fileprivate let LanguageFinderRegex: String = "user.ui_lang = '(.*?)';"
+fileprivate let UserLevelRegex: String = "&quot;currentLevel&quot;:(\\d+),&quot;"
 
 public enum InformationError: Error {
 	case notLogin
@@ -227,6 +229,27 @@ public final class NicoInformationHandler: HTTPCommunicatable {
 
 		return thumbnail
 	}// end thumbnail
+
+	public func userLevel (identifier userIdentifier: String) async -> Int {
+		let userPageURL: URL = URL(string: UserInformationPage)!.appendingPathComponent(userIdentifier)
+		let request: URLRequest = makeRequest(url: userPageURL, method: .get)
+		do {
+			let result: (data: Data, resp: URLResponse) = try await session.data(for: request)
+			guard let html: String = String(data: result.data, encoding: .utf8) else { return 1 }
+			let userLevelRegex: NSRegularExpression = try NSRegularExpression(pattern: UserLevelRegex, options: [NSRegularExpression.Options.caseInsensitive])
+			let htmlrange: NSRange = NSRange(location: 0, length: html.count)
+			if let match: NSTextCheckingResult = userLevelRegex.firstMatch(in: html, options: [.withTransparentBounds, .withoutAnchoringBounds], range: htmlrange) {
+				let userLevelRange: NSRange = match.range(at: 1)
+				if let userLevel: Int = Int((html as NSString).substring(with: userLevelRange)) {
+					return userLevel
+				}// end optional binding of user level
+			}// end optional binding of regex match
+			return 1
+		} catch let error {
+			print(error.localizedDescription)
+			return 1
+		}// end do - try - catch
+	}// end func userLevel
 
 	public func thumbnail (identifier userIdentifier: String, with handler: @escaping ThumbnailHandler) -> Void {
 		let prefix: String = String(userIdentifier.prefix(userIdentifier.count - 4))
