@@ -912,6 +912,29 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 		}// end do try - catch json encode
 	}// end updateProgramState
 
+		// MARK: Make Program
+	public func checkBroadcastable () async -> Dictionary<String, String> {
+		guard let url = URL(string: apiBaseString + CheckBroadcastable) else { return Dictionary() }
+		let reqest: URLRequest = makeRequest(url: url, method: .get)
+		do {
+			let result: (data: Data, resp: URLResponse) = try await session.data(for: reqest)
+			let decoder: JSONDecoder = JSONDecoder()
+			let decoded: BroadcastableCommunityResult = try decoder.decode(BroadcastableCommunityResult.self, from: result.data)
+			var communities: Dictionary<String, String> = Dictionary()
+			for community: BroadcastableCommunity in decoded.data {
+				if !community.isPenalized {
+					let title: String = String(format: "%@(%@, Lv%d)", community.name, community.id, community.level)
+					communities[title] = community.id
+				}// end if community is not penalized
+			}// end for each community
+
+			return communities
+		} catch let error {
+			print(error.localizedDescription)
+			return Dictionary()
+		}// end do - try - catch errors
+	}// end func checkBroadcastable
+
 		// MARK: - Internal methods
 		// MARK: - Private methods
 	private func checkMetaInformation (_ meta: MetaInformation) -> ResultStatus {
