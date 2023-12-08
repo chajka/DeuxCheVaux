@@ -373,6 +373,7 @@ internal let ContentTypeKey: String = "Content-type"
 internal let ContentTypeJSON: String = "application/json"
 
 private let ApiBase: String = "https://live2.nicovideo.jp/watch/"
+private let ProgramApiBase: String = "https://live2.nicovideo.jp/unama/api/v2/"
 private let UserNamaAPIBase: String = "https://live2.nicovideo.jp/unama/watch/"
 private let UserNamaAPITool: String = "https://live.nicovideo.jp/unama/tool/v2/programs"
 private let QuoteAPIBase: String = "https://lapi.spi.nicovideo.jp/v1/tools/live/contents/"
