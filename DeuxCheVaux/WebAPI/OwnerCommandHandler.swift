@@ -78,6 +78,13 @@ public struct CategoriesResult: Codable {
 	let data: Categories
 }// end struct CategoriesResult
 
+public enum FilterStrength: String, Codable {
+	case weak = "weak"
+	case medium = "medium"
+	case strong = "strong"
+	case stronger = "stronger"
+}// end enum FilterStrength
+
 	// MARK: owner specific NG settings
 public enum NGType: String, Codable {
 	case word = "word"
