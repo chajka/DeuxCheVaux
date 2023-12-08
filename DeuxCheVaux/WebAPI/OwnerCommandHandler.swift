@@ -92,6 +92,11 @@ public enum StreamingQuality: String, Codable {
 	case low = "384kbps288p"
 }// end enum StreamingQuality
 
+public struct Tag: Codable {
+	let label: String
+	let isLocked: Bool
+}// end struct Tag
+
 	// MARK: owner specific NG settings
 public enum NGType: String, Codable {
 	case word = "word"
