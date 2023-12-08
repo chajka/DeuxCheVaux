@@ -52,6 +52,17 @@ internal struct ProgramState: Codable {
 	var state: NextProgramStatus
 }// end struct ProgramState
 
+	// MARK: Broadcast specific struct
+public struct BroadcastableCommunity: Codable {
+	let id: String
+	let name: String
+	let isPenalized: Bool
+	let ownerUserId: Int
+	let thumbnailUrl: String
+	let smallThumbnailUrl: String
+	let level: Int
+}// end struct BroadcastableCommunity
+
 	// MARK: owner specific NG settings
 public enum NGType: String, Codable {
 	case word = "word"
