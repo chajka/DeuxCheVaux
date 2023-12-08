@@ -413,6 +413,13 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 		super.init(with: identifier)
 	}// end init
 
+	public override init (with identifier: String) {
+		program = ""
+		videoPrefixSet = Set(arrayLiteral: SmileVideoPrefix, NicoMoviePrefix, SmileOfficialPrefix)
+		apiBaseString = ProgramApiBase
+		super.init(with: identifier)
+	}// end init
+
 		// MARK: - Override
 		// MARK: - Actions
 		// MARK: - Public methods
