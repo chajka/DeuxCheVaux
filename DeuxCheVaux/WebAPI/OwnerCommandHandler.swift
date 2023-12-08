@@ -97,6 +97,12 @@ public struct Tag: Codable {
 	let isLocked: Bool
 }// end struct Tag
 
+public struct Rights: Codable {
+	let code: String
+	let title: String
+	let artist: String
+}// end struct Rights
+
 	// MARK: owner specific NG settings
 public enum NGType: String, Codable {
 	case word = "word"
