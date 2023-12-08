@@ -103,6 +103,27 @@ public struct Rights: Codable {
 	let artist: String
 }// end struct Rights
 
+public struct ProgramEntry: Codable {
+	let title: String
+	let description: String
+	let category: String
+	let optionalCategories: Array<String>
+	let tags: Array<Tag>
+	let isTagOwnerLock: Bool
+	let communityId: String
+	let reservationBeginTime: String?
+	let isMemberOnly: Bool
+	let isTimeshiftEnabled: Bool
+	let isUadEnabled: Bool
+	let isAutoCommentFilterEnabled: Bool
+	let autoCommentFilterStrength: FilterStrength?
+	let maxQuality: StreamingQuality
+	let rightsItems: Array<Rights>
+	let isOfficialIchibaOnly: Bool
+	let isQuotable: Bool
+	let isGiftEnabled: Bool
+}// end struct ProgramEntry
+
 	// MARK: owner specific NG settings
 public enum NGType: String, Codable {
 	case word = "word"
