@@ -935,6 +935,20 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 		}// end do - try - catch errors
 	}// end func checkBroadcastable
 
+	public func getCategories () async -> (Array<String>, Array<String>) {
+		guard let url = URL(string: apiBaseString + GetCategories) else { return (Array(), Array()) }
+		let request: URLRequest = makeRequest(url: url, method: .get)
+		do {
+			let result: (data: Data, resp: URLResponse) = try await session.data(for: request)
+			let decoder: JSONDecoder = JSONDecoder()
+			let categoryResult: CategoriesResult = try decoder.decode(CategoriesResult.self, from: result.data)
+			return (categoryResult.data.categories, categoryResult.data.optionalCategories)
+		} catch let error {
+			print(error)
+			return (Array(), Array())
+		}// end do - try - catcg
+	}// end func getCategories
+
 		// MARK: - Internal methods
 		// MARK: - Private methods
 	private func checkMetaInformation (_ meta: MetaInformation) -> ResultStatus {
