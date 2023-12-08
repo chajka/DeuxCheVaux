@@ -392,6 +392,8 @@ private let QuoteLayout: String = "/quotation/layout"
 private let QuoteContents: String = "/quotation/contents"
 
 private let CheckBroadcastable: String = "broadcastable"
+private let GetCategories: String = "programs/categories"
+
 private let perm: String = "/perm "
 private let clear: String = "/clear"
 
