@@ -73,6 +73,11 @@ public struct BroadcastableCommunityResult: Codable {
 	let data: Array<BroadcastableCommunity>
 }// end struct BroadcastableCommunityList
 
+public struct CategoriesResult: Codable {
+	let meta: MetaInformation
+	let data: Categories
+}// end struct CategoriesResult
+
 	// MARK: owner specific NG settings
 public enum NGType: String, Codable {
 	case word = "word"
