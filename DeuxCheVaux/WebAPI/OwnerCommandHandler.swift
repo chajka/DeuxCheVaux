@@ -85,6 +85,13 @@ public enum FilterStrength: String, Codable {
 	case stronger = "stronger"
 }// end enum FilterStrength
 
+public enum StreamingQuality: String, Codable {
+	case best = "6Mbps720p"
+	case better = "2Mbps450p"
+	case middle = "1Mbps450p"
+	case low = "384kbps288p"
+}// end enum StreamingQuality
+
 	// MARK: owner specific NG settings
 public enum NGType: String, Codable {
 	case word = "word"
