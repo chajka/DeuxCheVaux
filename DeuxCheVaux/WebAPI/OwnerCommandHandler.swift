@@ -82,6 +82,11 @@ public struct CategoriesResult: Codable {
 	let data: Categories
 }// end struct CategoriesResult
 
+public struct ReserveProgramResult: Codable {
+	let meta: MetaInformation
+	let data: LiveNumber?
+}// end struct ReserveProgramResult
+
 public enum FilterStrength: String, Codable {
 	case weak = "weak"
 	case medium = "medium"
