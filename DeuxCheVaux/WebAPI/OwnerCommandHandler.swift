@@ -1005,6 +1005,32 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 		}// end do - try - catcg
 	}// end func getCategories
 
+	public func reserveProgram (with entry: Data) async -> String? {
+		guard let url = URL(string: apiBaseString + Programs) else { return nil }
+		var request: URLRequest = makeRequest(url: url, method: .post, contentsType: ContentTypeJSON)
+		request.timeoutInterval = 120.0
+		let savedTimeOutForRequest: TimeInterval = session.configuration.timeoutIntervalForRequest
+		let savedTimeoutForResource: TimeInterval = session.configuration.timeoutIntervalForResource
+		session.configuration.timeoutIntervalForRequest = 120.0
+		session.configuration.timeoutIntervalForResource = 20.0
+		request.httpBody = entry
+		do {
+			let result: (data: Data, resp: URLResponse) = try await session.data(for: request)
+			let decoder: JSONDecoder = JSONDecoder()
+			let response: ReserveProgramResult = try decoder.decode(ReserveProgramResult.self, from: result.data)
+			if let programNumber: String = response.data?.id {
+				session.configuration.timeoutIntervalForRequest = savedTimeOutForRequest
+				session.configuration.timeoutIntervalForResource = savedTimeoutForResource
+				return programNumber
+			}
+		} catch let error {
+			print(error)
+		}
+		session.configuration.timeoutIntervalForRequest = savedTimeOutForRequest
+		session.configuration.timeoutIntervalForResource = savedTimeoutForResource
+		return nil
+	}
+
 		// MARK: - Internal methods
 		// MARK: - Private methods
 	private func checkMetaInformation (_ meta: MetaInformation) -> ResultStatus {
