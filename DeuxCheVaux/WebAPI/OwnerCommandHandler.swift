@@ -69,6 +69,9 @@ public struct Categories: Codable {
 }// end struct Categories
 
 public struct LiveNumber: Codable {
+	let id: String
+}// end struct LiveNumber
+
 public struct BroadcastableCommunityResult: Codable {
 	let meta: MetaInformation
 	let data: Array<BroadcastableCommunity>
