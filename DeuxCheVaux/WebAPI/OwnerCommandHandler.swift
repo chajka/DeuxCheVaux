@@ -87,52 +87,6 @@ public struct ReserveProgramResult: Codable {
 	let data: LiveNumber?
 }// end struct ReserveProgramResult
 
-public enum FilterStrength: String, Codable {
-	case weak = "weak"
-	case medium = "medium"
-	case strong = "strong"
-	case stronger = "stronger"
-}// end enum FilterStrength
-
-public enum StreamingQuality: String, Codable {
-	case best = "6Mbps720p"
-	case better = "2Mbps450p"
-	case middle = "1Mbps450p"
-	case low = "384kbps288p"
-}// end enum StreamingQuality
-
-public struct Tag: Codable {
-	let label: String
-	let isLocked: Bool
-}// end struct Tag
-
-public struct Rights: Codable {
-	let code: String
-	let title: String
-	let artist: String
-}// end struct Rights
-
-public struct ProgramEntry: Codable {
-	let title: String
-	let description: String
-	let category: String
-	let optionalCategories: Array<String>
-	let tags: Array<Tag>
-	let isTagOwnerLock: Bool
-	let communityId: String
-	let reservationBeginTime: String?
-	let isMemberOnly: Bool
-	let isTimeshiftEnabled: Bool
-	let isUadEnabled: Bool
-	let isAutoCommentFilterEnabled: Bool
-	let autoCommentFilterStrength: FilterStrength?
-	let maxQuality: StreamingQuality
-	let rightsItems: Array<Rights>
-	let isOfficialIchibaOnly: Bool
-	let isQuotable: Bool
-	let isGiftEnabled: Bool
-}// end struct ProgramEntry
-
 	// MARK: owner specific NG settings
 public enum NGType: String, Codable {
 	case word = "word"
