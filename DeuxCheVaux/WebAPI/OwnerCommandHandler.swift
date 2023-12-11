@@ -52,6 +52,41 @@ internal struct ProgramState: Codable {
 	var state: NextProgramStatus
 }// end struct ProgramState
 
+	// MARK: Broadcast specific struct
+public struct BroadcastableCommunity: Codable {
+	let id: String
+	let name: String
+	let isPenalized: Bool
+	let ownerUserId: Int
+	let thumbnailUrl: String
+	let smallThumbnailUrl: String
+	let level: Int
+}// end struct BroadcastableCommunity
+
+public struct Categories: Codable {
+	let categories: Array<String>
+	let optionalCategories: Array<String>
+}// end struct Categories
+
+public struct LiveNumber: Codable {
+	let id: String
+}// end struct LiveNumber
+
+public struct BroadcastableCommunityResult: Codable {
+	let meta: MetaInformation
+	let data: Array<BroadcastableCommunity>
+}// end struct BroadcastableCommunityList
+
+public struct CategoriesResult: Codable {
+	let meta: MetaInformation
+	let data: Categories
+}// end struct CategoriesResult
+
+public struct ReserveProgramResult: Codable {
+	let meta: MetaInformation
+	let data: LiveNumber?
+}// end struct ReserveProgramResult
+
 	// MARK: owner specific NG settings
 public enum NGType: String, Codable {
 	case word = "word"
@@ -347,6 +382,7 @@ internal let ContentTypeKey: String = "Content-type"
 internal let ContentTypeJSON: String = "application/json"
 
 private let ApiBase: String = "https://live2.nicovideo.jp/watch/"
+private let ProgramApiBase: String = "https://live2.nicovideo.jp/unama/api/v2/"
 private let UserNamaAPIBase: String = "https://live2.nicovideo.jp/unama/watch/"
 private let UserNamaAPITool: String = "https://live.nicovideo.jp/unama/tool/v2/programs"
 private let QuoteAPIBase: String = "https://lapi.spi.nicovideo.jp/v1/tools/live/contents/"
@@ -364,6 +400,10 @@ private let QuoteSuffix: String = "/quotation"
 private let QuoteLayout: String = "/quotation/layout"
 private let QuoteContents: String = "/quotation/contents"
 
+private let CheckBroadcastable: String = "broadcastable"
+private let Programs: String = "programs"
+private let GetCategories: String = "programs/categories"
+
 private let perm: String = "/perm "
 private let clear: String = "/clear"
 
@@ -380,6 +420,13 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 		self.program = program
 		videoPrefixSet = Set(arrayLiteral: SmileVideoPrefix, NicoMoviePrefix, SmileOfficialPrefix)
 		apiBaseString = ApiBase + self.program
+		super.init(with: identifier)
+	}// end init
+
+	public override init (with identifier: String) {
+		program = ""
+		videoPrefixSet = Set(arrayLiteral: SmileVideoPrefix, NicoMoviePrefix, SmileOfficialPrefix)
+		apiBaseString = ProgramApiBase
 		super.init(with: identifier)
 	}// end init
 
@@ -874,6 +921,69 @@ public final class OwnerCommandHandler: HTTPCommunicatable {
 			status = .encodeRequestError
 		}// end do try - catch json encode
 	}// end updateProgramState
+
+		// MARK: Make Program
+	public func checkBroadcastable () async -> Dictionary<String, String> {
+		guard let url = URL(string: apiBaseString + CheckBroadcastable) else { return Dictionary() }
+		let reqest: URLRequest = makeRequest(url: url, method: .get)
+		do {
+			let result: (data: Data, resp: URLResponse) = try await session.data(for: reqest)
+			let decoder: JSONDecoder = JSONDecoder()
+			let decoded: BroadcastableCommunityResult = try decoder.decode(BroadcastableCommunityResult.self, from: result.data)
+			var communities: Dictionary<String, String> = Dictionary()
+			for community: BroadcastableCommunity in decoded.data {
+				if !community.isPenalized {
+					let title: String = String(format: "%@(%@, Lv%d)", community.name, community.id, community.level)
+					communities[title] = community.id
+				}// end if community is not penalized
+			}// end for each community
+
+			return communities
+		} catch let error {
+			print(error.localizedDescription)
+			return Dictionary()
+		}// end do - try - catch errors
+	}// end func checkBroadcastable
+
+	public func getCategories () async -> (Array<String>, Array<String>) {
+		guard let url = URL(string: apiBaseString + GetCategories) else { return (Array(), Array()) }
+		let request: URLRequest = makeRequest(url: url, method: .get)
+		do {
+			let result: (data: Data, resp: URLResponse) = try await session.data(for: request)
+			let decoder: JSONDecoder = JSONDecoder()
+			let categoryResult: CategoriesResult = try decoder.decode(CategoriesResult.self, from: result.data)
+			return (categoryResult.data.categories, categoryResult.data.optionalCategories)
+		} catch let error {
+			print(error)
+			return (Array(), Array())
+		}// end do - try - catcg
+	}// end func getCategories
+
+	public func reserveProgram (with entry: Data) async -> String? {
+		guard let url = URL(string: apiBaseString + Programs) else { return nil }
+		var request: URLRequest = makeRequest(url: url, method: .post, contentsType: ContentTypeJSON)
+		request.timeoutInterval = 120.0
+		let savedTimeOutForRequest: TimeInterval = session.configuration.timeoutIntervalForRequest
+		let savedTimeoutForResource: TimeInterval = session.configuration.timeoutIntervalForResource
+		session.configuration.timeoutIntervalForRequest = 120.0
+		session.configuration.timeoutIntervalForResource = 20.0
+		request.httpBody = entry
+		do {
+			let result: (data: Data, resp: URLResponse) = try await session.data(for: request)
+			let decoder: JSONDecoder = JSONDecoder()
+			let response: ReserveProgramResult = try decoder.decode(ReserveProgramResult.self, from: result.data)
+			if let programNumber: String = response.data?.id {
+				session.configuration.timeoutIntervalForRequest = savedTimeOutForRequest
+				session.configuration.timeoutIntervalForResource = savedTimeoutForResource
+				return programNumber
+			}
+		} catch let error {
+			print(error)
+		}
+		session.configuration.timeoutIntervalForRequest = savedTimeOutForRequest
+		session.configuration.timeoutIntervalForResource = savedTimeoutForResource
+		return nil
+	}
 
 		// MARK: - Internal methods
 		// MARK: - Private methods
