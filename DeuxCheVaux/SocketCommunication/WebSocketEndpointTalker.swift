@@ -125,7 +125,6 @@ public final class WebSocketEndpointTalker: NSObject, WebSocketDelegate {
 		// MARK: - Computed Properties
 		// MARK: - Outlets
 		// MARK: - Member Variables
-	private weak var runLoop: RunLoop? = DeuxCheVaux.shared.runLoop
 	private var endpoint: WebSocket
 	private var keepSeatInterval: Int = 30
 	private var roomInfoHandler: OpenEndpointHander? = nil
