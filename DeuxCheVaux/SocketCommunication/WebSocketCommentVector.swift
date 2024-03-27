@@ -157,7 +157,7 @@ public protocol WebSocketCommentVectorDelegate: AnyObject  {
 	func commentVector (commentVector vector: WebSocketCommentVector, didRecieveComment comment: ChatElements, lastPastComment last: Bool)
 }// end protocol WebSocketCommentVectorDelegate
 
-public final class WebSocketCommentVector: NSObject {
+public final class WebSocketCommentVector: NSObject, WebSocketDelegate {
 		// MARK: Class variables
 		// MARK: - Class methods
 		// MARK: - Properties
