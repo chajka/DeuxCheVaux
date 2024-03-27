@@ -158,9 +158,8 @@ public final class WebSocketEndpointTalker: NSObject, WebSocketDelegate {
 		connecting = true
 		roomInfoHandler = handler
 		setupKeepSeatTimer()
-		setupSocketEventHandler()
-		endpoint.open()
-		endpoint.send(text: StartWatching)
+		endpoint.connect()
+		endpoint.write(string: StartWatching)
 	}// end open
 
 	public func close () {
