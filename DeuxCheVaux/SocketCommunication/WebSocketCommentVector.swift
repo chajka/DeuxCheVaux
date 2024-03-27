@@ -200,6 +200,10 @@ public final class WebSocketCommentVector: NSObject, WebSocketDelegate {
 		}
 		let userAgent: String = DeuxCheVaux.shared.userAgent
 		request.addValue(userAgent, forHTTPHeaderField: UserAgentKey)
+		request.addValue(SubProtocol, forHTTPHeaderField: SubProtocolHeader)
+		socket = WebSocket(request: request)
+		super.init()
+		socket.delegate = self
 	}// end init
 
 	deinit {
