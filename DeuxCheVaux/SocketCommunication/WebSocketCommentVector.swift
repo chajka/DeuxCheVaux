@@ -320,5 +320,42 @@ public final class WebSocketCommentVector: NSObject, WebSocketDelegate {
 		}// end optional binding check of keep alive timer
 	}// end cleanupKeepAliveTimer
 
+	private func processMessage (message: String) {
+		let text: NSString = message as NSString
+		guard let json: Data = (message as String).data(using: String.Encoding.utf8) else { return }
+		let decoder: JSONDecoder = JSONDecoder()
+		let messageType: String? = text.components(separatedBy: MessageSeparators).compactMap{ $0 != "" ? $0 : nil }.first
+		if let messageType: String = messageType, let type: ElementType = ElementType(rawValue: messageType) {
+			switch type {
+			case .thread:
+				do {
+					let info: ThreadResult = try decoder.decode(ThreadResult.self, from: json)
+					ticket = info.thread.ticket
+					if let last_res: Int = info.thread.last_res {
+						lastRes = last_res
+					} else {
+						lastRes = 0
+					}// end optional binding check for last_res
+				} catch let error {
+					Swift.print("Error: \(error.localizedDescription),\nDroped \(message)")
+				}// end do try - catch decode json
+			case .chat:
+				do {
+					let chat: ChatResult = try decoder.decode(ChatResult.self, from: json)
+					let last: Bool = lastRes == chat.chat.no
+					delegate?.commentVector(commentVector: self, didRecieveComment: chat.chat, lastPastComment: last)
+				} catch let error {
+					Swift.print("Error: \(error.localizedDescription),\nDroped \(message)")
+				}
+			case .chat_result:
+				break
+			case .type:
+				break
+			}// end switch case by message type
+		} else {
+			Swift.print("Droped \(message)")
+		}// end optional binding check of known element or not.
+	}// end processMessage
+
 		// MARK: - Delegates
 }// end WebSocketCommentVector
