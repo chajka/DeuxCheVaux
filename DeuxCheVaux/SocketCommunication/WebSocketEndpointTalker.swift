@@ -174,7 +174,7 @@ public final class WebSocketEndpointTalker: NSObject, WebSocketDelegate {
 		do {
 			let json: Data = try encoder.encode(comment)
 			if let postComment: String = String(data: json, encoding: .utf8) {
-				endpoint.send(text: postComment)
+				endpoint.write(string: postComment)
 			}// end optional binding check for json data convert to string
 		} catch let error {
 			print("post comment json encode error \(error.localizedDescription)")
@@ -186,7 +186,7 @@ public final class WebSocketEndpointTalker: NSObject, WebSocketDelegate {
 		keepSeatTimer = DispatchSource.makeTimerSource()
 		if let timer: DispatchSourceTimer = keepSeatTimer {
 			timer.setEventHandler {
-				self.endpoint.send(text: KeepSeat)
+				self.endpoint.write(string: KeepSeat)
 			}// end event Handler
 		}// end optional binding check for keep seat timer
 	}// end func setupKeepSeatTimer
