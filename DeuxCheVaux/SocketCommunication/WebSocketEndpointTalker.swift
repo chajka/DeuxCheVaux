@@ -7,7 +7,7 @@
 //
 
 import Cocoa
-import SwiftWebSocket
+import Starscream
 
 fileprivate let StartWatching: String = "{\"type\":\"startWatching\",\"data\":{}}"
 fileprivate let Pong: String = "{\"type\":\"pong\"}"
@@ -115,7 +115,7 @@ public protocol HeartbeatDelegate: AnyObject {
 
 public typealias OpenEndpointHander = (_ websocketURI: URL, _ threadId: String, _ yourpostkey: String) -> Void
 
-public final class WebSocketEndpointTalker: NSObject {
+public final class WebSocketEndpointTalker: NSObject, WebSocketDelegate {
 		// MARK:   Class Variables
 		// MARK: - Class Methods
 		// MARK: - Properties
@@ -125,7 +125,6 @@ public final class WebSocketEndpointTalker: NSObject {
 		// MARK: - Computed Properties
 		// MARK: - Outlets
 		// MARK: - Member Variables
-	private weak var runLoop: RunLoop? = DeuxCheVaux.shared.runLoop
 	private var endpoint: WebSocket
 	private var keepSeatInterval: Int = 30
 	private var roomInfoHandler: OpenEndpointHander? = nil
@@ -139,13 +138,9 @@ public final class WebSocketEndpointTalker: NSObject {
 		var request: URLRequest = URLRequest(url: self.url)
 		request.addValue(DeuxCheVaux.shared.userAgent, forHTTPHeaderField: UserAgentKey)
 		request.addValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
-		if let runLoop: RunLoop = self.runLoop {
-			endpoint = WebSocket(request: request, runLoop: runLoop)
-		} else {
-			endpoint = WebSocket(request: request)
-		}// end optional binding check for runLoop
-		endpoint.compression.on = true
-		endpoint.allowSelfSignedSSL = true
+		endpoint = WebSocket(request: request)
+		super.init()
+		endpoint.delegate = self
 	}// end init
 
 	deinit {
@@ -163,14 +158,13 @@ public final class WebSocketEndpointTalker: NSObject {
 		connecting = true
 		roomInfoHandler = handler
 		setupKeepSeatTimer()
-		setupSocketEventHandler()
-		endpoint.open()
-		endpoint.send(text: StartWatching)
+		endpoint.connect()
+		endpoint.write(string: StartWatching)
 	}// end open
 
 	public func close () {
 		connecting = false
-		endpoint.close()
+		endpoint.disconnect()
 	}// end close
 
 	public func postComment (comment: String, vpos: Int, isAnonymous: Bool, color: String? = nil, size: String? = nil, position: String? = nil, font: String? = nil) {
@@ -180,7 +174,7 @@ public final class WebSocketEndpointTalker: NSObject {
 		do {
 			let json: Data = try encoder.encode(comment)
 			if let postComment: String = String(data: json, encoding: .utf8) {
-				endpoint.send(text: postComment)
+				endpoint.write(string: postComment)
 			}// end optional binding check for json data convert to string
 		} catch let error {
 			print("post comment json encode error \(error.localizedDescription)")
@@ -192,95 +186,113 @@ public final class WebSocketEndpointTalker: NSObject {
 		keepSeatTimer = DispatchSource.makeTimerSource()
 		if let timer: DispatchSourceTimer = keepSeatTimer {
 			timer.setEventHandler {
-				self.endpoint.send(text: KeepSeat)
+				self.endpoint.write(string: KeepSeat)
 			}// end event Handler
 		}// end optional binding check for keep seat timer
 	}// end func setupKeepSeatTimer
 
-	private func setupSocketEventHandler () {
-		endpoint.event.open = {
-		}// end open event
-
-		endpoint.event.close = { (code: Int, reason: String, clean: Bool) in
-			if self.connecting {
-				self.endpoint.open()
-			}// end if conecting
-			print("talker code: \(code), reason: \(reason), clean: \(clean)")
-		}// end close event
-
-		endpoint.event.error = { (error: Error) in
-			print("talker error: \(error)")
-		}// end error event
-
-		endpoint.event.message = { [weak self] (message: Any) in
-			guard let weakSelf = self, let json: Data = (message as? String)?.data(using: String.Encoding.utf8) else { return }
-			let decoder: JSONDecoder = JSONDecoder()
-			do {
-				let messageType: MessageType = try decoder.decode(MessageType.self, from: json)
-				if let type: MessageKind = MessageKind(rawValue: messageType.type) {
-					switch type {
-					case .seat:
-						do {
-							guard let timer: DispatchSourceTimer = weakSelf.keepSeatTimer else { return }
-							let seat: Seat = try decoder.decode(Seat.self, from: json)
-							weakSelf.keepSeatInterval = seat.data.keepIntervalSec
-							timer.schedule(deadline: DispatchTime.now(), repeating: .seconds(weakSelf.keepSeatInterval), leeway: .milliseconds(10))
-							timer.resume()
-						} catch let error {
-							print("seat decode error \(error.localizedDescription)")
-						}
-					case .akashic:
-						break
-					case .stream:
-						break
-					case .room:
-						do {
-							let room: RoomInfo = try decoder.decode(RoomInfo.self, from: json)
-							if let handler: OpenEndpointHander = weakSelf.roomInfoHandler {
-								handler(URL(string: room.data.messageServer.uri)!, room.data.threadId, room.data.yourPostKey)
-							}// end if Optional binding check for roomInfoHandler
-						} catch let error {
-							print("room decode error \(error.localizedDescription)")
-						}
-					case .serverTime:
-						break
-					case .statistics:
-						do {
-							let statistics: Statistics = try decoder.decode(Statistics.self, from: json)
-							let stat: StatData = statistics.data
-							if let delegate: HeartbeatDelegate = weakSelf.delegate {
-								delegate.heartbeat(viewer: stat.viewers, comments: stat.comments, ad: stat.adPoints, gift: stat.giftPoints)
-							}// end optional binding check for heartbeat delegate
-						} catch let error {
-							print("statistics decode error \(error.localizedDescription)")
-						}// end do try - catch decode statistics json
-					case .schedule:
-						break
-					case .ping:
-						weakSelf.endpoint.send(text: Pong)
-					case .disconnect:
-						do {
-							let message: Disconnect = try decoder.decode(Disconnect.self, from: json)
-							print("Disconnect reason \(message.data.reason)")
-						} catch let error {
-							print("Disconnect decode error \(error.localizedDescription)")
-						}// end do try - catch decode json
-					case .reconnect:
-						print("reconnect message from ws endpoint")
-					case .postCommentResult:
-						break
-					case .tagUpdated:
-						break
+	private func processMessage (message: String) {
+		guard let json: Data = message.data(using: String.Encoding.utf8) else { return }
+		let decoder: JSONDecoder = JSONDecoder()
+		do {
+			let messageType: MessageType = try decoder.decode(MessageType.self, from: json)
+			if let type: MessageKind = MessageKind(rawValue: messageType.type) {
+				switch type {
+				case .seat:
+					do {
+						guard let timer: DispatchSourceTimer = keepSeatTimer else { return }
+						let seat: Seat = try decoder.decode(Seat.self, from: json)
+						keepSeatInterval = seat.data.keepIntervalSec
+						timer.schedule(deadline: DispatchTime.now(), repeating: .seconds(keepSeatInterval), leeway: .milliseconds(10))
+						timer.resume()
+					} catch let error {
+						print("seat decode error \(error.localizedDescription)")
 					}
-				} else {
-					print("incorrect type : \(message)")
-				}// end optional binding check for MessageKind
-				
-			} catch let error {
-				print("type json decode error \(error.localizedDescription)")
-			}
-		}
-	}// end func setupSocketEventHandler
+				case .akashic:
+					break
+				case .stream:
+					break
+				case .room:
+					do {
+						let room: RoomInfo = try decoder.decode(RoomInfo.self, from: json)
+						if let handler: OpenEndpointHander = roomInfoHandler {
+							handler(URL(string: room.data.messageServer.uri)!, room.data.threadId, room.data.yourPostKey)
+						}// end if Optional binding check for roomInfoHandler
+					} catch let error {
+						print("room decode error \(error.localizedDescription)")
+					}
+				case .serverTime:
+					break
+				case .statistics:
+					do {
+						let statistics: Statistics = try decoder.decode(Statistics.self, from: json)
+						let stat: StatData = statistics.data
+						if let delegate: HeartbeatDelegate = delegate {
+							delegate.heartbeat(viewer: stat.viewers, comments: stat.comments, ad: stat.adPoints, gift: stat.giftPoints)
+						}// end optional binding check for heartbeat delegate
+					} catch let error {
+						print("statistics decode error \(error.localizedDescription)")
+					}// end do try - catch decode statistics json
+				case .schedule:
+					break
+				case .ping:
+					endpoint.write(string: Pong)
+				case .disconnect:
+					do {
+						let message: Disconnect = try decoder.decode(Disconnect.self, from: json)
+						print("Disconnect reason \(message.data.reason)")
+					} catch let error {
+						print("Disconnect decode error \(error.localizedDescription)")
+					}// end do try - catch decode json
+				case .reconnect:
+					print("reconnect message from ws endpoint")
+				case .postCommentResult:
+					break
+				case .tagUpdated:
+					break
+				}
+			} else {
+				print("incorrect type : \(message)")
+			}// end optional binding check for MessageKind
+			
+		} catch let error {
+			print("type json decode error \(error.localizedDescription)")
+		}// end do try catch
+	}// end processMessage
 
 		// MARK: - Delegate / Protocol clients
+	public func didReceive (event: Starscream.WebSocketEvent, client: any Starscream.WebSocketClient) {
+		switch event {
+		case .connected (_):
+			break
+		case .disconnected (_, _):
+			if (connecting) {
+				endpoint.connect()
+			}// end if connectiing
+			break
+		case .text (let text):
+			processMessage(message: text)
+			break
+		case .binary (_):
+			break
+		case .ping (_):
+			break
+		case .pong (_):
+			break
+		case .viabilityChanged (_):
+			break
+		case .reconnectSuggested (_):
+			break
+		case .cancelled:
+			if (connecting) {
+				endpoint.connect()
+			}// end if connectiing
+			break
+		case .error (let error):
+			print("Websocket error: \(String(describing: error))")
+			break
+		case .peerClosed:
+			break
+		}// end switch by event
+	}// end didReceive
 }// end class WebSocketEndpointTalker
