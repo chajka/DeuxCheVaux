@@ -164,7 +164,7 @@ public final class WebSocketEndpointTalker: NSObject, WebSocketDelegate {
 
 	public func close () {
 		connecting = false
-		endpoint.close()
+		endpoint.disconnect()
 	}// end close
 
 	public func postComment (comment: String, vpos: Int, isAnonymous: Bool, color: String? = nil, size: String? = nil, position: String? = nil, font: String? = nil) {
