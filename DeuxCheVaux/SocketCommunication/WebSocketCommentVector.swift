@@ -358,4 +358,50 @@ public final class WebSocketCommentVector: NSObject, WebSocketDelegate {
 	}// end processMessage
 
 		// MARK: - Delegates
+	public func didReceive (event: Starscream.WebSocketEvent, client: any Starscream.WebSocketClient) {
+		switch event {
+		case .connected (_):
+			let threadData: ThreadRequest = ThreadRequest(thread: thread, uid: userIdentifier, resFrom: history)
+			let commentRequest: CommentRequest = CommentRequest(thread: threadData)
+			do {
+				let json: Data = try JSONEncoder().encode(commentRequest)
+				if let request: String = String(data: json, encoding: .utf8) {
+					socket.write(string: "\(request)")
+					history = 0
+				}
+			} catch let error {
+				print(error.localizedDescription)
+			}
+			break
+		case .disconnected (_, _):
+			if (connecting) {
+				socket.connect()
+			}// end if connectiing
+			break
+		case .text (let text):
+			processMessage(message: text)
+			break
+		case .binary (_):
+			break
+		case .ping (_):
+			break
+		case .pong (_):
+			break
+		case .viabilityChanged (_):
+			break
+		case .reconnectSuggested (_):
+			break
+		case .cancelled:
+			if (connecting) {
+				socket.connect()
+			}// end if connectiing
+			break
+		case .error (let error):
+			print("Websocket error: \(String(describing: error))")
+			break
+		case .peerClosed:
+			break
+		}// end switch by event
+
+	}// end didReceive
 }// end WebSocketCommentVector
