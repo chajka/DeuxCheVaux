@@ -115,7 +115,7 @@ public protocol HeartbeatDelegate: AnyObject {
 
 public typealias OpenEndpointHander = (_ websocketURI: URL, _ threadId: String, _ yourpostkey: String) -> Void
 
-public final class WebSocketEndpointTalker: NSObject {
+public final class WebSocketEndpointTalker: NSObject, WebSocketDelegate {
 		// MARK:   Class Variables
 		// MARK: - Class Methods
 		// MARK: - Properties
