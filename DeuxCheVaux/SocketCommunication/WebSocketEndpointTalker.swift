@@ -7,7 +7,7 @@
 //
 
 import Cocoa
-import SwiftWebSocket
+import Starscream
 
 fileprivate let StartWatching: String = "{\"type\":\"startWatching\",\"data\":{}}"
 fileprivate let Pong: String = "{\"type\":\"pong\"}"
