@@ -7,7 +7,7 @@
 //
 
 import Cocoa
-import SwiftWebSocket
+import Starscream
 
 fileprivate let ThreadVersion: String = "20061206"
 fileprivate let ServiceName: String = "LIVE"
