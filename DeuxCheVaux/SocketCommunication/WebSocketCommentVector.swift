@@ -200,13 +200,6 @@ public final class WebSocketCommentVector: NSObject, WebSocketDelegate {
 		}
 		let userAgent: String = DeuxCheVaux.shared.userAgent
 		request.addValue(userAgent, forHTTPHeaderField: UserAgentKey)
-		if let runLoop: RunLoop = self.runLoop {
-			socket = WebSocket(request: request, subProtocols: [SubProtocol], runLoop: runLoop)
-		} else {
-			socket = WebSocket(request: request, subProtocols: [SubProtocol])
-		}
-		socket.compression.on = true
-		socket.allowSelfSignedSSL = true
 	}// end init
 
 	deinit {
