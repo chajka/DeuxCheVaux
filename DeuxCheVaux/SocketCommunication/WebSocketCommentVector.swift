@@ -7,10 +7,11 @@
 //
 
 import Cocoa
-import SwiftWebSocket
+import Starscream
 
 fileprivate let ThreadVersion: String = "20061206"
 fileprivate let ServiceName: String = "LIVE"
+fileprivate let SubProtocolHeader: String = "Sec-WebSocket-Protocol"
 fileprivate let SubProtocol: String = "msg.nicovideo.jp#json"
 fileprivate let Ticket: String = "ticket"
 fileprivate let Watch: String = "watch"
@@ -156,7 +157,7 @@ public protocol WebSocketCommentVectorDelegate: AnyObject  {
 	func commentVector (commentVector vector: WebSocketCommentVector, didRecieveComment comment: ChatElements, lastPastComment last: Bool)
 }// end protocol WebSocketCommentVectorDelegate
 
-public final class WebSocketCommentVector: NSObject {
+public final class WebSocketCommentVector: NSObject, WebSocketDelegate {
 		// MARK: Class variables
 		// MARK: - Class methods
 		// MARK: - Properties
@@ -199,13 +200,10 @@ public final class WebSocketCommentVector: NSObject {
 		}
 		let userAgent: String = DeuxCheVaux.shared.userAgent
 		request.addValue(userAgent, forHTTPHeaderField: UserAgentKey)
-		if let runLoop: RunLoop = self.runLoop {
-			socket = WebSocket(request: request, subProtocols: [SubProtocol], runLoop: runLoop)
-		} else {
-			socket = WebSocket(request: request, subProtocols: [SubProtocol])
-		}
-		socket.compression.on = true
-		socket.allowSelfSignedSSL = true
+		request.addValue(SubProtocol, forHTTPHeaderField: SubProtocolHeader)
+		socket = WebSocket(request: request)
+		super.init()
+		socket.delegate = self
 	}// end init
 
 	deinit {
@@ -216,9 +214,9 @@ public final class WebSocketCommentVector: NSObject {
 		// MARK: - Actions
 		// MARK: - Public methods
 	public func open (history: Int) {
+		self.history = history
 		connecting = true
-		setupSocketEventHandler(history: history)
-		socket.open()
+		socket.connect()
 		keepaliveTimer = setupKeepAliveTimer()
 		keepaliveTimer?.resume()
 	}// end open
@@ -226,86 +224,20 @@ public final class WebSocketCommentVector: NSObject {
 	public func close () {
 		connecting = false
 		cleanupKeepAliveTimer()
-		socket.close()
+		socket.disconnect()
 	}// end close
 
 		// MARK: - Internal methods
 		// MARK: - Private methods
-	private func setupSocketEventHandler (history: Int) {
-		self.history = history
-		socket.event.open = { [weak self] in
-			guard let weakSelf = self else { return }
-			let threadData: ThreadRequest = ThreadRequest(thread: weakSelf.thread, uid: weakSelf.userIdentifier, resFrom: weakSelf.history)
-			let commentRequest: CommentRequest = CommentRequest(thread: threadData)
-			do {
-				let json: Data = try JSONEncoder().encode(commentRequest)
-				if let request: String = String(data: json, encoding: .utf8) {
-					weakSelf.socket.send(text: "\(request)")
-					weakSelf.history = 0
-				}
-			} catch let error {
-				print(error.localizedDescription)
-			}
-		}// end open event
-
-		socket.event.close = { [weak self] (code: Int, reason: String, clean: Bool) in
-			guard let weakSelf = self else { return }
-			if weakSelf.connecting {
-				weakSelf.socket.open()
-			}// end if connected
-			print("socket \(weakSelf.roomLabel) code: \(code), reason: \(reason), clean: \(clean)")
-		}// end close event
-
-		socket.event.error = { (error: Error) in
-			print("socket \(self.roomLabel) error: \(error)")
-		}// end error event
-
-		socket.event.message = { [weak self] (message: Any) in
-			guard let weakSelf = self, let text: NSString = message as? NSString, let json: Data = (message as? String)?.data(using: String.Encoding.utf8) else { return }
-			let decoder: JSONDecoder = JSONDecoder()
-			let messageType: String? = text.components(separatedBy: MessageSeparators).compactMap{ $0 != "" ? $0 : nil }.first
-			if let messageType: String = messageType, let type: ElementType = ElementType(rawValue: messageType) {
-				switch type {
-				case .thread:
-					do {
-						let info: ThreadResult = try decoder.decode(ThreadResult.self, from: json)
-						weakSelf.ticket = info.thread.ticket
-						if let last_res: Int = info.thread.last_res {
-							weakSelf.lastRes = last_res
-						} else {
-							weakSelf.lastRes = 0
-						}// end optional binding check for last_res
-					} catch let error {
-						Swift.print("Error: \(error.localizedDescription),\nDroped \(message)")
-					}// end do try - catch decode json
-				case .chat:
-					do {
-						let chat: ChatResult = try decoder.decode(ChatResult.self, from: json)
-						let last: Bool = weakSelf.lastRes == chat.chat.no
-						weakSelf.delegate?.commentVector(commentVector: weakSelf, didRecieveComment: chat.chat, lastPastComment: last)
-					} catch let error {
-						Swift.print("Error: \(error.localizedDescription),\nDroped \(message)")
-					}
-				case .chat_result:
-					break
-				case .type:
-					break
-				}// end switch case by message type
-			} else {
-				Swift.print("Droped \(message)")
-			}// end optional binding check of known element or not.
-		}// end message event
-	}// end setupSocketEventHandler
-
 	private func setupKeepAliveTimer () -> DispatchSourceTimer {
 		let keepAlive: DispatchSourceTimer = DispatchSource.makeTimerSource(flags: DispatchSource.TimerFlags.strict, queue: background)
 		keepAlive.setEventHandler() { [weak self] in
 			guard let weakSelf = self else { return }
-			weakSelf.socket.ping("{\"content\":\"rs:0\"}")
-			weakSelf.socket.ping("{\"content\":\"ps:0\"}")
-			weakSelf.socket.send(text: "")
-			weakSelf.socket.ping("{\"content\":\"pf:0\"}")
-			weakSelf.socket.ping("{\"content\":\"rf:0\"}")
+			weakSelf.socket.write(ping: "{\"content\":\"rs:0\"}".data(using: .utf8)!)
+			weakSelf.socket.write(ping: "{\"content\":\"ps:0\"}".data(using: .utf8)!)
+			weakSelf.socket.write(string: "")
+			weakSelf.socket.write(ping: "{\"content\":\"pf:0\"}".data(using: .utf8)!)
+			weakSelf.socket.write(ping: "{\"content\":\"rf:0\"}".data(using: .utf8)!)
 		}// end event handler closure
 
 		keepAlive.schedule(deadline: DispatchTime(uptimeNanoseconds: StartAfter), repeating: Minute, leeway: DefaultLeeway)
@@ -322,5 +254,88 @@ public final class WebSocketCommentVector: NSObject {
 		}// end optional binding check of keep alive timer
 	}// end cleanupKeepAliveTimer
 
+	private func processMessage (message: String) {
+		let text: NSString = message as NSString
+		guard let json: Data = (message as String).data(using: String.Encoding.utf8) else { return }
+		let decoder: JSONDecoder = JSONDecoder()
+		let messageType: String? = text.components(separatedBy: MessageSeparators).compactMap{ $0 != "" ? $0 : nil }.first
+		if let messageType: String = messageType, let type: ElementType = ElementType(rawValue: messageType) {
+			switch type {
+			case .thread:
+				do {
+					let info: ThreadResult = try decoder.decode(ThreadResult.self, from: json)
+					ticket = info.thread.ticket
+					if let last_res: Int = info.thread.last_res {
+						lastRes = last_res
+					} else {
+						lastRes = 0
+					}// end optional binding check for last_res
+				} catch let error {
+					Swift.print("Error: \(error.localizedDescription),\nDroped \(message)")
+				}// end do try - catch decode json
+			case .chat:
+				do {
+					let chat: ChatResult = try decoder.decode(ChatResult.self, from: json)
+					let last: Bool = lastRes == chat.chat.no
+					delegate?.commentVector(commentVector: self, didRecieveComment: chat.chat, lastPastComment: last)
+				} catch let error {
+					Swift.print("Error: \(error.localizedDescription),\nDroped \(message)")
+				}
+			case .chat_result:
+				break
+			case .type:
+				break
+			}// end switch case by message type
+		} else {
+			Swift.print("Droped \(message)")
+		}// end optional binding check of known element or not.
+	}// end processMessage
+
 		// MARK: - Delegates
+	public func didReceive (event: Starscream.WebSocketEvent, client: any Starscream.WebSocketClient) {
+		switch event {
+		case .connected (_):
+			let threadData: ThreadRequest = ThreadRequest(thread: thread, uid: userIdentifier, resFrom: history)
+			let commentRequest: CommentRequest = CommentRequest(thread: threadData)
+			do {
+				let json: Data = try JSONEncoder().encode(commentRequest)
+				if let request: String = String(data: json, encoding: .utf8) {
+					socket.write(string: "\(request)")
+					history = 0
+				}
+			} catch let error {
+				print(error.localizedDescription)
+			}
+			break
+		case .disconnected (_, _):
+			if (connecting) {
+				socket.connect()
+			}// end if connectiing
+			break
+		case .text (let text):
+			processMessage(message: text)
+			break
+		case .binary (_):
+			break
+		case .ping (_):
+			break
+		case .pong (_):
+			break
+		case .viabilityChanged (_):
+			break
+		case .reconnectSuggested (_):
+			break
+		case .cancelled:
+			if (connecting) {
+				socket.connect()
+			}// end if connectiing
+			break
+		case .error (let error):
+			print("Websocket error: \(String(describing: error))")
+			break
+		case .peerClosed:
+			break
+		}// end switch by event
+
+	}// end didReceive
 }// end WebSocketCommentVector
