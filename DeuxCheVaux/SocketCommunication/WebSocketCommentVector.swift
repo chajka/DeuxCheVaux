@@ -214,6 +214,7 @@ public final class WebSocketCommentVector: NSObject, WebSocketDelegate {
 		// MARK: - Actions
 		// MARK: - Public methods
 	public func open (history: Int) {
+		self.history = history
 		connecting = true
 		setupSocketEventHandler(history: history)
 		socket.open()
