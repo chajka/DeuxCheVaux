@@ -299,11 +299,11 @@ public final class WebSocketCommentVector: NSObject, WebSocketDelegate {
 		let keepAlive: DispatchSourceTimer = DispatchSource.makeTimerSource(flags: DispatchSource.TimerFlags.strict, queue: background)
 		keepAlive.setEventHandler() { [weak self] in
 			guard let weakSelf = self else { return }
-			weakSelf.socket.ping("{\"content\":\"rs:0\"}")
-			weakSelf.socket.ping("{\"content\":\"ps:0\"}")
-			weakSelf.socket.send(text: "")
-			weakSelf.socket.ping("{\"content\":\"pf:0\"}")
-			weakSelf.socket.ping("{\"content\":\"rf:0\"}")
+			weakSelf.socket.write(ping: "{\"content\":\"rs:0\"}".data(using: .utf8)!)
+			weakSelf.socket.write(ping: "{\"content\":\"ps:0\"}".data(using: .utf8)!)
+			weakSelf.socket.write(string: "")
+			weakSelf.socket.write(ping: "{\"content\":\"pf:0\"}".data(using: .utf8)!)
+			weakSelf.socket.write(ping: "{\"content\":\"rf:0\"}".data(using: .utf8)!)
 		}// end event handler closure
 
 		keepAlive.schedule(deadline: DispatchTime(uptimeNanoseconds: StartAfter), repeating: Minute, leeway: DefaultLeeway)
