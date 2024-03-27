@@ -138,11 +138,6 @@ public final class WebSocketEndpointTalker: NSObject, WebSocketDelegate {
 		var request: URLRequest = URLRequest(url: self.url)
 		request.addValue(DeuxCheVaux.shared.userAgent, forHTTPHeaderField: UserAgentKey)
 		request.addValue(ContentTypeJSON, forHTTPHeaderField: ContentTypeKey)
-		if let runLoop: RunLoop = self.runLoop {
-			endpoint = WebSocket(request: request, runLoop: runLoop)
-		} else {
-			endpoint = WebSocket(request: request)
-		}// end optional binding check for runLoop
 		endpoint.compression.on = true
 		endpoint.allowSelfSignedSSL = true
 	}// end init
