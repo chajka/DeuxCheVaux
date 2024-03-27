@@ -11,6 +11,7 @@ import Starscream
 
 fileprivate let ThreadVersion: String = "20061206"
 fileprivate let ServiceName: String = "LIVE"
+fileprivate let SubProtocolHeader: String = "Sec-WebSocket-Protocol"
 fileprivate let SubProtocol: String = "msg.nicovideo.jp#json"
 fileprivate let Ticket: String = "ticket"
 fileprivate let Watch: String = "watch"
