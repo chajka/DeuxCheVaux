@@ -261,4 +261,38 @@ public final class WebSocketEndpointTalker: NSObject, WebSocketDelegate {
 	}// end processMessage
 
 		// MARK: - Delegate / Protocol clients
+	public func didReceive (event: Starscream.WebSocketEvent, client: any Starscream.WebSocketClient) {
+		switch event {
+		case .connected (_):
+			break
+		case .disconnected (_, _):
+			if (connecting) {
+				endpoint.connect()
+			}// end if connectiing
+			break
+		case .text (let text):
+			processMessage(message: text)
+			break
+		case .binary (_):
+			break
+		case .ping (_):
+			break
+		case .pong (_):
+			break
+		case .viabilityChanged (_):
+			break
+		case .reconnectSuggested (_):
+			break
+		case .cancelled:
+			if (connecting) {
+				endpoint.connect()
+			}// end if connectiing
+			break
+		case .error (let error):
+			print("Websocket error: \(String(describing: error))")
+			break
+		case .peerClosed:
+			break
+		}// end switch by event
+	}// end didReceive
 }// end class WebSocketEndpointTalker
