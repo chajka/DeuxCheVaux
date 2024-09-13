@@ -42,6 +42,11 @@ fileprivate struct ServerTime: Codable {
 	let data: CurrentMS
 }// end struct ServerTime
 
+fileprivate struct ScheduleData: Codable {
+	let begin: String
+	let end: String
+}// end struct ScheduleData
+
 fileprivate struct SeatData: Codable {
 	let keepIntervalSec: Int
 }// end struct SeatData
