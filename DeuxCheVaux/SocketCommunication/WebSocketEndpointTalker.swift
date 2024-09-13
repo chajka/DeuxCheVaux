@@ -58,6 +58,11 @@ fileprivate struct ViewURI: Codable {
 	let hashedUserId: String
 }// end struct ViewURI
 
+fileprivate struct MessageServer: Codable {
+	let type: String
+	let data: ViewURI
+}// end struct MessageServer
+
 fileprivate struct SeatData: Codable {
 	let keepIntervalSec: Int
 }// end struct SeatData
