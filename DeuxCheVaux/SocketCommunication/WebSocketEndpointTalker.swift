@@ -264,6 +264,10 @@ public final class WebSocketEndpointTalker: NSObject, WebSocketDelegate {
 	public func didReceive (event: Starscream.WebSocketEvent, client: any Starscream.WebSocketClient) {
 		switch event {
 		case .connected (_):
+			if (!connecting) {
+				connecting = true
+				endpoint.write(string: StartWatching)
+			}
 			break
 		case .disconnected (_, _):
 			if (connecting) {
