@@ -52,6 +52,12 @@ fileprivate struct Schedule: Codable {
 	let data: ScheduleData
 }// end Schedule
 
+fileprivate struct ViewURI: Codable {
+	let viewUri: String
+	let vposBaseTime: String
+	let hashedUserId: String
+}// end struct ViewURI
+
 fileprivate struct SeatData: Codable {
 	let keepIntervalSec: Int
 }// end struct SeatData
