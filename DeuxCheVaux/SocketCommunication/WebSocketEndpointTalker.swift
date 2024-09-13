@@ -9,7 +9,7 @@
 import Cocoa
 import Starscream
 
-fileprivate let StartWatching: String = "{\"type\":\"startWatching\",\"data\":{}}"
+fileprivate let StartWatching: String = "{\"type\":\"startWatching\",\"data\":{\"reconnect\":false}}"
 fileprivate let Pong: String = "{\"type\":\"pong\"}"
 fileprivate let KeepSeat: String = "{\"type\":\"keepSeat\"}"
 fileprivate let PostCommentType: String = "postComment"
