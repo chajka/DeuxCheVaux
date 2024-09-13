@@ -33,6 +33,10 @@ fileprivate struct MessageType: Codable {
 	let type: String
 }// end struct MessageType
 
+fileprivate struct CurrentMS: Codable {
+	let currentMs: String
+}// end struct CurrentMS
+
 fileprivate struct SeatData: Codable {
 	let keepIntervalSec: Int
 }// end struct SeatData
