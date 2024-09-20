@@ -26,17 +26,6 @@ public struct XMLSocket {
 	}// end func ==
 }// end struct XMLSocket
 
-public struct MessageServer: Equatable {
-	public let webSocket: URL?
-	public let thread: String
-	public let name: String?
-	public let identifier: Int?
-
-	static public func == (lhs: MessageServer, rhs: MessageServer) -> Bool {
-		return (lhs.webSocket == rhs.webSocket) && (lhs.thread == rhs.thread)
-	}// end func ==
-}// end struct MessageServer
-
 public enum SocialType: String, Codable {
 	case community = "community"
 	case channel = "channel"
@@ -163,7 +152,6 @@ public final class ProgramInfo: NSObject {
 	public private(set) var thumbnailURL: URL!
 	public private(set) var canNicoAd: Bool!
 	public private(set) var viewURL: URL!
-	public private(set) var servers: Array<MessageServer> = Array()
 
 		// MARK: - Member variables
 		// MARK: - Constructor/Destructor
