@@ -84,16 +84,7 @@ fileprivate struct Statistics: Codable {
 	let data: StatData
 }// end struct Statistics
 
-fileprivate struct Reason: Codable {
-	let reason: String
-}// end struct Reason
-
-fileprivate struct Disconnect: Codable {
-	let type: String
-	let data: Reason
-}// end struct Disconnect
-
-public enum DisconnectReason: String {
+public enum DisconnectReason: String, Codable{
 	case takeover = "TAKEOVER"
 	case noPermission = "NO_PERMISSION"
 	case endProgram = "END_PROGRAM"
@@ -104,6 +95,15 @@ public enum DisconnectReason: String {
 	case maintenanceIn = "MAINTENANCE_IN"
 	case serverTemporaryUnavailable = "SERVICE_TEMPORARILY_UNAVAILABLE"
 }// end enum DisconnectReason
+
+fileprivate struct Reason: Codable {
+	let reason: DisconnectReason
+}// end struct Reason
+
+fileprivate struct Disconnect: Codable {
+	let type: String
+	let data: Reason
+}// end struct Disconnect
 
 fileprivate struct PostCommentData: Codable {
 	let text: String
