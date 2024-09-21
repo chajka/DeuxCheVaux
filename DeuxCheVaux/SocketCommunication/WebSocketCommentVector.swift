@@ -85,64 +85,6 @@ struct ThreadResult: Codable {
 	let thread: ThreadInfo
 }// end struct ThreadResult
 
-public struct ChatElements: Codable {
-	public let thread: String
-	public let vpos: TimeInterval
-	public let no: Int
-	public let user_id: String
-	public let content: String
-	public let date: TimeInterval
-	public let date_usec: TimeInterval
-	public let premium: Int?
-	public let mail: String?
-	public let anonymity: Int?
-	public let locale: UserLanguage?
-	
-	public static var logHeader: String {
-		get {
-			var message: String = String()
-
-			message += "\"thread\""
-			message += ",\"vpos\""
-			message += ",\"no\""
-			message += ",\"user_id\""
-			message += ",\"content\""
-			message += ",\"date\""
-			message += ",\"date_usec\""
-			message += ",\"premium\""
-			message += ",\"mail\""
-			message += ",\"anonymity\""
-			message += ",\"locale\""
-
-			return message
-		}// end get
-	}// end computed property log header
-
-	public var logMessage: String {
-		get {
-			var message: String = String()
-
-			message += "\"\(thread)\""
-			message += ",\"\(vpos)\""
-			message += ",\"\(no)\""
-			message += ",\"\(user_id)\""
-			message += ",\"\(content.replacingOccurrences(of: "\"", with: "\"\""))\""
-			message += ",\"\(date)\""
-			message += ",\"\(date_usec)\""
-			message += ",\"\(String(describing: premium != nil ? premium! : 0))\""
-			message += ",\"\(mail ?? "")\""
-			message += ",\"\(anonymity ?? 0)\""
-			message += ",\"\(locale?.rawValue ?? UserLanguage.ja.rawValue)\""
-
-			return message
-		}// end get
-	}// end logmesage
-}// end struct ChatElement
-
-struct ChatResult: Codable {
-	let chat: ChatElements
-}// end struct ChatResult
-
 fileprivate enum ElementType: String {
 	case thread
 	case type

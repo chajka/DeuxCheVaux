@@ -9,7 +9,7 @@
 import Cocoa
 import Starscream
 
-fileprivate let StartWatching: String = "{\"type\":\"startWatching\",\"data\":{}}"
+fileprivate let StartWatching: String = "{\"type\":\"startWatching\",\"data\":{\"reconnect\":false}}"
 fileprivate let Pong: String = "{\"type\":\"pong\"}"
 fileprivate let KeepSeat: String = "{\"type\":\"keepSeat\"}"
 fileprivate let PostCommentType: String = "postComment"
@@ -18,7 +18,7 @@ fileprivate enum MessageKind: String {
 	case seat = "seat"
 	case akashic = "akashic"
 	case stream = "stream"
-	case room = "room"
+	case messageServer = "messageServer"
 	case serverTime = "serverTime"
 	case statistics = "statistics"
 	case schedule = "schedule"
@@ -33,24 +33,35 @@ fileprivate struct MessageType: Codable {
 	let type: String
 }// end struct MessageType
 
-fileprivate struct MessageServerData: Codable {
-	let uri: String
-	let type: String
-}// end struct MessageServerData
+fileprivate struct CurrentMS: Codable {
+	let currentMs: String
+}// end struct CurrentMS
 
-fileprivate struct RoomData: Codable {
-	let messageServer: MessageServerData
-	let name: String
-	let threadId: String
-	let isFirst: Bool
-	let waybackkey: String
-	let yourPostKey: String
-}// end struct RoomData
-
-fileprivate struct RoomInfo: Codable {
+fileprivate struct ServerTime: Codable {
 	let type: String
-	let data: RoomData
-}// end struct RoomType
+	let data: CurrentMS
+}// end struct ServerTime
+
+fileprivate struct ScheduleData: Codable {
+	let begin: String
+	let end: String
+}// end struct ScheduleData
+
+fileprivate struct Schedule: Codable {
+	let type: String
+	let data: ScheduleData
+}// end Schedule
+
+fileprivate struct ViewURI: Codable {
+	let viewUri: String
+	let vposBaseTime: String
+	let hashedUserId: String
+}// end struct ViewURI
+
+fileprivate struct MessageServer: Codable {
+	let type: String
+	let data: ViewURI
+}// end struct MessageServer
 
 fileprivate struct SeatData: Codable {
 	let keepIntervalSec: Int
@@ -73,16 +84,7 @@ fileprivate struct Statistics: Codable {
 	let data: StatData
 }// end struct Statistics
 
-fileprivate struct Reason: Codable {
-	let reason: String
-}// end struct Reason
-
-fileprivate struct Disconnect: Codable {
-	let type: String
-	let data: Reason
-}// end struct Disconnect
-
-public enum DisconnectReason: String {
+public enum DisconnectReason: String, Codable{
 	case takeover = "TAKEOVER"
 	case noPermission = "NO_PERMISSION"
 	case endProgram = "END_PROGRAM"
@@ -93,6 +95,15 @@ public enum DisconnectReason: String {
 	case maintenanceIn = "MAINTENANCE_IN"
 	case serverTemporaryUnavailable = "SERVICE_TEMPORARILY_UNAVAILABLE"
 }// end enum DisconnectReason
+
+fileprivate struct Reason: Codable {
+	let reason: DisconnectReason
+}// end struct Reason
+
+fileprivate struct Disconnect: Codable {
+	let type: String
+	let data: Reason
+}// end struct Disconnect
 
 fileprivate struct PostCommentData: Codable {
 	let text: String
@@ -113,7 +124,11 @@ public protocol HeartbeatDelegate: AnyObject {
 	func heartbeat (viewer: Int, comments: Int, ad: Int?, gift: Int?)
 }// end protocol heartbeatDelegate
 
-public typealias OpenEndpointHander = (_ websocketURI: URL, _ threadId: String, _ yourpostkey: String) -> Void
+public protocol ConnectionDelegate: AnyObject {
+	func disconnected ()
+}
+
+public typealias OpenEndpointHander = (_ viewURL: String, _ vposBaseAt: Date) -> Void
 
 public final class WebSocketEndpointTalker: NSObject, WebSocketDelegate {
 		// MARK:   Class Variables
@@ -121,6 +136,7 @@ public final class WebSocketEndpointTalker: NSObject, WebSocketDelegate {
 		// MARK: - Properties
 	public let url: URL
 	public weak var delegate: HeartbeatDelegate?
+	public weak var connectionDelegate: ConnectionDelegate?
 
 		// MARK: - Computed Properties
 		// MARK: - Outlets
@@ -155,11 +171,9 @@ public final class WebSocketEndpointTalker: NSObject, WebSocketDelegate {
 		// MARK: - Actions
 		// MARK: - Public Methods
 	public func open (handler: OpenEndpointHander? = nil) {
-		connecting = true
 		roomInfoHandler = handler
 		setupKeepSeatTimer()
 		endpoint.connect()
-		endpoint.write(string: StartWatching)
 	}// end open
 
 	public func close () {
@@ -212,15 +226,20 @@ public final class WebSocketEndpointTalker: NSObject, WebSocketDelegate {
 					break
 				case .stream:
 					break
-				case .room:
+				case .messageServer:
 					do {
-						let room: RoomInfo = try decoder.decode(RoomInfo.self, from: json)
-						if let handler: OpenEndpointHander = roomInfoHandler {
-							handler(URL(string: room.data.messageServer.uri)!, room.data.threadId, room.data.yourPostKey)
-						}// end if Optional binding check for roomInfoHandler
+						let messageServer: MessageServer = try decoder.decode(MessageServer.self, from: json)
+						let viewURL: String = messageServer.data.viewUri
+						let RFC3339DateFormatter = DateFormatter()
+						RFC3339DateFormatter.locale = Locale(identifier: "en_US_POSIX")
+						RFC3339DateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZZZZZ"
+						RFC3339DateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
+						if let date: Date = RFC3339DateFormatter.date(from: messageServer.data.vposBaseTime), let roomInfoHandler: OpenEndpointHander = roomInfoHandler {
+							roomInfoHandler(viewURL, date)
+						}// end if data and url is parsed.
 					} catch let error {
-						print("room decode error \(error.localizedDescription)")
-					}
+						print("message server decode error \(error.localizedDescription)")
+					}// end try deocode message server
 				case .serverTime:
 					break
 				case .statistics:
@@ -241,6 +260,11 @@ public final class WebSocketEndpointTalker: NSObject, WebSocketDelegate {
 					do {
 						let message: Disconnect = try decoder.decode(Disconnect.self, from: json)
 						print("Disconnect reason \(message.data.reason)")
+						if message.data.reason == .endProgram {
+							if let delegate: ConnectionDelegate = connectionDelegate {
+								delegate.disconnected()
+							}// end optional binding
+						}// end if reason is end program
 					} catch let error {
 						print("Disconnect decode error \(error.localizedDescription)")
 					}// end do try - catch decode json
@@ -264,6 +288,10 @@ public final class WebSocketEndpointTalker: NSObject, WebSocketDelegate {
 	public func didReceive (event: Starscream.WebSocketEvent, client: any Starscream.WebSocketClient) {
 		switch event {
 		case .connected (_):
+			if (!connecting) {
+				connecting = true
+				endpoint.write(string: StartWatching)
+			}
 			break
 		case .disconnected (_, _):
 			if (connecting) {
