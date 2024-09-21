@@ -26,17 +26,6 @@ public struct XMLSocket {
 	}// end func ==
 }// end struct XMLSocket
 
-public struct MessageServer: Equatable {
-	public let webSocket: URL?
-	public let thread: String
-	public let name: String?
-	public let identifier: Int?
-
-	static public func == (lhs: MessageServer, rhs: MessageServer) -> Bool {
-		return (lhs.webSocket == rhs.webSocket) && (lhs.thread == rhs.thread)
-	}// end func ==
-}// end struct MessageServer
-
 public enum SocialType: String, Codable {
 	case community = "community"
 	case channel = "channel"
@@ -44,11 +33,7 @@ public enum SocialType: String, Codable {
 }// end enum SocialType
 
 public struct Room: Codable {
-	let webSocketUri: URL
-	let xmlSocketUri: URL?
-	let name: String
-	let id: Int
-	let threadId: String
+	let viewUri: URL
 }// end struct Room
 
 public struct SocialGroup: Codable {
@@ -166,7 +151,7 @@ public final class ProgramInfo: NSObject {
 	public private(set) var broadcaster: BroadcasterInfo!
 	public private(set) var thumbnailURL: URL!
 	public private(set) var canNicoAd: Bool!
-	public private(set) var servers: Array<MessageServer> = Array()
+	public private(set) var viewURL: URL!
 
 		// MARK: - Member variables
 		// MARK: - Constructor/Destructor
@@ -192,9 +177,7 @@ public final class ProgramInfo: NSObject {
 		broadcaster = BroadcasterInfo(name: programInfo.broadcaster.name, identifier: programInfo.broadcaster.id)
 		self.thumbnailURL = programInfo.socialGroup.thumbnailUrl
 		for room: Room in programInfo.rooms {
-			let webSocket: URL = room.webSocketUri
-			let server: MessageServer = MessageServer(webSocket: webSocket, thread: room.threadId, name: room.name, identifier: room.id)
-			servers.append(server)
+			viewURL = room.viewUri
 		}// end foreach rooms
 	}// end init
 
@@ -222,9 +205,7 @@ public final class ProgramInfo: NSObject {
 				programDesc = programInfo.description
 				broadcaster = BroadcasterInfo(name: programInfo.broadcaster.name, identifier: programInfo.broadcaster.id)
 				for room: Room in programInfo.rooms {
-					let webSocket: URL = room.webSocketUri
-					let server: MessageServer = MessageServer(webSocket: webSocket, thread: room.threadId, name: room.name, identifier: room.id)
-					servers.append(server)
+					viewURL = room.viewUri
 				}// end foreach rooms
 			}// end if optional check for data
 		} catch let error {

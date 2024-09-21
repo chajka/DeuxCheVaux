@@ -28,7 +28,6 @@ enum PlayerStatusKey: String {
 	case listenerIsVIP = "is_vip"
 	case msAddress = "addr"
 	case msPort = "port"
-	case messageServerList = "ms_list"
 	case code = "code"
 }// end enum PlayerStatusKey
 
@@ -61,7 +60,6 @@ public final class PlayerStatus: NSObject , XMLParserDelegate {
 	public private(set) var listenerLanguage: UserLanguage!
 	public private(set) var listenerIsVIP: Bool!
 
-	public private(set) var messageServers: Array<MessageServer> = Array()
 
 		// MARK: - Member variables
 	private var stringBuffer: String = String()
@@ -184,8 +182,6 @@ public final class PlayerStatus: NSObject , XMLParserDelegate {
 				if let portNumber: Int = Int(stringBuffer) {
 					port = portNumber
 				}// end if port number is convert to integer
-			case .messageServerList:
-				messageServers.removeFirst()
 			case .code:
 				code = stringBuffer
 			}// end switch case by element name
