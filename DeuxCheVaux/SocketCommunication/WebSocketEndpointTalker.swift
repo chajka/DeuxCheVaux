@@ -18,7 +18,7 @@ fileprivate enum MessageKind: String {
 	case seat = "seat"
 	case akashic = "akashic"
 	case stream = "stream"
-	case room = "room"
+	case messageServer = "messageServer"
 	case serverTime = "serverTime"
 	case statistics = "statistics"
 	case schedule = "schedule"
@@ -124,7 +124,11 @@ public protocol HeartbeatDelegate: AnyObject {
 	func heartbeat (viewer: Int, comments: Int, ad: Int?, gift: Int?)
 }// end protocol heartbeatDelegate
 
-public typealias OpenEndpointHander = (_ websocketURI: URL, _ threadId: String, _ yourpostkey: String) -> Void
+public protocol ConnectionDelegate: AnyObject {
+	func disconnected ()
+}
+
+public typealias OpenEndpointHander = (_ viewURL: String, _ vposBaseAt: Date) -> Void
 
 public final class WebSocketEndpointTalker: NSObject, WebSocketDelegate {
 		// MARK:   Class Variables
@@ -132,6 +136,7 @@ public final class WebSocketEndpointTalker: NSObject, WebSocketDelegate {
 		// MARK: - Properties
 	public let url: URL
 	public weak var delegate: HeartbeatDelegate?
+	public weak var connectionDelegate: ConnectionDelegate?
 
 		// MARK: - Computed Properties
 		// MARK: - Outlets
@@ -221,15 +226,20 @@ public final class WebSocketEndpointTalker: NSObject, WebSocketDelegate {
 					break
 				case .stream:
 					break
-				case .room:
+				case .messageServer:
 					do {
-						let room: RoomInfo = try decoder.decode(RoomInfo.self, from: json)
-						if let handler: OpenEndpointHander = roomInfoHandler {
-							handler(URL(string: room.data.messageServer.uri)!, room.data.threadId, room.data.yourPostKey)
-						}// end if Optional binding check for roomInfoHandler
+						let messageServer: MessageServer = try decoder.decode(MessageServer.self, from: json)
+						let viewURL: String = messageServer.data.viewUri
+						let RFC3339DateFormatter = DateFormatter()
+						RFC3339DateFormatter.locale = Locale(identifier: "en_US_POSIX")
+						RFC3339DateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZZZZZ"
+						RFC3339DateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
+						if let date: Date = RFC3339DateFormatter.date(from: messageServer.data.vposBaseTime), let roomInfoHandler: OpenEndpointHander = roomInfoHandler {
+							roomInfoHandler(viewURL, date)
+						}// end if data and url is parsed.
 					} catch let error {
-						print("room decode error \(error.localizedDescription)")
-					}
+						print("message server decode error \(error.localizedDescription)")
+					}// end try deocode message server
 				case .serverTime:
 					break
 				case .statistics:
@@ -250,6 +260,11 @@ public final class WebSocketEndpointTalker: NSObject, WebSocketDelegate {
 					do {
 						let message: Disconnect = try decoder.decode(Disconnect.self, from: json)
 						print("Disconnect reason \(message.data.reason)")
+						if message.data.reason == .endProgram {
+							if let delegate: ConnectionDelegate = connectionDelegate {
+								delegate.disconnected()
+							}// end optional binding
+						}// end if reason is end program
 					} catch let error {
 						print("Disconnect decode error \(error.localizedDescription)")
 					}// end do try - catch decode json
