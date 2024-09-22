@@ -91,6 +91,7 @@ public final class ProtobufCommentVector: NSObject, URLSessionDataDelegate {
 	private var connecting: Bool = true
 	private var first: Bool = true
 	private let config: URLSessionConfiguration = URLSessionConfiguration.default
+	private var viewSession: URLSession?
 
 		// MARK: - Constructor/Destructor
 	public init (viewURI: String) {
@@ -107,6 +108,7 @@ public final class ProtobufCommentVector: NSObject, URLSessionDataDelegate {
 
 		// MARK: - Public methods
 	public func start () {
+		viewSession = URLSession(configuration: config, delegate: self, delegateQueue: .main)
 		let url = URL(string: viewURI + Query + At + ParmConcat + Now)!
 		Task {
 			do {
