@@ -95,6 +95,7 @@ public final class ProtobufCommentVector: NSObject, URLSessionDataDelegate {
 	private let config: URLSessionConfiguration = URLSessionConfiguration.default
 	private var viewSession: URLSession?
 	private var segmentSession: URLSession?
+	private var tasks: Dictionary<URLSessionDataTask, URLSessionDataTask> = Dictionary()
 
 		// MARK: - Constructor/Destructor
 	public init (viewURI: String) {
