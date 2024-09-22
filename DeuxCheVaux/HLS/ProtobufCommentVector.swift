@@ -90,10 +90,13 @@ public final class ProtobufCommentVector: NSObject, URLSessionDataDelegate {
 	private var nextAt: String = Now
 	private var connecting: Bool = true
 	private var first: Bool = true
+	private let config: URLSessionConfiguration = URLSessionConfiguration.default
 
 		// MARK: - Constructor/Destructor
 	public init (viewURI: String) {
 		self.viewURI = viewURI
+		self.config.timeoutIntervalForRequest = 20
+		self.config.timeoutIntervalForResource = 40
 	}// end init
 
 		// MARK: - Override
