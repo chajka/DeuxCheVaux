@@ -108,7 +108,7 @@ public final class ProtobufCommentVector: NSObject, URLSessionDataDelegate {
 		// MARK: - Actions
 	public func stop () {
 		connecting = false
-	}
+	}// end func stop
 
 		// MARK: - Public methods
 	public func start () {
