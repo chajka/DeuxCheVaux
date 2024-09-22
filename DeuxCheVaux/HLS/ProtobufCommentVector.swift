@@ -90,6 +90,8 @@ public final class ProtobufCommentVector: NSObject, URLSessionDataDelegate {
 	private var nextAt: String = Now
 	private var connecting: Bool = true
 	private var first: Bool = true
+	private var backward: Bool = true
+
 	private let config: URLSessionConfiguration = URLSessionConfiguration.default
 	private var viewSession: URLSession?
 	private var segmentSession: URLSession?
