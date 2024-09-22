@@ -76,9 +76,9 @@ public protocol ProtobufCommentVectorDelegate: AnyObject {
 	func commentVector (commentVector vector: ProtobufCommentVector, didRecieveComment comment: ChatElements)
 }// end protocol ProtobufCommentVectorDelegate
 
-public final class ProtobufCommentVector: NSObject {
 	let viewURI: String
 
+public final class ProtobufCommentVector: NSObject, URLSessionDataDelegate {
 		// MARK: Static properties
 		// MARK: - Class Method
 		// MARK: - Outlets
