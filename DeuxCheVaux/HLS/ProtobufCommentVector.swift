@@ -72,7 +72,7 @@ struct ChatResult: Codable {
 	let chat: ChatElements
 }// end struct ChatResult
 
-public protocol ProtobufCommentVectorDelegate: AnyObject  {
+public protocol ProtobufCommentVectorDelegate: AnyObject {
 	func commentVector (commentVector vector: ProtobufCommentVector, didRecieveComment comment: ChatElements)
 }// end protocol ProtobufCommentVectorDelegate
 
