@@ -76,8 +76,6 @@ public protocol ProtobufCommentVectorDelegate: AnyObject {
 	func commentVector (commentVector vector: ProtobufCommentVector, didRecieveComment comment: ChatElements)
 }// end protocol ProtobufCommentVectorDelegate
 
-	let viewURI: String
-
 public final class ProtobufCommentVector: NSObject, URLSessionDataDelegate {
 		// MARK: Static properties
 		// MARK: - Class Method
@@ -86,6 +84,7 @@ public final class ProtobufCommentVector: NSObject, URLSessionDataDelegate {
 	public weak var delegate: ProtobufCommentVectorDelegate?
 
 		// MARK: - Member variables
+	private let viewURI: String
 	private let streams: BinaryStream = BinaryStream(data: Data())
 	private let messages: BinaryStream = BinaryStream(data: Data())
 	private var nextAt: String = Now
