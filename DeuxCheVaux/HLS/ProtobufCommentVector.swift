@@ -72,13 +72,11 @@ struct ChatResult: Codable {
 	let chat: ChatElements
 }// end struct ChatResult
 
-public protocol ProtobufCommentVectorDelegate: AnyObject  {
+public protocol ProtobufCommentVectorDelegate: AnyObject {
 	func commentVector (commentVector vector: ProtobufCommentVector, didRecieveComment comment: ChatElements)
 }// end protocol ProtobufCommentVectorDelegate
 
-public final class ProtobufCommentVector: NSObject {
-	let viewURI: String
-
+public final class ProtobufCommentVector: NSObject, URLSessionDataDelegate {
 		// MARK: Static properties
 		// MARK: - Class Method
 		// MARK: - Outlets
@@ -86,118 +84,74 @@ public final class ProtobufCommentVector: NSObject {
 	public weak var delegate: ProtobufCommentVectorDelegate?
 
 		// MARK: - Member variables
+	private let viewURI: String
 	private let streams: BinaryStream = BinaryStream(data: Data())
 	private let messages: BinaryStream = BinaryStream(data: Data())
 	private var nextAt: String = Now
 	private var connecting: Bool = true
 	private var first: Bool = true
+	private var backward: Bool = true
+
+	private let config: URLSessionConfiguration = URLSessionConfiguration.default
+	private var viewSession: URLSession?
+	private var segmentSession: URLSession?
+	private var tasks: Dictionary<URLSessionDataTask, URLSessionDataTask> = Dictionary()
 
 		// MARK: - Constructor/Destructor
 	public init (viewURI: String) {
 		self.viewURI = viewURI
+		self.config.timeoutIntervalForRequest = 20
+		self.config.timeoutIntervalForResource = 40
 	}// end init
 
 		// MARK: - Override
 		// MARK: - Actions
 	public func stop () {
 		connecting = false
-	}
+	}// end func stop
 
 		// MARK: - Public methods
 	public func start () {
+		viewSession = URLSession(configuration: config, delegate: self, delegateQueue: .main)
+		segmentSession = URLSession(configuration: config, delegate: self, delegateQueue: .main)
 		let url = URL(string: viewURI + Query + At + ParmConcat + Now)!
-		Task {
-			do {
-				var request: URLRequest = URLRequest(url: url)
-				let session: URLSession = URLSession(configuration: URLSessionConfiguration.default)
-				var result: (data: Data, resp: URLResponse) = try await session.data(for: request)
-				streams.addBuffer(data: result.data)
-				let chunk = streams.read().next()
-				let entry: Dwango_Nicolive_Chat_Service_Edge_ChunkedEntry = try Dwango_Nicolive_Chat_Service_Edge_ChunkedEntry(serializedBytes: Data(chunk!))
-				nextAt = String(format: "%ld", entry.next.at)
-				var nextURL: URL = URL(string: viewURI + Query + At + ParmConcat + nextAt)!
-				while (connecting) {
-					request = URLRequest(url: nextURL)
-					result = try await session.data(for: request)
-					streams.addBuffer(data: result.data)
-					for chunk in streams.read() {
-						nextAt = parseChunk(dat: chunk)
-					}
-					nextURL = URL(string: viewURI + Query + At + ParmConcat + nextAt)!
-					first = false
-				}
-			} catch let error {
-				print(error.localizedDescription)
-			}
-		}
+		let request: URLRequest = URLRequest(url: url)
+		if let session: URLSession = viewSession {
+			let task: URLSessionDataTask = session.dataTask(with: request)
+			task.resume()
+			tasks[task] = task
+		}// end if
 	}// end start
 
-	public func close () {
-		
-	}
-
 		// MARK: - Private methods
-	private func parseChunk (dat: [UInt8]) -> String {
-		do {
-			let data: Data = Data(dat)
-			let entry: Dwango_Nicolive_Chat_Service_Edge_ChunkedEntry = try Dwango_Nicolive_Chat_Service_Edge_ChunkedEntry(serializedBytes: data)
-			if (first && entry.backward.segment.uri != Empty) {
-				loadBackword(uri: entry.backward.segment.uri)
-			} else if (first && entry.previous.uri != Empty) {
-				loadSegment(uri: entry.previous.uri)
-			} else if (entry.segment.uri != Empty) {
-				loadSegment(uri: entry.segment.uri)
-			} else if (entry.next.at != 0) {
-				return String(format: "%ld", entry.next.at)
-			}
-		} catch let error {
-			print(error.localizedDescription)
-		}// end do try catch
-		return nextAt
-	}// end func parseChunk
-
 	private func loadSegment (uri: String) {
-		Task {
-			let url = URL(string: uri)!
-			let session: URLSession = URLSession(configuration: URLSessionConfiguration.default)
-			let request: URLRequest = URLRequest(url: url)
-			do {
-				let result: (data: Data, resp: URLResponse) = try await session.data(for: request)
-				if result.data.count > 3 { messages.addBuffer(data: result.data) }
-				for mes in messages.read() {
-					let message: Dwango_Nicolive_Chat_Service_Edge_ChunkedMessage = try Dwango_Nicolive_Chat_Service_Edge_ChunkedMessage(serializedBytes: mes)
-					if (message.meta.origin.chat.liveID != 0) {
-						let element: ChatElements = parseMessage(message: message)
-						delegate?.commentVector(commentVector: self, didRecieveComment: element)
-					}// end if garbage message
-				}
-			} catch let error {
-				print("Error parse ChunkedMessage:")
-				print(error.localizedDescription)
-			}
-		}// end Task
+		let url = URL(string: uri)!
+		if let session: URLSession = segmentSession {
+			let segmentTask: URLSessionDataTask = session.dataTask(with: url)
+			segmentTask.resume()
+		}// end if
 	}// end func loadPrevious
 
-	private func loadBackword (uri: String) {
-		Task {
-			let url = URL(string: uri)!
-			let session: URLSession = URLSession(configuration: URLSessionConfiguration.default)
-			let request: URLRequest = URLRequest(url: url)
+	private func loadBackward (uri: String) {
+		let url = URL(string: uri)!
+		let session: URLSession = URLSession(configuration: URLSessionConfiguration.default)
+		let request: URLRequest = URLRequest(url: url)
+		let task: URLSessionDataTask = session.dataTask(with: request) { (data, response, error) in
+			guard let data else { return }
 			do {
-				let result: (data: Data, resp: URLResponse) = try await session.data(for: request)
-				let comments: Dwango_Nicolive_Chat_Service_Edge_PackedSegment = try Dwango_Nicolive_Chat_Service_Edge_PackedSegment(serializedBytes: result.data)
+				let comments: Dwango_Nicolive_Chat_Service_Edge_PackedSegment = try Dwango_Nicolive_Chat_Service_Edge_PackedSegment(serializedBytes: data)
 				for comment in comments.messages {
-					let element: ChatElements = parseMessage(message: comment)
-					delegate?.commentVector(commentVector: self, didRecieveComment: element)
-				}
-				
+					let element: ChatElements = self.parseMessage(message: comment)
+					self.delegate?.commentVector(commentVector: self, didRecieveComment: element)
+				}// end each comment
 			} catch let error {
-				print(error.localizedDescription)
-			}
-		}
-	}// end func loadBackword
+				print("PackedSegment Error: \(error.localizedDescription)")
+			}// end do try catch
+		}// end closure completion handler
+		task.resume()
+	}// end func loadBackward
 
-	func parseMessage (message: Dwango_Nicolive_Chat_Service_Edge_ChunkedMessage) -> ChatElements {
+	private func parseMessage (message: Dwango_Nicolive_Chat_Service_Edge_ChunkedMessage) -> ChatElements {
 		let thread: String = String(format: "%lld", message.meta.origin.chat.liveID)
 		var user_id: String = message.message.chat.rawUserID != 0 ? String(format: "%ld", message.message.chat.rawUserID) : message.message.chat.hashedUserID
 		let vpos: TimeInterval = TimeInterval(message.message.chat.vpos)
@@ -249,8 +203,60 @@ public final class ProtobufCommentVector: NSObject {
 		}
 		let element: ChatElements = ChatElements(thread: thread, vpos: vpos, no: no, user_id: user_id, content: content, date: date, date_usec: date_usec, premium: premium, mail: "", anonymity: annonimity, locale: .ja)
 		return element
-	}
-		// MARK: - Delegates
+	}// end func parseMessage
 
+		// MARK: - Delegates
+	public func urlSession (_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
+		if (session == viewSession) {
+			streams.addBuffer(data: data)
+			for chunk in streams.read() {
+				do {
+					let entry: Dwango_Nicolive_Chat_Service_Edge_ChunkedEntry = try Dwango_Nicolive_Chat_Service_Edge_ChunkedEntry(serializedBytes: Data(chunk))
+					if (backward && entry.backward.segment.uri != Empty) {
+						loadBackward(uri: entry.backward.segment.uri)
+						backward = false
+					}// end if process backword
+
+					if (first && entry.previous.uri != Empty) {
+						loadSegment(uri: entry.previous.uri)
+					} else if (entry.segment.uri != Empty) {
+						loadSegment(uri: entry.segment.uri)
+						first = false
+					}// end if prceess segment
+
+					if (entry.next.at != 0) {
+						nextAt = String(format: "%ld", entry.next.at)
+						if (connecting) {
+							if let session: URLSession = viewSession {
+								let request: URLRequest = URLRequest(url: URL(string: viewURI + Query + At + ParmConcat + nextAt)!)
+								let task: URLSessionDataTask = session.dataTask(with: request)
+								task.resume()
+								tasks[task] = task
+							}// end optional binding
+						}// end if connecting
+					}// end if found next.at
+				} catch let error {
+					print("ChunkedEntry Parse error: \(error.localizedDescription)")
+				}// end do try catch
+			}// end foreach chunk
+		} else if (session == segmentSession) {
+			do {
+				if data.count > 3 { messages.addBuffer(data: data) }
+				for mes in messages.read() {
+					let message: Dwango_Nicolive_Chat_Service_Edge_ChunkedMessage = try Dwango_Nicolive_Chat_Service_Edge_ChunkedMessage(serializedBytes: mes)
+					if (message.meta.origin.chat.liveID != 0) {
+						let element: ChatElements = parseMessage(message: message)
+						delegate?.commentVector(commentVector: self, didRecieveComment: element)
+					}// end if garbage message
+				}// end foreach message
+			} catch let error {
+				print("Error parse ChunkedMessage: \(error.localizedDescription)")
+			}// end do try catch
+		}// end else if session is segment session
+	}// end func urlSession dataTask didRecieve
+
+	public func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: (any Error)?) {
+		tasks.removeValue(forKey: task as! URLSessionDataTask)
+	}// end func urlSession task didCompleteWithError
 
 }// end class ProtobufCommnentVector
