@@ -125,25 +125,11 @@ public final class ProtobufCommentVector: NSObject, URLSessionDataDelegate {
 
 		// MARK: - Private methods
 	private func loadSegment (uri: String) {
-		Task {
-			let url = URL(string: uri)!
-			let session: URLSession = URLSession(configuration: URLSessionConfiguration.default)
-			let request: URLRequest = URLRequest(url: url)
-			do {
-				let result: (data: Data, resp: URLResponse) = try await session.data(for: request)
-				if result.data.count > 3 { messages.addBuffer(data: result.data) }
-				for mes in messages.read() {
-					let message: Dwango_Nicolive_Chat_Service_Edge_ChunkedMessage = try Dwango_Nicolive_Chat_Service_Edge_ChunkedMessage(serializedBytes: mes)
-					if (message.meta.origin.chat.liveID != 0) {
-						let element: ChatElements = parseMessage(message: message)
-						delegate?.commentVector(commentVector: self, didRecieveComment: element)
-					}// end if garbage message
-				}
-			} catch let error {
-				print("Error parse ChunkedMessage:")
-				print(error.localizedDescription)
-			}
-		}// end Task
+		let url = URL(string: uri)!
+		if let session: URLSession = segmentSession {
+			let segmentTask: URLSessionDataTask = session.dataTask(with: url)
+			segmentTask.resume()
+		}// end if
 	}// end func loadPrevious
 
 	private func loadBackword (uri: String) {
