@@ -206,6 +206,57 @@ public final class ProtobufCommentVector: NSObject, URLSessionDataDelegate {
 	}// end func parseMessage
 
 		// MARK: - Delegates
+	public func urlSession (_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
+		if (session == viewSession) {
+			streams.addBuffer(data: data)
+			for chunk in streams.read() {
+				do {
+					let entry: Dwango_Nicolive_Chat_Service_Edge_ChunkedEntry = try Dwango_Nicolive_Chat_Service_Edge_ChunkedEntry(serializedBytes: Data(chunk))
+					if (backward && entry.backward.segment.uri != Empty) {
+						loadBackward(uri: entry.backward.segment.uri)
+						backward = false
+					}// end if process backword
 
+					if (first && entry.previous.uri != Empty) {
+						loadSegment(uri: entry.previous.uri)
+					} else if (entry.segment.uri != Empty) {
+						loadSegment(uri: entry.segment.uri)
+						first = false
+					}// end if prceess segment
+
+					if (entry.next.at != 0) {
+						nextAt = String(format: "%ld", entry.next.at)
+						if (connecting) {
+							if let session: URLSession = viewSession {
+								let request: URLRequest = URLRequest(url: URL(string: viewURI + Query + At + ParmConcat + nextAt)!)
+								let task: URLSessionDataTask = session.dataTask(with: request)
+								task.resume()
+								tasks[task] = task
+							}// end optional binding
+						}// end if connecting
+					}// end if found next.at
+				} catch let error {
+					print("ChunkedEntry Parse error: \(error.localizedDescription)")
+				}// end do try catch
+			}// end foreach chunk
+		} else if (session == segmentSession) {
+			do {
+				if data.count > 3 { messages.addBuffer(data: data) }
+				for mes in messages.read() {
+					let message: Dwango_Nicolive_Chat_Service_Edge_ChunkedMessage = try Dwango_Nicolive_Chat_Service_Edge_ChunkedMessage(serializedBytes: mes)
+					if (message.meta.origin.chat.liveID != 0) {
+						let element: ChatElements = parseMessage(message: message)
+						delegate?.commentVector(commentVector: self, didRecieveComment: element)
+					}// end if garbage message
+				}// end foreach message
+			} catch let error {
+				print("Error parse ChunkedMessage: \(error.localizedDescription)")
+			}// end do try catch
+		}// end else if session is segment session
+	}// end func urlSession dataTask didRecieve
+
+	public func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: (any Error)?) {
+		tasks.removeValue(forKey: task as! URLSessionDataTask)
+	}// end func urlSession task didCompleteWithError
 
 }// end class ProtobufCommnentVector
