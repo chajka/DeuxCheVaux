@@ -115,30 +115,12 @@ public final class ProtobufCommentVector: NSObject, URLSessionDataDelegate {
 		viewSession = URLSession(configuration: config, delegate: self, delegateQueue: .main)
 		segmentSession = URLSession(configuration: config, delegate: self, delegateQueue: .main)
 		let url = URL(string: viewURI + Query + At + ParmConcat + Now)!
-		Task {
-			do {
-				var request: URLRequest = URLRequest(url: url)
-				let session: URLSession = URLSession(configuration: URLSessionConfiguration.default)
-				var result: (data: Data, resp: URLResponse) = try await session.data(for: request)
-				streams.addBuffer(data: result.data)
-				let chunk = streams.read().next()
-				let entry: Dwango_Nicolive_Chat_Service_Edge_ChunkedEntry = try Dwango_Nicolive_Chat_Service_Edge_ChunkedEntry(serializedBytes: Data(chunk!))
-				nextAt = String(format: "%ld", entry.next.at)
-				var nextURL: URL = URL(string: viewURI + Query + At + ParmConcat + nextAt)!
-				while (connecting) {
-					request = URLRequest(url: nextURL)
-					result = try await session.data(for: request)
-					streams.addBuffer(data: result.data)
-					for chunk in streams.read() {
-						nextAt = parseChunk(dat: chunk)
-					}
-					nextURL = URL(string: viewURI + Query + At + ParmConcat + nextAt)!
-					first = false
-				}
-			} catch let error {
-				print(error.localizedDescription)
-			}
-		}
+		let request: URLRequest = URLRequest(url: url)
+		if let session: URLSession = viewSession {
+			let task: URLSessionDataTask = session.dataTask(with: request)
+			task.resume()
+			tasks[task] = task
+		}// end if
 	}// end start
 
 	public func close () {
