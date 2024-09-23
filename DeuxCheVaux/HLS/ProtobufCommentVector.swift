@@ -132,24 +132,24 @@ public final class ProtobufCommentVector: NSObject, URLSessionDataDelegate {
 		}// end if
 	}// end func loadPrevious
 
-	private func loadBackword (uri: String) {
-		Task {
-			let url = URL(string: uri)!
-			let session: URLSession = URLSession(configuration: URLSessionConfiguration.default)
-			let request: URLRequest = URLRequest(url: url)
+	private func loadBackward (uri: String) {
+		let url = URL(string: uri)!
+		let session: URLSession = URLSession(configuration: URLSessionConfiguration.default)
+		let request: URLRequest = URLRequest(url: url)
+		let task: URLSessionDataTask = session.dataTask(with: request) { (data, response, error) in
+			guard let data else { return }
 			do {
-				let result: (data: Data, resp: URLResponse) = try await session.data(for: request)
-				let comments: Dwango_Nicolive_Chat_Service_Edge_PackedSegment = try Dwango_Nicolive_Chat_Service_Edge_PackedSegment(serializedBytes: result.data)
+				let comments: Dwango_Nicolive_Chat_Service_Edge_PackedSegment = try Dwango_Nicolive_Chat_Service_Edge_PackedSegment(serializedBytes: data)
 				for comment in comments.messages {
-					let element: ChatElements = parseMessage(message: comment)
-					delegate?.commentVector(commentVector: self, didRecieveComment: element)
-				}
-				
+					let element: ChatElements = self.parseMessage(message: comment)
+					self.delegate?.commentVector(commentVector: self, didRecieveComment: element)
+				}// end each comment
 			} catch let error {
-				print(error.localizedDescription)
-			}
-		}
-	}// end func loadBackword
+				print("PackedSegment Error: \(error.localizedDescription)")
+			}// end do try catch
+		}// end closure completion handler
+		task.resume()
+	}// end func loadBackward
 
 	private func parseMessage (message: Dwango_Nicolive_Chat_Service_Edge_ChunkedMessage) -> ChatElements {
 		let thread: String = String(format: "%lld", message.meta.origin.chat.liveID)
