@@ -203,7 +203,8 @@ public final class ProtobufCommentVector: NSObject, URLSessionDataDelegate {
 		}
 		let element: ChatElements = ChatElements(thread: thread, vpos: vpos, no: no, user_id: user_id, content: content, date: date, date_usec: date_usec, premium: premium, mail: "", anonymity: annonimity, locale: .ja)
 		return element
-	}
+	}// end func parseMessage
+
 		// MARK: - Delegates
 
 
