@@ -123,10 +123,6 @@ public final class ProtobufCommentVector: NSObject, URLSessionDataDelegate {
 		}// end if
 	}// end start
 
-	public func close () {
-		
-	}
-
 		// MARK: - Private methods
 	private func parseChunk (dat: [UInt8]) -> String {
 		do {
