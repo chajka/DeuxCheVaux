@@ -264,6 +264,7 @@ public final class WebSocketEndpointTalker: NSObject, WebSocketDelegate {
 							if let delegate: ConnectionDelegate = connectionDelegate {
 								delegate.disconnected()
 							}// end optional binding
+							close()
 						}// end if reason is end program
 					} catch let error {
 						print("Disconnect decode error \(error.localizedDescription)")
