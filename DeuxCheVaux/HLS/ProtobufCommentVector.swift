@@ -124,25 +124,6 @@ public final class ProtobufCommentVector: NSObject, URLSessionDataDelegate {
 	}// end start
 
 		// MARK: - Private methods
-	private func parseChunk (dat: [UInt8]) -> String {
-		do {
-			let data: Data = Data(dat)
-			let entry: Dwango_Nicolive_Chat_Service_Edge_ChunkedEntry = try Dwango_Nicolive_Chat_Service_Edge_ChunkedEntry(serializedBytes: data)
-			if (first && entry.backward.segment.uri != Empty) {
-				loadBackword(uri: entry.backward.segment.uri)
-			} else if (first && entry.previous.uri != Empty) {
-				loadSegment(uri: entry.previous.uri)
-			} else if (entry.segment.uri != Empty) {
-				loadSegment(uri: entry.segment.uri)
-			} else if (entry.next.at != 0) {
-				return String(format: "%ld", entry.next.at)
-			}
-		} catch let error {
-			print(error.localizedDescription)
-		}// end do try catch
-		return nextAt
-	}// end func parseChunk
-
 	private func loadSegment (uri: String) {
 		Task {
 			let url = URL(string: uri)!
