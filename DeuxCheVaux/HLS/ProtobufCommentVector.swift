@@ -158,7 +158,7 @@ public final class ProtobufCommentVector: NSObject, URLSessionDataDelegate {
 		let no: Int = Int(message.message.chat.no)
 		let date: TimeInterval = TimeInterval(message.meta.at.seconds)
 		let date_usec: TimeInterval = TimeInterval(message.meta.at.nanos)
-		let annonimity: Int = message.message.chat.rawUserID == 0 ? 1 : 0
+		let annonimity: Int = message.message.chat.hasRawUserID ? 0 : 1
 		var content: String = ""
 		var premium: Int = 0
 		if (message.message.chat.content != Empty) {
