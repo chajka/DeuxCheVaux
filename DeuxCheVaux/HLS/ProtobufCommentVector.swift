@@ -153,12 +153,12 @@ public final class ProtobufCommentVector: NSObject, URLSessionDataDelegate {
 
 	private func parseMessage (message: Dwango_Nicolive_Chat_Service_Edge_ChunkedMessage) -> ChatElements {
 		let thread: String = String(format: "%lld", message.meta.origin.chat.liveID)
-		var user_id: String = message.message.chat.rawUserID != 0 ? String(format: "%ld", message.message.chat.rawUserID) : message.message.chat.hashedUserID
+		var user_id: String = message.message.chat.hasRawUserID ? String(format: "%ld", message.message.chat.rawUserID) : message.message.chat.hashedUserID
 		let vpos: TimeInterval = TimeInterval(message.message.chat.vpos)
 		let no: Int = Int(message.message.chat.no)
 		let date: TimeInterval = TimeInterval(message.meta.at.seconds)
 		let date_usec: TimeInterval = TimeInterval(message.meta.at.nanos)
-		let annonimity: Int = message.message.chat.rawUserID == 0 ? 1 : 0
+		let annonimity: Int = message.message.chat.hasRawUserID ? 0 : 1
 		var content: String = ""
 		var premium: Int = 0
 		if (message.message.chat.content != Empty) {
