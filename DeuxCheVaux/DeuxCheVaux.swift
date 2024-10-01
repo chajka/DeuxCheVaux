@@ -88,13 +88,6 @@ public final class DeuxCheVaux: NSObject {
 	}// end setFirstLaucn
 		// MARK: - Internal methods
 		// MARK: - Private methods
-	private func stopRunLoop () -> Void {
-		guard let runLoop: RunLoop = self.runLoop else { return }
-		finishRunLoop = true
-		let timer: Timer = Timer(timeInterval: 0, target: self, selector: #selector(noop(timer: )), userInfo: nil, repeats: false)
-		runLoop.add(timer, forMode: RunLoop.Mode.default)
-	}// end function stopRunLoop
-
 	@objc private func noop(timer: Timer) -> Void {
 		// dummy noop function for terminate private run loop
 	}// end function noop
