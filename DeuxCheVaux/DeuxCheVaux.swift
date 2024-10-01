@@ -19,8 +19,6 @@ public enum StatusError: Error {
 	case XMLParseError
 }// end StatusError
 
-fileprivate let nullDevicePath: String = "/dev/null"
-
 public final class DeuxCheVaux: NSObject {
 		// MARK:   Class Variable
 	public static let shared: DeuxCheVaux = DeuxCheVaux()
