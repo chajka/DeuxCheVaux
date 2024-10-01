@@ -61,14 +61,6 @@ public final class DeuxCheVaux: NSObject {
 		frameworkVersionFix = FrameworkVersionFix
 	}// end private init
 
-	deinit {
-		if let nullDevice: OutputStream = nullDevice, let runLoop = runLoop {
-			nullDevice.remove(from: runLoop, forMode: RunLoop.Mode.common)
-			nullDevice.close()
-		}// end if output stream of null device is there
-		stopRunLoop()
-	}// end deinit
-
 		// MARK: - Override
 		// MARK: - Public methods
 	public func setFirstLaucn () {
