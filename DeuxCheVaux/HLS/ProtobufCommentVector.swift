@@ -111,7 +111,7 @@ public final class ProtobufCommentVector: NSObject, URLSessionDataDelegate {
 	}// end func stop
 
 		// MARK: - Public methods
-	public func start () {
+	public func start () -> Bool {
 		viewSession = URLSession(configuration: config, delegate: self, delegateQueue: .main)
 		segmentSession = URLSession(configuration: config, delegate: self, delegateQueue: .main)
 		let url = URL(string: viewURI + Query + At + ParmConcat + Now)!
@@ -120,7 +120,11 @@ public final class ProtobufCommentVector: NSObject, URLSessionDataDelegate {
 			let task: URLSessionDataTask = session.dataTask(with: request)
 			task.resume()
 			tasks[task] = task
+
+			return true
 		}// end if
+
+		return false
 	}// end start
 
 		// MARK: - Private methods
