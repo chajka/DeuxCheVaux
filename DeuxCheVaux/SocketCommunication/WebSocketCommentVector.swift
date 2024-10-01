@@ -106,7 +106,6 @@ public final class WebSocketCommentVector: NSObject, WebSocketDelegate {
 	public let url: URL
 	public var lastRes: Int!
 	public let roomLabel: String
-	public private(set) weak var runLoop: RunLoop?
 	public weak var delegate: WebSocketCommentVectorDelegate?
 
 		// MARK: - Member variables
@@ -130,7 +129,6 @@ public final class WebSocketCommentVector: NSObject, WebSocketDelegate {
 		userIdentifier = uid
 		userLanguage = lang
 		self.baseTime = baseTime
-		runLoop = DeuxCheVaux.shared.runLoop
 		let roomPrefix: Substring = room.prefix(1)
 		let prefix = String(roomPrefix)
 		roomLabel = prefix == CommunityChannelPrefix ? Arena : room
