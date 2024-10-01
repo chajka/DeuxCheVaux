@@ -204,6 +204,9 @@ public final class ProtobufCommentVector: NSObject, URLSessionDataDelegate {
 		} else if (message.message.nicoad.v1.message != Empty) {
 			content = message.message.nicoad.v1.message
 			premium = 3
+		} else if (message.state.programStatus.state == .ended) {
+			content = "/disconnect"
+			premium = 2
 		}
 		let element: ChatElements = ChatElements(thread: thread, vpos: vpos, no: no, user_id: user_id, content: content, date: date, date_usec: date_usec, premium: premium, mail: "", anonymity: annonimity, locale: .ja)
 		return element
