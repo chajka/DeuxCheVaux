@@ -88,9 +88,5 @@ public final class DeuxCheVaux: NSObject {
 	}// end setFirstLaucn
 		// MARK: - Internal methods
 		// MARK: - Private methods
-	@objc private func noop(timer: Timer) -> Void {
-		// dummy noop function for terminate private run loop
-	}// end function noop
-
 		// MARK: - Delegates
 }// end class DeuxCheVaux
