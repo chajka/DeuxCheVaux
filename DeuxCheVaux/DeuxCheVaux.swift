@@ -88,31 +88,6 @@ public final class DeuxCheVaux: NSObject {
 	}// end setFirstLaucn
 		// MARK: - Internal methods
 		// MARK: - Private methods
-	private func startRunLoop () -> Void {
-		runLoop = nil
-        let qos: DispatchQoS = DispatchQoS(qosClass: .default, relativePriority: 0)
-		queue = DispatchQueue(label: QueueLabel, qos: qos, attributes: .concurrent, autoreleaseFrequency: .inherit, target: nil)
-		guard let runLoopQueue: DispatchQueue = self.queue else { return }
-		finishRunLoop = false
-		var runLoop: RunLoop? = nil
-		let semaaphore: DispatchSemaphore = DispatchSemaphore(value: 0)
-		runLoopQueue.async { [weak self] in
-			guard let weakSelf = self else {
-				semaaphore.signal()
-				return
-			}// end guard
-			runLoop = RunLoop.current
-			semaaphore.signal()
-			while (!weakSelf.finishRunLoop) {
-				RunLoop.current.run(mode: RunLoop.Mode.default, before: Date.distantFuture)
-			}// end keep runloop
-		}// end block async
-		semaaphore.wait()
-		if let rl: RunLoop = runLoop {
-			self.runLoop = rl
-		}// end optional binding cheeck for runLoop is assigned?
-	}// end makeRunLoop
-
 	private func stopRunLoop () -> Void {
 		guard let runLoop: RunLoop = self.runLoop else { return }
 		finishRunLoop = true
