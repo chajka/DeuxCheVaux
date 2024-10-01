@@ -59,18 +59,6 @@ public final class DeuxCheVaux: NSObject {
 		frameworkVersionMajor = FrameworkVersionMajor
 		frameworkVersionMinor = FrameworkVersionMinor
 		frameworkVersionFix = FrameworkVersionFix
-		let url: URL = URL(fileURLWithPath: nullDevicePath)
-		if let outputStream: OutputStream = OutputStream(url: url, append: true) {
-			self.nullDevice = outputStream
-		} else {
-			self.nullDevice = nil
-		}// end if make null device output stream is success or not.
-		super.init()
-		startRunLoop()
-		if let nullDevice: OutputStream = nullDevice, let runLoop = runLoop {
-			nullDevice.open()
-			nullDevice.schedule(in: runLoop, forMode: RunLoop.Mode.common)
-		}// end if output stream of null device is there
 	}// end private init
 
 	deinit {
