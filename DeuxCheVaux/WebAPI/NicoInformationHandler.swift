@@ -212,23 +212,23 @@ public final class NicoInformationHandler: HTTPCommunicatable {
 		task.resume()
 	}// end fetchNickname
 
-	public func thumbnail (identifier userIdentifier: String) async -> NSImage? {
+	public func thumbnailData (identifier userIdentifier: String) async -> Data? {
 		let prefix: String = String(userIdentifier.prefix(userIdentifier.count - 4))
 		let urlString: String = String(format: ThumbnailAPIFormat, prefix, userIdentifier)
-		var thumbnail: NSImage? = nil
-		guard let url: URL = URL(string: urlString) else { return thumbnail }
+		var thumbnailData: Data? = nil
+		guard let url: URL = URL(string: urlString) else { return thumbnailData }
 		let request: URLRequest = makeRequest(url: url, method: .get)
 		do {
 			let result: (data: Data, resp: URLResponse) = try await session.data(for: request)
-				if let image: NSImage = NSImage(data: result.data) {
-					thumbnail = image
+				if let _: NSImage = NSImage(data: result.data) {
+					thumbnailData = result.data
 				}
 		} catch let error {
 			Swift.print(error.localizedDescription)
 		}// end do - try - catch
 
-		return thumbnail
-	}// end thumbnail
+		return thumbnailData
+	}// end thumbnailData
 
 	public func userLevel (identifier userIdentifier: String) async -> Int {
 		let userPageURL: URL = URL(string: UserInformationPage)!.appendingPathComponent(userIdentifier)
