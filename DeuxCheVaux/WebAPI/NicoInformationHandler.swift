@@ -251,19 +251,19 @@ public final class NicoInformationHandler: HTTPCommunicatable {
 		}// end do - try - catch
 	}// end func userLevel
 
-	public func communityThumbnail (_ url: URL) async -> NSImage? {
+	public func communityThumbnailData (_ url: URL) async -> Data? {
 		let request: URLRequest = makeRequest(url: url, method: .get)
-		var thumbnail: NSImage? = nil
+		var thumbnailData: Data? = nil
 		do {
 			let result: (data: Data, resp: URLResponse) = try await session.data(for: request)
-			if let image: NSImage = NSImage(data: result.data) {
-				thumbnail = image
+			if let _: NSImage = NSImage(data: result.data) {
+				thumbnailData = result.data
 			}
 		} catch let error {
 			print(error.localizedDescription)
 		}// end completion handler closure
 
-		return thumbnail
+		return thumbnailData
 	}// end communityThumbnail
 
 	public func channelThumbnail (of channel: String) async -> NSImage? {
