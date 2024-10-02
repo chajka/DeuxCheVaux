@@ -111,7 +111,7 @@ public final class ProtobufCommentVector: NSObject, URLSessionDataDelegate {
 	}// end func stop
 
 		// MARK: - Public methods
-	public func start () {
+	public func start () -> Bool {
 		viewSession = URLSession(configuration: config, delegate: self, delegateQueue: .main)
 		segmentSession = URLSession(configuration: config, delegate: self, delegateQueue: .main)
 		let url = URL(string: viewURI + Query + At + ParmConcat + Now)!
@@ -120,7 +120,11 @@ public final class ProtobufCommentVector: NSObject, URLSessionDataDelegate {
 			let task: URLSessionDataTask = session.dataTask(with: request)
 			task.resume()
 			tasks[task] = task
+
+			return true
 		}// end if
+
+		return false
 	}// end start
 
 		// MARK: - Private methods
@@ -200,6 +204,9 @@ public final class ProtobufCommentVector: NSObject, URLSessionDataDelegate {
 		} else if (message.message.nicoad.v1.message != Empty) {
 			content = message.message.nicoad.v1.message
 			premium = 3
+		} else if (message.state.programStatus.state == .ended) {
+			content = "/disconnect"
+			premium = 2
 		}
 		let element: ChatElements = ChatElements(thread: thread, vpos: vpos, no: no, user_id: user_id, content: content, date: date, date_usec: date_usec, premium: premium, mail: "", anonymity: annonimity, locale: .ja)
 		return element
