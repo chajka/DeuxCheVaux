@@ -212,23 +212,23 @@ public final class NicoInformationHandler: HTTPCommunicatable {
 		task.resume()
 	}// end fetchNickname
 
-	public func thumbnail (identifier userIdentifier: String) async -> NSImage? {
+	public func thumbnailData (identifier userIdentifier: String) async -> Data? {
 		let prefix: String = String(userIdentifier.prefix(userIdentifier.count - 4))
 		let urlString: String = String(format: ThumbnailAPIFormat, prefix, userIdentifier)
-		var thumbnail: NSImage? = nil
-		guard let url: URL = URL(string: urlString) else { return thumbnail }
+		var thumbnailData: Data? = nil
+		guard let url: URL = URL(string: urlString) else { return thumbnailData }
 		let request: URLRequest = makeRequest(url: url, method: .get)
 		do {
 			let result: (data: Data, resp: URLResponse) = try await session.data(for: request)
-				if let image: NSImage = NSImage(data: result.data) {
-					thumbnail = image
+				if let _: NSImage = NSImage(data: result.data) {
+					thumbnailData = result.data
 				}
 		} catch let error {
 			Swift.print(error.localizedDescription)
 		}// end do - try - catch
 
-		return thumbnail
-	}// end thumbnail
+		return thumbnailData
+	}// end thumbnailData
 
 	public func userLevel (identifier userIdentifier: String) async -> Int {
 		let userPageURL: URL = URL(string: UserInformationPage)!.appendingPathComponent(userIdentifier)
@@ -251,51 +251,38 @@ public final class NicoInformationHandler: HTTPCommunicatable {
 		}// end do - try - catch
 	}// end func userLevel
 
-	public func thumbnail (identifier userIdentifier: String, with handler: @escaping ThumbnailHandler) -> Void {
-		let prefix: String = String(userIdentifier.prefix(userIdentifier.count - 4))
-		let urlString: String = String(format: ThumbnailAPIFormat, prefix, userIdentifier)
-		var thumbnail: NSImage? = nil
-		guard let url: URL = URL(string: urlString) else { handler(thumbnail); return }// end guard url initialize failed
+	public func communityThumbnailData (_ url: URL) async -> Data? {
 		let request: URLRequest = makeRequest(url: url, method: .get)
-		let task: URLSessionDataTask = session.dataTask(with: request) { (dat: Data?, resp: URLResponse?, err: Error?) in
-			defer { handler(thumbnail) }
-			guard let data: Data = dat, let image: NSImage = NSImage(data: data) else { return }
-			thumbnail = image
-		}// end closure
-		task.resume()
-	}// end thumbnail
-
-	public func communityThumbnail (_ url: URL) async -> NSImage? {
-		let request: URLRequest = makeRequest(url: url, method: .get)
-		var thumbnail: NSImage? = nil
+		var thumbnailData: Data? = nil
 		do {
 			let result: (data: Data, resp: URLResponse) = try await session.data(for: request)
-			if let image: NSImage = NSImage(data: result.data) {
-				thumbnail = image
+			if let _: NSImage = NSImage(data: result.data) {
+				thumbnailData = result.data
 			}
 		} catch let error {
 			print(error.localizedDescription)
 		}// end completion handler closure
 
-		return thumbnail
+		return thumbnailData
 	}// end communityThumbnail
 
-	public func channelThumbnail (of channel: String) async -> NSImage? {
-		var thumbnail: NSImage? = nil
+	public func channelThumbnailData (of channel: String) async -> Data? {
+		var thumbnailData: Data? = nil
 		let urlString: String = String(format: ChannelThumbnailApi, channel)
-		guard let url: URL = URL(string: urlString) else { return thumbnail }
+		guard let url: URL = URL(string: urlString) else { return thumbnailData }
 		let request: URLRequest = makeRequest(url: url, method: .get)
 		do {
 			let result: (data: Data, resp: URLResponse) = try await session.data(for: request)
-			let image: NSImage? = NSImage(data: result.data)
-			thumbnail = image
+			if let _: NSImage = NSImage(data: result.data) {
+				thumbnailData = result.data
+			}
 
-			return thumbnail
+			return thumbnailData
 		} catch let error {
 			print(error.localizedDescription)
-			return thumbnail
+			return thumbnailData
 		}
-	}// end channelThumbnail
+	}// end channelThumbnailData
 
 	public func rawData (ofURL url: URL, httpMethod method: HTTPMethod = .get, HTTPBody body: Data? = nil, contentsType type: String? = nil) async throws -> Data {
 		var request: URLRequest = makeRequest(url: url, method: method)
