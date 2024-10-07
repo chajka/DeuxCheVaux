@@ -84,7 +84,7 @@ public final class ProtobufCommentVector: NSObject, URLSessionDataDelegate {
 	public weak var delegate: ProtobufCommentVectorDelegate?
 
 		// MARK: - Member variables
-	private let viewURI: String
+	private var viewURI: String
 	private let streams: BinaryStream = BinaryStream(data: Data())
 	private let messages: BinaryStream = BinaryStream(data: Data())
 	private var nextAt: String = Now
