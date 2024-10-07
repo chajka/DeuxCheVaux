@@ -127,6 +127,17 @@ public final class ProtobufCommentVector: NSObject, URLSessionDataDelegate {
 		return false
 	}// end start
 
+	public func updateViewURI (_ uri: String) {
+		viewURI = uri
+		let url = URL(string: viewURI + Query + At + ParmConcat + Now)!
+		let request: URLRequest = URLRequest(url: url)
+		if let session: URLSession = viewSession {
+			let task: URLSessionDataTask = session.dataTask(with: request)
+			task.resume()
+			tasks[task] = task
+		}// end optional binding
+	}// end func updateViewURI
+
 		// MARK: - Private methods
 	private func loadSegment (uri: String) {
 		let url = URL(string: uri)!
