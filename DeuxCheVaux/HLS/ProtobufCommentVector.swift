@@ -275,6 +275,17 @@ public final class ProtobufCommentVector: NSObject, URLSessionDataDelegate {
 
 	public func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: (any Error)?) {
 		tasks.removeValue(forKey: task as! URLSessionDataTask)
+		if session == segmentSession {
+			if let error: URLError = error as? URLError, error.code == .timedOut {
+				DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+					if let url: URL = task.originalRequest?.url {
+						let retrytask: URLSessionDataTask = session.dataTask(with: url)
+						retrytask.resume()
+						self.tasks[retrytask] = retrytask
+					}// end optional binding check
+				}// end dispatch async after
+			}// end if error
+		}// end if session is segment session
 	}// end func urlSession task didCompleteWithError
 
 }// end class ProtobufCommnentVector
