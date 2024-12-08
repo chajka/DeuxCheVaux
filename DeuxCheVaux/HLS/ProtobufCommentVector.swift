@@ -156,8 +156,10 @@ public final class ProtobufCommentVector: NSObject, URLSessionDataDelegate {
 			do {
 				let comments: Dwango_Nicolive_Chat_Service_Edge_PackedSegment = try Dwango_Nicolive_Chat_Service_Edge_PackedSegment(serializedBytes: data)
 				for comment in comments.messages {
-					let element: ChatElements = self.parseMessage(message: comment)
-					self.delegate?.commentVector(commentVector: self, didRecieveComment: element)
+					if (comment.state.statistics.viewers == 0) {
+						let element: ChatElements = self.parseMessage(message: comment)
+						self.delegate?.commentVector(commentVector: self, didRecieveComment: element)
+					}// end if statistics is not there
 				}// end each comment
 			} catch let error {
 				print("PackedSegment Error: \(error.localizedDescription)")
