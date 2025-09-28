@@ -589,6 +589,22 @@ struct Dwango_Nicolive_Chat_Data_SimpleNotification: Sendable {
     set {message = .visited(newValue)}
   }
 
+  var supporterRegistered: String {
+    get {
+      if case .supporterRegistered(let v)? = message {return v}
+      return String()
+    }
+    set {message = .supporterRegistered(newValue)}
+  }
+
+  var userLevelUp: String {
+    get {
+      if case .userLevelUp(let v)? = message {return v}
+      return String()
+    }
+    set {message = .userLevelUp(newValue)}
+  }
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   enum OneOf_Message: Equatable, Sendable {
@@ -600,6 +616,8 @@ struct Dwango_Nicolive_Chat_Data_SimpleNotification: Sendable {
     case rankingIn(String)
     case rankingUpdated(String)
     case visited(String)
+    case supporterRegistered(String)
+    case userLevelUp(String)
 
   }
 
@@ -787,12 +805,22 @@ struct Dwango_Nicolive_Chat_Data_CommentLock: Sendable {
 
   var status: Dwango_Nicolive_Chat_Data_CommentLock.Status = .unrestricted
 
+  var followRestriction: Dwango_Nicolive_Chat_Data_CommentLock.FollowRestriction {
+    get {return _followRestriction ?? Dwango_Nicolive_Chat_Data_CommentLock.FollowRestriction()}
+    set {_followRestriction = newValue}
+  }
+  /// Returns true if `followRestriction` has been explicitly set.
+  var hasFollowRestriction: Bool {return self._followRestriction != nil}
+  /// Clears the value of `followRestriction`. Subsequent reads from it will return its default value.
+  mutating func clearFollowRestriction() {self._followRestriction = nil}
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   enum Status: SwiftProtobuf.Enum, Swift.CaseIterable {
     typealias RawValue = Int
     case unrestricted // = 0
     case locked // = 1
+    case restricted // = 2
     case UNRECOGNIZED(Int)
 
     init() {
@@ -803,6 +831,7 @@ struct Dwango_Nicolive_Chat_Data_CommentLock: Sendable {
       switch rawValue {
       case 0: self = .unrestricted
       case 1: self = .locked
+      case 2: self = .restricted
       default: self = .UNRECOGNIZED(rawValue)
       }
     }
@@ -811,6 +840,7 @@ struct Dwango_Nicolive_Chat_Data_CommentLock: Sendable {
       switch self {
       case .unrestricted: return 0
       case .locked: return 1
+      case .restricted: return 2
       case .UNRECOGNIZED(let i): return i
       }
     }
@@ -819,11 +849,35 @@ struct Dwango_Nicolive_Chat_Data_CommentLock: Sendable {
     static let allCases: [Dwango_Nicolive_Chat_Data_CommentLock.Status] = [
       .unrestricted,
       .locked,
+      .restricted,
     ]
 
   }
 
+  struct FollowRestriction: Sendable {
+    // SwiftProtobuf.Message conformance is added in an extension below. See the
+    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+    // methods supported on all messages.
+
+    var minimumFollowDuration: SwiftProtobuf.Google_Protobuf_Duration {
+      get {return _minimumFollowDuration ?? SwiftProtobuf.Google_Protobuf_Duration()}
+      set {_minimumFollowDuration = newValue}
+    }
+    /// Returns true if `minimumFollowDuration` has been explicitly set.
+    var hasMinimumFollowDuration: Bool {return self._minimumFollowDuration != nil}
+    /// Clears the value of `minimumFollowDuration`. Subsequent reads from it will return its default value.
+    mutating func clearMinimumFollowDuration() {self._minimumFollowDuration = nil}
+
+    var unknownFields = SwiftProtobuf.UnknownStorage()
+
+    init() {}
+
+    fileprivate var _minimumFollowDuration: SwiftProtobuf.Google_Protobuf_Duration? = nil
+  }
+
   init() {}
+
+  fileprivate var _followRestriction: Dwango_Nicolive_Chat_Data_CommentLock.FollowRestriction? = nil
 }
 
 struct Dwango_Nicolive_Chat_Data_CommentMode: Sendable {
@@ -1040,11 +1094,20 @@ struct Dwango_Nicolive_Chat_Data_TagUpdated: Sendable {
 
     var reserved: Bool = false
 
-    var nicopediaUri: String = String()
+    var nicopediaUri: String {
+      get {return _nicopediaUri ?? String()}
+      set {_nicopediaUri = newValue}
+    }
+    /// Returns true if `nicopediaUri` has been explicitly set.
+    var hasNicopediaUri: Bool {return self._nicopediaUri != nil}
+    /// Clears the value of `nicopediaUri`. Subsequent reads from it will return its default value.
+    mutating func clearNicopediaUri() {self._nicopediaUri = nil}
 
     var unknownFields = SwiftProtobuf.UnknownStorage()
 
     init() {}
+
+    fileprivate var _nicopediaUri: String? = nil
   }
 
   init() {}
@@ -1091,6 +1154,15 @@ struct Dwango_Nicolive_Chat_Data_Statistics: Sendable {
   /// Clears the value of `giftPoints`. Subsequent reads from it will return its default value.
   mutating func clearGiftPoints() {self._giftPoints = nil}
 
+  var timeshiftReservations: Int64 {
+    get {return _timeshiftReservations ?? 0}
+    set {_timeshiftReservations = newValue}
+  }
+  /// Returns true if `timeshiftReservations` has been explicitly set.
+  var hasTimeshiftReservations: Bool {return self._timeshiftReservations != nil}
+  /// Clears the value of `timeshiftReservations`. Subsequent reads from it will return its default value.
+  mutating func clearTimeshiftReservations() {self._timeshiftReservations = nil}
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
@@ -1099,6 +1171,7 @@ struct Dwango_Nicolive_Chat_Data_Statistics: Sendable {
   fileprivate var _comments: Int64? = nil
   fileprivate var _adPoints: Int64? = nil
   fileprivate var _giftPoints: Int64? = nil
+  fileprivate var _timeshiftReservations: Int64? = nil
 }
 
 struct Dwango_Nicolive_Chat_Data_Marquee: Sendable {
@@ -1703,6 +1776,8 @@ extension Dwango_Nicolive_Chat_Data_SimpleNotification: SwiftProtobuf.Message, S
     6: .standard(proto: "ranking_in"),
     8: .standard(proto: "ranking_updated"),
     7: .same(proto: "visited"),
+    9: .standard(proto: "supporter_registered"),
+    10: .standard(proto: "user_level_up"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1775,6 +1850,22 @@ extension Dwango_Nicolive_Chat_Data_SimpleNotification: SwiftProtobuf.Message, S
           self.message = .rankingUpdated(v)
         }
       }()
+      case 9: try {
+        var v: String?
+        try decoder.decodeSingularStringField(value: &v)
+        if let v = v {
+          if self.message != nil {try decoder.handleConflictingOneOf()}
+          self.message = .supporterRegistered(v)
+        }
+      }()
+      case 10: try {
+        var v: String?
+        try decoder.decodeSingularStringField(value: &v)
+        if let v = v {
+          if self.message != nil {try decoder.handleConflictingOneOf()}
+          self.message = .userLevelUp(v)
+        }
+      }()
       default: break
       }
     }
@@ -1817,6 +1908,14 @@ extension Dwango_Nicolive_Chat_Data_SimpleNotification: SwiftProtobuf.Message, S
     case .rankingUpdated?: try {
       guard case .rankingUpdated(let v)? = self.message else { preconditionFailure() }
       try visitor.visitSingularStringField(value: v, fieldNumber: 8)
+    }()
+    case .supporterRegistered?: try {
+      guard case .supporterRegistered(let v)? = self.message else { preconditionFailure() }
+      try visitor.visitSingularStringField(value: v, fieldNumber: 9)
+    }()
+    case .userLevelUp?: try {
+      guard case .userLevelUp(let v)? = self.message else { preconditionFailure() }
+      try visitor.visitSingularStringField(value: v, fieldNumber: 10)
     }()
     case nil: break
     }
@@ -2164,6 +2263,7 @@ extension Dwango_Nicolive_Chat_Data_CommentLock: SwiftProtobuf.Message, SwiftPro
   static let protoMessageName: String = _protobuf_package + ".CommentLock"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "status"),
+    2: .standard(proto: "follow_restriction"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -2173,20 +2273,29 @@ extension Dwango_Nicolive_Chat_Data_CommentLock: SwiftProtobuf.Message, SwiftPro
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
       case 1: try { try decoder.decodeSingularEnumField(value: &self.status) }()
+      case 2: try { try decoder.decodeSingularMessageField(value: &self._followRestriction) }()
       default: break
       }
     }
   }
 
   func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
     if self.status != .unrestricted {
       try visitor.visitSingularEnumField(value: self.status, fieldNumber: 1)
     }
+    try { if let v = self._followRestriction {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
+    } }()
     try unknownFields.traverse(visitor: &visitor)
   }
 
   static func ==(lhs: Dwango_Nicolive_Chat_Data_CommentLock, rhs: Dwango_Nicolive_Chat_Data_CommentLock) -> Bool {
     if lhs.status != rhs.status {return false}
+    if lhs._followRestriction != rhs._followRestriction {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -2196,7 +2305,44 @@ extension Dwango_Nicolive_Chat_Data_CommentLock.Status: SwiftProtobuf._ProtoName
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     0: .same(proto: "Unrestricted"),
     1: .same(proto: "Locked"),
+    2: .same(proto: "Restricted"),
   ]
+}
+
+extension Dwango_Nicolive_Chat_Data_CommentLock.FollowRestriction: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = Dwango_Nicolive_Chat_Data_CommentLock.protoMessageName + ".FollowRestriction"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "minimum_follow_duration"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularMessageField(value: &self._minimumFollowDuration) }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    try { if let v = self._minimumFollowDuration {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
+    } }()
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Dwango_Nicolive_Chat_Data_CommentLock.FollowRestriction, rhs: Dwango_Nicolive_Chat_Data_CommentLock.FollowRestriction) -> Bool {
+    if lhs._minimumFollowDuration != rhs._minimumFollowDuration {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
 }
 
 extension Dwango_Nicolive_Chat_Data_CommentMode: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
@@ -2406,13 +2552,17 @@ extension Dwango_Nicolive_Chat_Data_TagUpdated.Tag: SwiftProtobuf.Message, Swift
       case 1: try { try decoder.decodeSingularStringField(value: &self.text) }()
       case 2: try { try decoder.decodeSingularBoolField(value: &self.locked) }()
       case 3: try { try decoder.decodeSingularBoolField(value: &self.reserved) }()
-      case 4: try { try decoder.decodeSingularStringField(value: &self.nicopediaUri) }()
+      case 4: try { try decoder.decodeSingularStringField(value: &self._nicopediaUri) }()
       default: break
       }
     }
   }
 
   func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
     if !self.text.isEmpty {
       try visitor.visitSingularStringField(value: self.text, fieldNumber: 1)
     }
@@ -2422,9 +2572,9 @@ extension Dwango_Nicolive_Chat_Data_TagUpdated.Tag: SwiftProtobuf.Message, Swift
     if self.reserved != false {
       try visitor.visitSingularBoolField(value: self.reserved, fieldNumber: 3)
     }
-    if !self.nicopediaUri.isEmpty {
-      try visitor.visitSingularStringField(value: self.nicopediaUri, fieldNumber: 4)
-    }
+    try { if let v = self._nicopediaUri {
+      try visitor.visitSingularStringField(value: v, fieldNumber: 4)
+    } }()
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -2432,7 +2582,7 @@ extension Dwango_Nicolive_Chat_Data_TagUpdated.Tag: SwiftProtobuf.Message, Swift
     if lhs.text != rhs.text {return false}
     if lhs.locked != rhs.locked {return false}
     if lhs.reserved != rhs.reserved {return false}
-    if lhs.nicopediaUri != rhs.nicopediaUri {return false}
+    if lhs._nicopediaUri != rhs._nicopediaUri {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -2445,6 +2595,7 @@ extension Dwango_Nicolive_Chat_Data_Statistics: SwiftProtobuf.Message, SwiftProt
     2: .same(proto: "comments"),
     3: .standard(proto: "ad_points"),
     4: .standard(proto: "gift_points"),
+    6: .standard(proto: "timeshift_reservations"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -2457,6 +2608,7 @@ extension Dwango_Nicolive_Chat_Data_Statistics: SwiftProtobuf.Message, SwiftProt
       case 2: try { try decoder.decodeSingularInt64Field(value: &self._comments) }()
       case 3: try { try decoder.decodeSingularInt64Field(value: &self._adPoints) }()
       case 4: try { try decoder.decodeSingularInt64Field(value: &self._giftPoints) }()
+      case 6: try { try decoder.decodeSingularInt64Field(value: &self._timeshiftReservations) }()
       default: break
       }
     }
@@ -2479,6 +2631,9 @@ extension Dwango_Nicolive_Chat_Data_Statistics: SwiftProtobuf.Message, SwiftProt
     try { if let v = self._giftPoints {
       try visitor.visitSingularInt64Field(value: v, fieldNumber: 4)
     } }()
+    try { if let v = self._timeshiftReservations {
+      try visitor.visitSingularInt64Field(value: v, fieldNumber: 6)
+    } }()
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -2487,6 +2642,7 @@ extension Dwango_Nicolive_Chat_Data_Statistics: SwiftProtobuf.Message, SwiftProt
     if lhs._comments != rhs._comments {return false}
     if lhs._adPoints != rhs._adPoints {return false}
     if lhs._giftPoints != rhs._giftPoints {return false}
+    if lhs._timeshiftReservations != rhs._timeshiftReservations {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
