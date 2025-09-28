@@ -184,14 +184,8 @@ public final class ProtobufCommentVector: NSObject, URLSessionDataDelegate {
 		} else if (message.state.marquee.display.operatorComment.content != Empty) {
 			content = message.state.marquee.display.operatorComment.content
 			premium = 2
-		} else if (message.message.simpleNotification.emotion != Empty) {
-			content = message.message.simpleNotification.emotion
-			premium = 3
-		} else if (message.message.simpleNotification.ichiba != Empty) {
-			content = message.message.simpleNotification.ichiba
-			premium = 3
-		} else if (message.message.simpleNotification.programExtended != Empty) {
-			content = message.message.simpleNotification.programExtended
+		} else if (message.message.simpleNotificationV2.message != Empty) {
+			content = message.message.simpleNotificationV2.message
 			premium = 3
 		} else if (message.message.gift.itemName != Empty) {
 			content = message.message.gift.itemName
