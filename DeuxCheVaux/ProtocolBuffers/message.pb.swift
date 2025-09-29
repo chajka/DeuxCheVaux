@@ -99,6 +99,22 @@ struct Dwango_Nicolive_Chat_Data_NicoliveMessage: Sendable {
     set {data = .overflowedChat(newValue)}
   }
 
+  var forwardedChat: Dwango_Nicolive_Chat_Data_Atoms_ForwardedChat {
+    get {
+      if case .forwardedChat(let v)? = data {return v}
+      return Dwango_Nicolive_Chat_Data_Atoms_ForwardedChat()
+    }
+    set {data = .forwardedChat(newValue)}
+  }
+
+  var simpleNotificationV2: Dwango_Nicolive_Chat_Data_Atoms_SimpleNotificationV2 {
+    get {
+      if case .simpleNotificationV2(let v)? = data {return v}
+      return Dwango_Nicolive_Chat_Data_Atoms_SimpleNotificationV2()
+    }
+    set {data = .simpleNotificationV2(newValue)}
+  }
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   enum OneOf_Data: Equatable, Sendable {
@@ -111,6 +127,8 @@ struct Dwango_Nicolive_Chat_Data_NicoliveMessage: Sendable {
     case moderatorUpdated(Dwango_Nicolive_Chat_Data_Atoms_ModeratorUpdated)
     case ssngUpdated(Dwango_Nicolive_Chat_Data_Atoms_SSNGUpdated)
     case overflowedChat(Dwango_Nicolive_Chat_Data_Chat)
+    case forwardedChat(Dwango_Nicolive_Chat_Data_Atoms_ForwardedChat)
+    case simpleNotificationV2(Dwango_Nicolive_Chat_Data_Atoms_SimpleNotificationV2)
 
   }
 
@@ -133,6 +151,8 @@ extension Dwango_Nicolive_Chat_Data_NicoliveMessage: SwiftProtobuf.Message, Swif
     18: .standard(proto: "moderator_updated"),
     19: .standard(proto: "ssng_updated"),
     20: .standard(proto: "overflowed_chat"),
+    22: .standard(proto: "forwarded_chat"),
+    23: .standard(proto: "simple_notification_v2"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -258,6 +278,32 @@ extension Dwango_Nicolive_Chat_Data_NicoliveMessage: SwiftProtobuf.Message, Swif
           self.data = .overflowedChat(v)
         }
       }()
+      case 22: try {
+        var v: Dwango_Nicolive_Chat_Data_Atoms_ForwardedChat?
+        var hadOneofValue = false
+        if let current = self.data {
+          hadOneofValue = true
+          if case .forwardedChat(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.data = .forwardedChat(v)
+        }
+      }()
+      case 23: try {
+        var v: Dwango_Nicolive_Chat_Data_Atoms_SimpleNotificationV2?
+        var hadOneofValue = false
+        if let current = self.data {
+          hadOneofValue = true
+          if case .simpleNotificationV2(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.data = .simpleNotificationV2(v)
+        }
+      }()
       default: break
       }
     }
@@ -304,6 +350,14 @@ extension Dwango_Nicolive_Chat_Data_NicoliveMessage: SwiftProtobuf.Message, Swif
     case .overflowedChat?: try {
       guard case .overflowedChat(let v)? = self.data else { preconditionFailure() }
       try visitor.visitSingularMessageField(value: v, fieldNumber: 20)
+    }()
+    case .forwardedChat?: try {
+      guard case .forwardedChat(let v)? = self.data else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 22)
+    }()
+    case .simpleNotificationV2?: try {
+      guard case .simpleNotificationV2(let v)? = self.data else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 23)
     }()
     case nil: break
     }

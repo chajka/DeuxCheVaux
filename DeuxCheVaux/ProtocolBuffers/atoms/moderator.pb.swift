@@ -165,6 +165,8 @@ struct Dwango_Nicolive_Chat_Data_Atoms_SSNGUpdated: Sendable {
   /// Clears the value of `updatedAt`. Subsequent reads from it will return its default value.
   mutating func clearUpdatedAt() {self._updatedAt = nil}
 
+  var operatorType: Dwango_Nicolive_Chat_Data_Atoms_SSNGUpdated.SSNGOperatorType = .moderator
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   enum SSNGOperation: SwiftProtobuf.Enum, Swift.CaseIterable {
@@ -235,6 +237,40 @@ struct Dwango_Nicolive_Chat_Data_Atoms_SSNGUpdated: Sendable {
       .user,
       .word,
       .command,
+    ]
+
+  }
+
+  enum SSNGOperatorType: SwiftProtobuf.Enum, Swift.CaseIterable {
+    typealias RawValue = Int
+    case moderator // = 0
+    case broadcaster // = 1
+    case UNRECOGNIZED(Int)
+
+    init() {
+      self = .moderator
+    }
+
+    init?(rawValue: Int) {
+      switch rawValue {
+      case 0: self = .moderator
+      case 1: self = .broadcaster
+      default: self = .UNRECOGNIZED(rawValue)
+      }
+    }
+
+    var rawValue: Int {
+      switch self {
+      case .moderator: return 0
+      case .broadcaster: return 1
+      case .UNRECOGNIZED(let i): return i
+      }
+    }
+
+    // The compiler won't synthesize support with the UNRECOGNIZED case.
+    static let allCases: [Dwango_Nicolive_Chat_Data_Atoms_SSNGUpdated.SSNGOperatorType] = [
+      .moderator,
+      .broadcaster,
     ]
 
   }
@@ -442,6 +478,7 @@ extension Dwango_Nicolive_Chat_Data_Atoms_SSNGUpdated: SwiftProtobuf.Message, Sw
     4: .same(proto: "type"),
     5: .same(proto: "source"),
     6: .same(proto: "updatedAt"),
+    7: .standard(proto: "operator_type"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -456,6 +493,7 @@ extension Dwango_Nicolive_Chat_Data_Atoms_SSNGUpdated: SwiftProtobuf.Message, Sw
       case 4: try { try decoder.decodeSingularEnumField(value: &self._type) }()
       case 5: try { try decoder.decodeSingularStringField(value: &self._source) }()
       case 6: try { try decoder.decodeSingularMessageField(value: &self._updatedAt) }()
+      case 7: try { try decoder.decodeSingularEnumField(value: &self.operatorType) }()
       default: break
       }
     }
@@ -484,6 +522,9 @@ extension Dwango_Nicolive_Chat_Data_Atoms_SSNGUpdated: SwiftProtobuf.Message, Sw
     try { if let v = self._updatedAt {
       try visitor.visitSingularMessageField(value: v, fieldNumber: 6)
     } }()
+    if self.operatorType != .moderator {
+      try visitor.visitSingularEnumField(value: self.operatorType, fieldNumber: 7)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -494,6 +535,7 @@ extension Dwango_Nicolive_Chat_Data_Atoms_SSNGUpdated: SwiftProtobuf.Message, Sw
     if lhs._type != rhs._type {return false}
     if lhs._source != rhs._source {return false}
     if lhs._updatedAt != rhs._updatedAt {return false}
+    if lhs.operatorType != rhs.operatorType {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -511,6 +553,13 @@ extension Dwango_Nicolive_Chat_Data_Atoms_SSNGUpdated.SSNGType: SwiftProtobuf._P
     0: .same(proto: "USER"),
     1: .same(proto: "WORD"),
     2: .same(proto: "COMMAND"),
+  ]
+}
+
+extension Dwango_Nicolive_Chat_Data_Atoms_SSNGUpdated.SSNGOperatorType: SwiftProtobuf._ProtoNameProviding {
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    0: .same(proto: "MODERATOR"),
+    1: .same(proto: "BROADCASTER"),
   ]
 }
 
