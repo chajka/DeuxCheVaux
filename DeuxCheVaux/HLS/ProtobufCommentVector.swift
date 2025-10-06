@@ -157,8 +157,9 @@ public final class ProtobufCommentVector: NSObject, URLSessionDataDelegate {
 				let comments: Dwango_Nicolive_Chat_Service_Edge_PackedSegment = try Dwango_Nicolive_Chat_Service_Edge_PackedSegment(serializedBytes: data)
 				for comment in comments.messages {
 					if (comment.state.statistics.viewers == 0) {
-						let element: ChatElements = self.parseMessage(message: comment)
-						self.delegate?.commentVector(commentVector: self, didRecieveComment: element)
+						if let element: ChatElements = self.parseMessage(message: comment) {
+							self.delegate?.commentVector(commentVector: self, didRecieveComment: element)
+						}// end optional binding
 					}// end if statistics is not there
 				}// end each comment
 			} catch let error {
