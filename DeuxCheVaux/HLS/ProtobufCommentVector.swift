@@ -157,8 +157,9 @@ public final class ProtobufCommentVector: NSObject, URLSessionDataDelegate {
 				let comments: Dwango_Nicolive_Chat_Service_Edge_PackedSegment = try Dwango_Nicolive_Chat_Service_Edge_PackedSegment(serializedBytes: data)
 				for comment in comments.messages {
 					if (comment.state.statistics.viewers == 0) {
-						let element: ChatElements = self.parseMessage(message: comment)
-						self.delegate?.commentVector(commentVector: self, didRecieveComment: element)
+						if let element: ChatElements = self.parseMessage(message: comment) {
+							self.delegate?.commentVector(commentVector: self, didRecieveComment: element)
+						}// end optional binding
 					}// end if statistics is not there
 				}// end each comment
 			} catch let error {
@@ -168,7 +169,7 @@ public final class ProtobufCommentVector: NSObject, URLSessionDataDelegate {
 		task.resume()
 	}// end func loadBackward
 
-	private func parseMessage (message: Dwango_Nicolive_Chat_Service_Edge_ChunkedMessage) -> ChatElements {
+	private func parseMessage (message: Dwango_Nicolive_Chat_Service_Edge_ChunkedMessage) -> ChatElements? {
 		let thread: String = String(format: "%lld", message.meta.origin.chat.liveID)
 		var user_id: String = message.message.chat.hasRawUserID ? String(format: "%ld", message.message.chat.rawUserID) : message.message.chat.hashedUserID
 		let vpos: TimeInterval = TimeInterval(message.message.chat.vpos)
@@ -202,6 +203,8 @@ public final class ProtobufCommentVector: NSObject, URLSessionDataDelegate {
 		} else if (message.state.programStatus.state == .ended) {
 			content = "/disconnect"
 			premium = 2
+		} else if (message.message.data == nil) {
+			return nil
 		}
 		let element: ChatElements = ChatElements(thread: thread, vpos: vpos, no: no, user_id: user_id, content: content, date: date, date_usec: date_usec, premium: premium, mail: "", anonymity: annonimity, locale: .ja)
 		return element
@@ -247,8 +250,9 @@ public final class ProtobufCommentVector: NSObject, URLSessionDataDelegate {
 				for mes in messages.read() {
 					let message: Dwango_Nicolive_Chat_Service_Edge_ChunkedMessage = try Dwango_Nicolive_Chat_Service_Edge_ChunkedMessage(serializedBytes: mes)
 					if (message.meta.origin.chat.liveID != 0) && (message.state.statistics.viewers == 0) {
-						let element: ChatElements = parseMessage(message: message)
-						delegate?.commentVector(commentVector: self, didRecieveComment: element)
+						if let element: ChatElements = parseMessage(message: message) {
+							delegate?.commentVector(commentVector: self, didRecieveComment: element)
+						}// end optional binding check
 					}// end if garbage message
 				}// end foreach message
 			} catch let error {
