@@ -183,6 +183,9 @@ public final class ProtobufCommentVector: NSObject, URLSessionDataDelegate {
 		if (message.message.chat.content != Empty) {
 			content = message.message.chat.content
 			premium = message.message.chat.accountStatus == .premium ? 1 : 0
+		} else if (message.message.simpleNotification.quote != Empty) {
+			content = message.message.simpleNotification.quote
+			premium = 2
 		} else if (message.state.marquee.display.operatorComment.content != Empty) {
 			content = message.state.marquee.display.operatorComment.content
 			premium = 3
