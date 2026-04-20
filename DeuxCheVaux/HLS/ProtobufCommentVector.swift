@@ -186,34 +186,34 @@ public final class ProtobufCommentVector: NSObject, URLSessionDataDelegate {
 		let date_usec: TimeInterval = TimeInterval(message.meta.at.nanos)
 		let annonimity: Int = message.message.chat.hasRawUserID ? 0 : 1
 		var content: String = ""
-		var premium: Int = 0
+		var premium: Int = Premium.normal.rawValue
 		if (message.message.chat.content != Empty) {
 			content = message.message.chat.content
 			premium = message.message.chat.accountStatus == .premium ? 1 : 0
 		} else if (message.message.simpleNotification.quote != Empty) {
 			content = message.message.simpleNotification.quote
-			premium = 2
+			premium = Premium.cruise.rawValue
 		} else if (message.state.marquee.display.operatorComment.content != Empty) {
 			content = message.state.marquee.display.operatorComment.content
-			premium = 3
+			premium = Premium.owner.rawValue
 		} else if (message.message.simpleNotificationV2.message != Empty) {
 			content = message.message.simpleNotificationV2.message
-			premium = 3
+			premium = Premium.owner.rawValue
 		} else if (message.message.gift.itemName != Empty) {
 			content = message.message.gift.itemName
 			if (message.message.gift.advertiserUserID != 0) {
 				user_id = String(format: "%ld", message.message.gift.advertiserUserID)
 			}
-			premium = 3
+			premium = Premium.owner.rawValue
 		} else if (message.message.nicoad.v1.message != Empty) {
 			content = message.message.nicoad.v1.message
-			premium = 3
+			premium = Premium.owner.rawValue
 		} else if (message.message.nicoad.v1.message != Empty) {
 			content = message.message.nicoad.v1.message
-			premium = 3
+			premium = Premium.owner.rawValue
 		} else if (message.state.programStatus.state == .ended) {
 			content = "/disconnect"
-			premium = 3
+			premium = Premium.owner.rawValue
 		} else if (message.message.data == nil) {
 			return nil
 		}
