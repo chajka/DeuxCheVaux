@@ -73,6 +73,13 @@ struct ChatResult: Codable {
 	let chat: ChatElements
 }// end struct ChatResult
 
+private enum Premium: Int {
+	case normal = 0
+	case premium = 1
+	case cruise = 2
+	case owner = 3
+}// end enum Premium
+
 public protocol ProtobufCommentVectorDelegate: AnyObject {
 	func commentVector (commentVector vector: ProtobufCommentVector, didRecieveComment comment: ChatElements)
 }// end protocol ProtobufCommentVectorDelegate
