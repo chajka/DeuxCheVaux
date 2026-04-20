@@ -13,6 +13,8 @@ fileprivate let Now: String = "now"
 fileprivate let Query: String = "?"
 fileprivate let ParmConcat: String = "="
 fileprivate let Empty: String = ""
+fileprivate let owner: String = "BroadcastOwner"
+fileprivate let Disconnect: String = "/disconnect"
 
 public struct ChatElements: Codable {
 	public let thread: String
@@ -71,6 +73,13 @@ public struct ChatElements: Codable {
 struct ChatResult: Codable {
 	let chat: ChatElements
 }// end struct ChatResult
+
+private enum Premium: Int {
+	case normal = 0
+	case premium = 1
+	case cruise = 2
+	case owner = 3
+}// end enum Premium
 
 public protocol ProtobufCommentVectorDelegate: AnyObject {
 	func commentVector (commentVector vector: ProtobufCommentVector, didRecieveComment comment: ChatElements)
@@ -178,35 +187,39 @@ public final class ProtobufCommentVector: NSObject, URLSessionDataDelegate {
 		let date_usec: TimeInterval = TimeInterval(message.meta.at.nanos)
 		let annonimity: Int = message.message.chat.hasRawUserID ? 0 : 1
 		var content: String = ""
-		var premium: Int = 0
+		var premium: Int = Premium.normal.rawValue
 		if (message.message.chat.content != Empty) {
 			content = message.message.chat.content
 			premium = message.message.chat.accountStatus == .premium ? 1 : 0
+		} else if (message.message.simpleNotification.quote != Empty) {
+			content = message.message.simpleNotification.quote
+			premium = Premium.cruise.rawValue
 		} else if (message.state.marquee.display.operatorComment.content != Empty) {
 			content = message.state.marquee.display.operatorComment.content
-			premium = 2
+			premium = Premium.owner.rawValue
 		} else if (message.message.simpleNotificationV2.message != Empty) {
 			content = message.message.simpleNotificationV2.message
-			premium = 3
+			premium = Premium.owner.rawValue
 		} else if (message.message.gift.itemName != Empty) {
 			content = message.message.gift.itemName
 			if (message.message.gift.advertiserUserID != 0) {
 				user_id = String(format: "%ld", message.message.gift.advertiserUserID)
 			}
-			premium = 3
+			premium = Premium.owner.rawValue
 		} else if (message.message.nicoad.v1.message != Empty) {
 			content = message.message.nicoad.v1.message
-			premium = 3
+			premium = Premium.owner.rawValue
 		} else if (message.message.nicoad.v1.message != Empty) {
 			content = message.message.nicoad.v1.message
-			premium = 3
+			premium = Premium.owner.rawValue
 		} else if (message.state.programStatus.state == .ended) {
-			content = "/disconnect"
-			premium = 2
+			content = Disconnect
+			premium = Premium.owner.rawValue
 		} else if (message.message.data == nil) {
 			return nil
 		}
-		let element: ChatElements = ChatElements(thread: thread, vpos: vpos, no: no, user_id: user_id, content: content, date: date, date_usec: date_usec, premium: premium, mail: "", anonymity: annonimity, locale: .ja)
+		if (user_id == Empty) { user_id = owner}
+		let element: ChatElements = ChatElements(thread: thread, vpos: vpos, no: no, user_id: user_id, content: content, date: date, date_usec: date_usec, premium: premium, mail: Empty, anonymity: annonimity, locale: .ja)
 		return element
 	}// end func parseMessage
 
