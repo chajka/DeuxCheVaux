@@ -213,7 +213,7 @@ public final class ProtobufCommentVector: NSObject, URLSessionDataDelegate {
 			content = message.message.nicoad.v1.message
 			premium = Premium.owner.rawValue
 		} else if (message.state.programStatus.state == .ended) {
-			content = "/disconnect"
+			content = Disconnect
 			premium = Premium.owner.rawValue
 		} else if (message.message.data == nil) {
 			return nil
