@@ -185,22 +185,22 @@ public final class ProtobufCommentVector: NSObject, URLSessionDataDelegate {
 			premium = message.message.chat.accountStatus == .premium ? 1 : 0
 		} else if (message.state.marquee.display.operatorComment.content != Empty) {
 			content = message.state.marquee.display.operatorComment.content
-			premium = 2
+			premium = 3
 		} else if (message.message.simpleNotificationV2.message != Empty) {
 			content = message.message.simpleNotificationV2.message
-			premium = 3
+			premium = 2
 		} else if (message.message.gift.itemName != Empty) {
 			content = message.message.gift.itemName
 			if (message.message.gift.advertiserUserID != 0) {
 				user_id = String(format: "%ld", message.message.gift.advertiserUserID)
 			}
-			premium = 3
+			premium = 2
 		} else if (message.message.nicoad.v1.message != Empty) {
 			content = message.message.nicoad.v1.message
-			premium = 3
+			premium = 2
 		} else if (message.message.nicoad.v1.message != Empty) {
 			content = message.message.nicoad.v1.message
-			premium = 3
+			premium = 2
 		} else if (message.state.programStatus.state == .ended) {
 			content = "/disconnect"
 			premium = 2
