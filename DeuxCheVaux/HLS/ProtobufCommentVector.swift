@@ -13,6 +13,7 @@ fileprivate let Now: String = "now"
 fileprivate let Query: String = "?"
 fileprivate let ParmConcat: String = "="
 fileprivate let Empty: String = ""
+fileprivate let owner: String = "BroadcastOwner"
 
 public struct ChatElements: Codable {
 	public let thread: String
