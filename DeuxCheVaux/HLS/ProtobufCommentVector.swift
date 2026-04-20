@@ -14,6 +14,7 @@ fileprivate let Query: String = "?"
 fileprivate let ParmConcat: String = "="
 fileprivate let Empty: String = ""
 fileprivate let owner: String = "BroadcastOwner"
+fileprivate let Disconnect: String = "/disconnect"
 
 public struct ChatElements: Codable {
 	public let thread: String
