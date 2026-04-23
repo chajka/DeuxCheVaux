@@ -209,13 +209,11 @@ public final class ProtobufCommentVector: NSObject, URLSessionDataDelegate {
 			if (message.message.gift.advertiserUserID != 0) {
 				user_id = String(format: "%ld", message.message.gift.advertiserUserID)
 			}
-			premium = Premium.owner.rawValue
+			premium = Premium.official.rawValue
 		} else if (message.message.nicoad.v1.message != Empty) {
 			content = message.message.nicoad.v1.message
-			premium = Premium.owner.rawValue
-		} else if (message.message.nicoad.v1.message != Empty) {
-			content = message.message.nicoad.v1.message
-			premium = Premium.owner.rawValue
+			premium = Premium.official.rawValue
+			user_id = informationUserIdentifier
 		} else if (message.state.programStatus.state == .ended) {
 			content = Disconnect
 			premium = Premium.owner.rawValue
