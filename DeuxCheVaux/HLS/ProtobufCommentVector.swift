@@ -79,7 +79,10 @@ private enum Premium: Int {
 	case premium = 1
 	case cruise = 2
 	case owner = 3
+	case official = 6
 }// end enum Premium
+
+private let informationUserIdentifier: String = "900000000"
 
 public protocol ProtobufCommentVectorDelegate: AnyObject {
 	func commentVector (commentVector vector: ProtobufCommentVector, didRecieveComment comment: ChatElements)
