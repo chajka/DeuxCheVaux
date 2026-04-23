@@ -202,7 +202,8 @@ public final class ProtobufCommentVector: NSObject, URLSessionDataDelegate {
 			premium = Premium.owner.rawValue
 		} else if (message.message.simpleNotificationV2.message != Empty) {
 			content = message.message.simpleNotificationV2.message
-			premium = Premium.owner.rawValue
+			premium = Premium.official.rawValue
+			user_id = informationUserIdentifier
 		} else if (message.message.gift.itemName != Empty) {
 			content = message.message.gift.itemName
 			if (message.message.gift.advertiserUserID != 0) {
