@@ -79,7 +79,10 @@ private enum Premium: Int {
 	case premium = 1
 	case cruise = 2
 	case owner = 3
+	case official = 6
 }// end enum Premium
+
+private let informationUserIdentifier: String = "900000000"
 
 public protocol ProtobufCommentVectorDelegate: AnyObject {
 	func commentVector (commentVector vector: ProtobufCommentVector, didRecieveComment comment: ChatElements)
@@ -199,19 +202,18 @@ public final class ProtobufCommentVector: NSObject, URLSessionDataDelegate {
 			premium = Premium.owner.rawValue
 		} else if (message.message.simpleNotificationV2.message != Empty) {
 			content = message.message.simpleNotificationV2.message
-			premium = Premium.owner.rawValue
+			premium = Premium.official.rawValue
+			user_id = informationUserIdentifier
 		} else if (message.message.gift.itemName != Empty) {
 			content = message.message.gift.itemName
 			if (message.message.gift.advertiserUserID != 0) {
 				user_id = String(format: "%ld", message.message.gift.advertiserUserID)
 			}
-			premium = Premium.owner.rawValue
+			premium = Premium.official.rawValue
 		} else if (message.message.nicoad.v1.message != Empty) {
 			content = message.message.nicoad.v1.message
-			premium = Premium.owner.rawValue
-		} else if (message.message.nicoad.v1.message != Empty) {
-			content = message.message.nicoad.v1.message
-			premium = Premium.owner.rawValue
+			premium = Premium.official.rawValue
+			user_id = informationUserIdentifier
 		} else if (message.state.programStatus.state == .ended) {
 			content = Disconnect
 			premium = Premium.owner.rawValue
