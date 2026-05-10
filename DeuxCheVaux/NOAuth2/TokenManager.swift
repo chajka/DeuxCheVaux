@@ -193,7 +193,6 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 	private var sessionIsValid: Bool = false
 	private let defaultQuery: Dictionary<String, AnyObject> = [
 		kSecClass as String: kSecClassGenericPassword,
-		kSecReturnPersistentRef as String: kCFBooleanTrue,
 		kSecAttrSynchronizable as String: kCFBooleanTrue,
 		kSecAttrType as String: kSecAttrApplicationLabel
 	]
