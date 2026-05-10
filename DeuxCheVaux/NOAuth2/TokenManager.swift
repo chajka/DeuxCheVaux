@@ -568,56 +568,15 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 	}// end update data of keychain
 
 	private func readStringFromKeychain (kind: String, account: String? = nil) -> String? {
-		var query: Dictionary<String, AnyObject> = defaultQuery
-		query[kSecAttrService as String] = kind as NSString
-		if let account: String = account {
-			query[kSecAttrAccount as String] = account as NSString
-		}
-		query[kSecMatchLimit as String] = kSecMatchLimitOne as NSString
-		query[kSecReturnData as String] = kCFBooleanTrue
-		query[kSecAttrSynchronizable as String] = kSecAttrSynchronizableAny
-		var result: AnyObject?
-		let resultCode = withUnsafeMutablePointer(to: &result) {
-			 SecItemCopyMatching(query as CFDictionary, $0)
-		}
-		if resultCode == errSecItemNotFound {
-			return nil
-		} else {
-			if let keychainItem = result as? NSDictionary {
-				if let data: Data = keychainItem[kSecValueData] as? Data {
-					return String(data: data, encoding: .utf8)!
-				}// end if token found
-			}// end if found keychain items
-		}// end if keychain items found or not
-
-		return nil
-	}// end func read string from keychain
+		guard let data: Data = readDataFromKeychain(kind: kind, account: account) else { return nil }
+		return String(data: data, encoding: .utf8)
+	}// end readStringFromKeychain
 
 	private func readStringFromKeychain (kind: String) -> Array<String> {
-		var items: Array<String> = Array()
-		var query: Dictionary<String, AnyObject> = defaultQuery
-		query[kSecAttrService as String] = kind as NSString
-		query[kSecMatchLimit as String] = kSecMatchLimitAll as NSString
-		query[kSecReturnData as String] = kCFBooleanTrue
-		query[kSecAttrSynchronizable as String] = kSecAttrSynchronizableAny
-		var result: AnyObject?
-		let resultCode = withUnsafeMutablePointer(to: &result) {
-			 SecItemCopyMatching(query as CFDictionary, $0)
+		return readDataFromKeychain(kind: kind).compactMap {
+			String(data: $0, encoding: .utf8)
 		}
-		if resultCode == errSecItemNotFound {
-			return items
-		} else {
-			if let keychainItems = result as? Array<NSDictionary> {
-				for item: NSDictionary in keychainItems {
-					if let data: Data = item[kSecValueData] as? Data {
-						items.append(String(data: data, encoding: .utf8)!)
-					}// end if token found
-				}// end foreach keychain items
-			}// end if found keychain items
-		}// end if keychain items found or not
-
-		return items
-	}// end func read strings from keychain
+	}// end readStringFromKeychain
 
 	private func readDataFromKeychain (kind: String, account: String? = nil) -> Data? {
 		var query: Dictionary<String, AnyObject> = defaultQuery
@@ -625,50 +584,35 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		if let account: String = account {
 			query[kSecAttrAccount as String] = account as NSString
 		}
-		query[kSecMatchLimit as String] = kSecMatchLimitOne as NSString
+		query[kSecMatchLimit as String] = kSecMatchLimitOne
 		query[kSecReturnData as String] = kCFBooleanTrue
-		query[kSecAttrSynchronizable as String] = kSecAttrSynchronizableAny
-		var result: AnyObject?
-		let resultCode = withUnsafeMutablePointer(to: &result) {
-			 SecItemCopyMatching(query as CFDictionary, $0)
-		}
-		if resultCode == errSecItemNotFound {
-			return nil
-		} else {
-			if let keychainItem = result as? NSDictionary {
-				if let data: Data = keychainItem[kSecValueData] as? Data {
-					return data
-				}// end if token found
-			}// end if found keychain items
-		}// end if keychain items found or not
+		query[kSecAttrSynchronizable as String] = kCFBooleanTrue
 
-		return nil
-	}// end func read data from keychain
+		var result: AnyObject?
+		let resultCode: OSStatus = withUnsafeMutablePointer(to: &result) {
+			SecItemCopyMatching(query as CFDictionary, $0)
+		}
+
+		guard resultCode == errSecSuccess else { return nil }
+
+		return result as? Data
+	}// end func readDataFromKeychain
 
 	private func readDataFromKeychain (kind: String) -> Array<Data> {
-		var items: Array<Data> = Array()
 		var query: Dictionary<String, AnyObject> = defaultQuery
 		query[kSecAttrService as String] = kind as NSString
-		query[kSecMatchLimit as String] = kSecMatchLimitAll as NSString
+		query[kSecMatchLimit as String] = kSecMatchLimitAll
 		query[kSecReturnData as String] = kCFBooleanTrue
-		query[kSecAttrSynchronizable as String] = kSecAttrSynchronizableAny
-		var result: AnyObject?
-		let resultCode = withUnsafeMutablePointer(to: &result) {
-			 SecItemCopyMatching(query as CFDictionary, $0)
-		}
-		if resultCode == errSecItemNotFound {
-			return items
-		} else {
-			if let keychainItems = result as? Array<NSDictionary> {
-				for item in keychainItems {
-					if let data: Data = item[kSecValueData] as? Data {
-						items.append(data)
-					}// end if token found
-				}// end foreach keychain items
-			}// end if found keychain items
-		}// end if keychain items found or not
+		query[kSecAttrSynchronizable as String] = kCFBooleanTrue
 
-		return items
+		var result: AnyObject?
+		let resultCode: OSStatus = withUnsafeMutablePointer(to: &result) {
+			SecItemCopyMatching(query as CFDictionary, $0)
+		}
+
+		guard resultCode == errSecSuccess else { return Array() }
+
+		return result as? Array<Data> ?? Array()
 	}// end func read datas from keychain
 
 	@discardableResult
