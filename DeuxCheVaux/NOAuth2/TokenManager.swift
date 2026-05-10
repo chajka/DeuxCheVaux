@@ -575,6 +575,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		}
 		query[kSecMatchLimit as String] = kSecMatchLimitOne as NSString
 		query[kSecReturnData as String] = kCFBooleanTrue
+		query[kSecAttrSynchronizable as String] = kSecAttrSynchronizableAny
 		var result: AnyObject?
 		let resultCode = withUnsafeMutablePointer(to: &result) {
 			 SecItemCopyMatching(query as CFDictionary, $0)
@@ -598,6 +599,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		query[kSecAttrService as String] = kind as NSString
 		query[kSecMatchLimit as String] = kSecMatchLimitAll as NSString
 		query[kSecReturnData as String] = kCFBooleanTrue
+		query[kSecAttrSynchronizable as String] = kSecAttrSynchronizableAny
 		var result: AnyObject?
 		let resultCode = withUnsafeMutablePointer(to: &result) {
 			 SecItemCopyMatching(query as CFDictionary, $0)
@@ -625,6 +627,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		}
 		query[kSecMatchLimit as String] = kSecMatchLimitOne as NSString
 		query[kSecReturnData as String] = kCFBooleanTrue
+		query[kSecAttrSynchronizable as String] = kSecAttrSynchronizableAny
 		var result: AnyObject?
 		let resultCode = withUnsafeMutablePointer(to: &result) {
 			 SecItemCopyMatching(query as CFDictionary, $0)
@@ -648,6 +651,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		query[kSecAttrService as String] = kind as NSString
 		query[kSecMatchLimit as String] = kSecMatchLimitAll as NSString
 		query[kSecReturnData as String] = kCFBooleanTrue
+		query[kSecAttrSynchronizable as String] = kSecAttrSynchronizableAny
 		var result: AnyObject?
 		let resultCode = withUnsafeMutablePointer(to: &result) {
 			 SecItemCopyMatching(query as CFDictionary, $0)
@@ -673,6 +677,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		if let account: String = account {
 			query[kSecAttrAccount as String] = account as NSString
 		}
+		query[kSecAttrSynchronizable as String] = kSecAttrSynchronizableAny
 		query[kSecAttrService as String] = kind as NSString
 		let resultCode: OSStatus = SecItemDelete(query as CFDictionary)
 
