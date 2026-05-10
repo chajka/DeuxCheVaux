@@ -279,7 +279,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 	public func removeAccount (of identifier: String) {
 		tokens[identifier] = nil
 		removeItemFromKeychain(kind: TokenKey, account: identifier)
-		let center: NotificationCenter = NotificationCenter()
+		let center: NotificationCenter = NotificationCenter.default
 		center.post(name: .userModificationDone, object: nil)
 	}// end func remove
 
