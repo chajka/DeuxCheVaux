@@ -551,15 +551,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 
 	@discardableResult
 	private func updateStringToKeychain (string: String, kind: String, account: String? = nil) -> Bool {
-		var query: Dictionary<String, AnyObject> = defaultQuery
-		query[kSecAttrService as String] = kind as NSString
-		if let account: String = account {
-			query[kSecAttrAccount as String] = account as NSString
-		}
-		let newAttribute: Dictionary<String, AnyObject> = [kSecValueData as String : string.data(using: .utf8)! as NSData]
-		let resultCode: OSStatus = SecItemUpdate(query as CFDictionary, newAttribute as CFDictionary)
-
-		return resultCode == errSecSuccess
+		return updateDataToKeychain(data: string.data(using: .utf8)! as Data, kind: kind, account: account)
 	}// end update string of keychain
 
 	@discardableResult
