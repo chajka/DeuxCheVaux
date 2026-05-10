@@ -224,7 +224,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		} catch let error {
 			print ("Decode tokens in initializer failed: \(error.localizedDescription)")
 		}// end do try - catch
-	}// end convinience init
+	}// end convenience init
 
 	deinit {
 		if let timer: DispatchSourceTimer = refreshTokenTimer, !timer.isCancelled {
@@ -527,22 +527,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 	}// end func get user information
 
 	private func saveStringToKeychain (string: String, kind: String, account: String? = nil) -> Bool {
-		var query: Dictionary<String, AnyObject> = defaultQuery
-		query[kSecAttrService as String] = kind as NSString
-		if let account: String = account {
-			query[kSecAttrAccount as String] = account as NSString
-		}
-		query[kSecValueData as String] = string.data(using: .utf8)! as NSData
-		var result: AnyObject?
-		let resultCode: OSStatus = withUnsafeMutablePointer(to: &result) {
-			SecItemAdd(query as CFDictionary, $0)
-		}
-		if resultCode == errSecDuplicateItem {
-			let resultCode: OSStatus = SecItemUpdate(query as CFDictionary, [kSecValueData as String : string.data(using: .utf8)! as NSData] as CFDictionary)
-			if resultCode == errSecSuccess { return true }
-		}
-
-		return resultCode == errSecSuccess
+		return saveDataToKeychain(data: string.data(using: .utf8)! as Data, kind: kind, account: account)
 	}// end func save string into keychain
 
 	private func saveDataToKeychain (data: Data, kind: String, account: String? = nil) -> Bool {
