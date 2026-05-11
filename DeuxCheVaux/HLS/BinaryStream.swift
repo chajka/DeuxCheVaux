@@ -79,12 +79,5 @@ final class BinaryStream {
 		return nil
 	}// end func decodeVariant
 
-	func tryClearBuffer () {
-		if buffer.count == offset {
-			self.buffer = []
-			self.offset = 0
-		}
-	}
-}
 		// MARK: - Delegates
 }// end class BinaryStream
