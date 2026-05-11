@@ -18,8 +18,7 @@ final class BinaryStream {
 
 		// MARK: - Constructor/Destructor
 	init (data: Data) {
-		self.buffer = data.map { $0 }
-		self.offset = 0
+		self.buffer = Array(data)
 	}
 
 	private func decodeVarint (offset: inout Int) -> (value: Int, offset: Int)? {
