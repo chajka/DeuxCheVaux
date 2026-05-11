@@ -32,28 +32,32 @@ final class BinaryStream {
 		var offset = 0
 
 		return AnyIterator {
-			while let result = self.decodeVarint(offset: &offset) {
-				let value = result.value
-				let newOffset = result.offset
-				let start = newOffset + 1
-				let end = start + value
+			while true {
+				let frameOffset = offset
 
-				if self.buffer.count < end {
+				guard let length = self.decodeVariant(offset: &offset) else {
+					offset = frameOffset
 					break
-				}
+				}// end guard
 
+				let end = offset + length
+				guard end <= self.buffer.count else {
+					offset = frameOffset
+					break
+				}// end guard
+
+				let binaryData = Array(self.buffer[offset..<end])
 				offset = end
-				let binaryData = Array(self.buffer[start..<end])
 				return binaryData
-			}
+			}// end while
 
 			if offset > 0 {
-				self.buffer = Array(self.buffer.dropFirst(offset))
-			}
+				self.buffer.removeFirst(offset)
+			}// end if offset > 0
 
 			return nil
-		}
-	}
+		}// end while
+	}// end func read
 
 		// MARK: - Private methods
 	private func decodeVariant (offset: inout Int) -> Int? {
