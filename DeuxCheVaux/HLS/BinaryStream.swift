@@ -21,27 +21,6 @@ final class BinaryStream {
 		self.buffer = Array(data)
 	}
 
-	private func decodeVarint (offset: inout Int) -> (value: Int, offset: Int)? {
-		var value = 0
-		var shift = 0
-		let length = buffer.count - 1
-		var more = false
-
-		repeat {
-			if length < offset {
-				return nil
-			}
-			let byte = buffer[offset]
-			more = (byte & 128) != 0
-			value |= Int(byte & 127) << shift
-			if more {
-				offset += 1
-				shift += 7
-			}
-		} while more
-
-		return (value: value, offset: offset)
-	}
 		// MARK: - Override
 		// MARK: - Actions
 		// MARK: - Public methods
@@ -76,6 +55,25 @@ final class BinaryStream {
 		}
 	}
 
+		// MARK: - Private methods
+	private func decodeVariant (offset: inout Int) -> Int? {
+		var value = 0
+		var shift = 0
+
+		while offset < buffer.count {
+			let byte = buffer[offset]
+			offset += 1
+			value |= Int(byte & 0x7f) << shift
+
+			if (byte & 0x80) == 0 {
+				return value
+			}// end if
+
+			shift += 7
+		}// end while
+
+		return nil
+	}// end func decodeVariant
 
 	func tryClearBuffer () {
 		if buffer.count == offset {
