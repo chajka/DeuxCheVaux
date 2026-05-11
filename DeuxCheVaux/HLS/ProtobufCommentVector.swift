@@ -170,6 +170,21 @@ public final class ProtobufCommentVector: NSObject, URLSessionDataDelegate {
 		loadNextSegmentIfNeeded()
 	}// end func enqueueBackward
 
+	private func loadNextSegmentIfNeeded () {
+		guard loadingSegmentRequest == nil else { return }
+		guard !segmentQueue.isEmpty else { return }
+
+		let request = segmentQueue.removeFirst()
+		loadingSegmentRequest = request
+
+		switch request {
+		case .chunked(let uri):
+			loadChunkedSegment(uri: uri)
+		case .packedBackward(let uri):
+			loadPackedBackward(uri: uri)
+		}
+	}// end func loadNextSegmentIfNeeded
+
 		let url = URL(string: uri)!
 		if let session: URLSession = segmentSession {
 			let segmentTask: URLSessionDataTask = session.dataTask(with: url)
