@@ -261,7 +261,7 @@ public final class ProtobufCommentVector: NSObject, URLSessionDataDelegate {
 			}// end foreach chunk
 		} else if (session == segmentSession) {
 			do {
-				if data.count > 3 { messages.addBuffer(data: data) }
+				messages.addBuffer(data: data)
 				for mes in messages.read() {
 					let message: Dwango_Nicolive_Chat_Service_Edge_ChunkedMessage = try Dwango_Nicolive_Chat_Service_Edge_ChunkedMessage(serializedBytes: mes)
 					if (message.meta.origin.chat.liveID != 0) && (message.state.statistics.viewers == 0) {
