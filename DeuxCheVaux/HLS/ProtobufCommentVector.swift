@@ -198,6 +198,10 @@ public final class ProtobufCommentVector: NSObject, URLSessionDataDelegate {
 	}// end func loadChunkedSegment
 
 	private func loadBackward (uri: String) {
+	private func retrySegment (request: SegmentRequest) {
+		segmentQueue.insert(request, at: 0)
+		loadNextSegmentIfNeeded()
+	}// end func retrySegment
 		let url = URL(string: uri)!
 		let session: URLSession = URLSession(configuration: URLSessionConfiguration.default)
 		let request: URLRequest = URLRequest(url: url)
