@@ -47,6 +47,9 @@ final class BinaryStream {
 		// MARK: - Override
 		// MARK: - Actions
 		// MARK: - Public methods
+	func addBuffer (data: Data) {
+		buffer.append(contentsOf: data)
+	}// end func addBuffer
 
 	func read () -> AnyIterator<[UInt8]> {
 		var offset = 0
@@ -75,10 +78,6 @@ final class BinaryStream {
 		}
 	}
 
-	func addBuffer (data: Data) {
-		let newBuffer = data.map { $0 }
-		self.buffer.append(contentsOf: newBuffer)
-	}
 
 	func tryClearBuffer () {
 		if buffer.count == offset {
