@@ -89,6 +89,11 @@ public protocol ProtobufCommentVectorDelegate: AnyObject {
 }// end protocol ProtobufCommentVectorDelegate
 
 public final class ProtobufCommentVector: NSObject, URLSessionDataDelegate {
+	private enum SegmentRequest {
+		case chunked(String)
+		case packedBackward(String)
+	}
+
 		// MARK: Static properties
 		// MARK: - Class Method
 		// MARK: - Outlets
@@ -98,7 +103,6 @@ public final class ProtobufCommentVector: NSObject, URLSessionDataDelegate {
 		// MARK: - Member variables
 	private var viewURI: String
 	private let streams: BinaryStream = BinaryStream(data: Data())
-	private let messages: BinaryStream = BinaryStream(data: Data())
 	private var nextAt: String = Now
 	private var connecting: Bool = true
 	private var first: Bool = true
@@ -108,6 +112,10 @@ public final class ProtobufCommentVector: NSObject, URLSessionDataDelegate {
 	private var viewSession: URLSession?
 	private var segmentSession: URLSession?
 	private var tasks: Dictionary<URLSessionDataTask, URLSessionDataTask> = Dictionary()
+
+	private var segmentQueue: [SegmentRequest] = []
+	private var loadingSegmentRequest: SegmentRequest?
+	private var segmentStreams: [URLSessionDataTask: BinaryStream] = [:]
 
 		// MARK: - Constructor/Destructor
 	public init (viewURI: String) {
