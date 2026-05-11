@@ -160,6 +160,11 @@ public final class ProtobufCommentVector: NSObject, URLSessionDataDelegate {
 
 		// MARK: - Private methods
 	private func loadSegment (uri: String) {
+	private func enqueueSegment (uri: String) {
+		segmentQueue.append(.chunked(uri))
+		loadNextSegmentIfNeeded()
+	}// end func enqueueSegment
+
 		let url = URL(string: uri)!
 		if let session: URLSession = segmentSession {
 			let segmentTask: URLSessionDataTask = session.dataTask(with: url)
