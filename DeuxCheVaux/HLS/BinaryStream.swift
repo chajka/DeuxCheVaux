@@ -15,7 +15,6 @@ final class BinaryStream {
 		// MARK: - Properties
 		// MARK: - Member variables
 	private var buffer: [UInt8]
-	private var offset: Int
 
 		// MARK: - Constructor/Destructor
 	init (data: Data) {
