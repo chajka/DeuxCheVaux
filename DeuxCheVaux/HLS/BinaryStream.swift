@@ -9,9 +9,15 @@
 import Cocoa
 
 final class BinaryStream {
+		// MARK: Static properties
+		// MARK: - Class Method
+		// MARK: - Outlets
+		// MARK: - Properties
+		// MARK: - Member variables
 	private var buffer: [UInt8]
 	private var offset: Int
 
+		// MARK: - Constructor/Destructor
 	init (data: Data) {
 		self.buffer = data.map { $0 }
 		self.offset = 0
@@ -38,6 +44,9 @@ final class BinaryStream {
 
 		return (value: value, offset: offset)
 	}
+		// MARK: - Override
+		// MARK: - Actions
+		// MARK: - Public methods
 
 	func read () -> AnyIterator<[UInt8]> {
 		var offset = 0
@@ -78,3 +87,5 @@ final class BinaryStream {
 		}
 	}
 }
+		// MARK: - Delegates
+}// end class BinaryStream
