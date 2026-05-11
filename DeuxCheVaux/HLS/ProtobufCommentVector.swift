@@ -159,7 +159,6 @@ public final class ProtobufCommentVector: NSObject, URLSessionDataDelegate {
 	}// end func updateViewURI
 
 		// MARK: - Private methods
-	private func loadSegment (uri: String) {
 	private func enqueueSegment (uri: String) {
 		segmentQueue.append(.chunked(uri))
 		loadNextSegmentIfNeeded()
@@ -185,12 +184,18 @@ public final class ProtobufCommentVector: NSObject, URLSessionDataDelegate {
 		}
 	}// end func loadNextSegmentIfNeeded
 
+	private func loadChunkedSegment (uri: String) {
+		guard let session: URLSession = segmentSession else {
+			loadingSegmentRequest = nil
+			return
+		}
+
 		let url = URL(string: uri)!
-		if let session: URLSession = segmentSession {
-			let segmentTask: URLSessionDataTask = session.dataTask(with: url)
-			segmentTask.resume()
-		}// end if
-	}// end func loadPrevious
+		let segmentTask: URLSessionDataTask = session.dataTask(with: url)
+		segmentStreams[segmentTask] = BinaryStream(data: Data())
+		tasks[segmentTask] = segmentTask
+		segmentTask.resume()
+	}// end func loadChunkedSegment
 
 	private func loadBackward (uri: String) {
 		let url = URL(string: uri)!
