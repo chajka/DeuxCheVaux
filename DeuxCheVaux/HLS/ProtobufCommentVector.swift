@@ -226,6 +226,20 @@ public final class ProtobufCommentVector: NSObject, URLSessionDataDelegate {
 		task.resume()
 	}// end func loadPackedBackward
 
+	private func parsePackedBackward (data: Data) {
+		do {
+			let comments: Dwango_Nicolive_Chat_Service_Edge_PackedSegment = try Dwango_Nicolive_Chat_Service_Edge_PackedSegment(serializedBytes: data)
+			for comment in comments.messages {
+				if (comment.state.statistics.viewers == 0) {
+					if let element: ChatElements = self.parseMessage(message: comment) {
+						self.delegate?.commentVector(commentVector: self, didRecieveComment: element)
+					}// end optional binding
+				}// end if statistics is not there
+			}// end each comment
+		} catch let error {
+			print("PackedSegment Error: \(error.localizedDescription)")
+		}// end do try catch
+	}// end func parsePackedBackward
 
 	private func parseMessage (message: Dwango_Nicolive_Chat_Service_Edge_ChunkedMessage) -> ChatElements? {
 		let thread: String = String(format: "%lld", message.meta.origin.chat.liveID)
