@@ -197,7 +197,6 @@ public final class ProtobufCommentVector: NSObject, URLSessionDataDelegate {
 		segmentTask.resume()
 	}// end func loadChunkedSegment
 
-	private func loadBackward (uri: String) {
 	private func retrySegment (request: SegmentRequest) {
 		segmentQueue.insert(request, at: 0)
 		loadNextSegmentIfNeeded()
@@ -293,14 +292,14 @@ public final class ProtobufCommentVector: NSObject, URLSessionDataDelegate {
 				do {
 					let entry: Dwango_Nicolive_Chat_Service_Edge_ChunkedEntry = try Dwango_Nicolive_Chat_Service_Edge_ChunkedEntry(serializedBytes: Data(chunk))
 					if (backward && entry.backward.segment.uri != Empty) {
-						loadBackward(uri: entry.backward.segment.uri)
+						enqueueBackward(uri: entry.backward.segment.uri)
 						backward = false
 					}// end if process backword
 
 					if (first && entry.previous.uri != Empty) {
-						loadSegment(uri: entry.previous.uri)
+						enqueueSegment(uri: entry.previous.uri)
 					} else if (entry.segment.uri != Empty) {
-						loadSegment(uri: entry.segment.uri)
+						enqueueSegment(uri: entry.segment.uri)
 						first = false
 					}// end if prceess segment
 
@@ -321,8 +320,10 @@ public final class ProtobufCommentVector: NSObject, URLSessionDataDelegate {
 			}// end foreach chunk
 		} else if (session == segmentSession) {
 			do {
-				messages.addBuffer(data: data)
-				for mes in messages.read() {
+				guard let stream = segmentStreams[dataTask] else { return }
+
+				stream.addBuffer(data: data)
+				for mes in stream.read() {
 					let message: Dwango_Nicolive_Chat_Service_Edge_ChunkedMessage = try Dwango_Nicolive_Chat_Service_Edge_ChunkedMessage(serializedBytes: mes)
 					if (message.meta.origin.chat.liveID != 0) && (message.state.statistics.viewers == 0) {
 						if let element: ChatElements = parseMessage(message: message) {
@@ -336,19 +337,22 @@ public final class ProtobufCommentVector: NSObject, URLSessionDataDelegate {
 		}// end else if session is segment session
 	}// end func urlSession dataTask didRecieve
 
-	public func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: (any Error)?) {
-		tasks.removeValue(forKey: task as! URLSessionDataTask)
-		if session == segmentSession {
-			if let error: URLError = error as? URLError, error.code == .timedOut {
-				DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-					if let url: URL = task.originalRequest?.url {
-						let retrytask: URLSessionDataTask = session.dataTask(with: url)
-						retrytask.resume()
-						self.tasks[retrytask] = retrytask
-					}// end optional binding check
-				}// end dispatch async after
+	public func urlSession (_ session: URLSession, task: URLSessionTask, didCompleteWithError error: (any Error)?) {
+		guard let dataTask = task as? URLSessionDataTask else { return }
+
+			tasks.removeValue(forKey: dataTask)
+			if session == segmentSession {
+				let completedRequest = loadingSegmentRequest
+				segmentStreams.removeValue(forKey: dataTask)
+				loadingSegmentRequest = nil
+
+				if let error: URLError = error as? URLError, error.code == .timedOut, let request = completedRequest {
+					DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+						self.retrySegment(request: request)
+					}// end dispatch async after
+				} else {
+					loadNextSegmentIfNeeded()
 			}// end if error
 		}// end if session is segment session
 	}// end func urlSession task didCompleteWithError
-
 }// end class ProtobufCommnentVector
