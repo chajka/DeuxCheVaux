@@ -74,7 +74,7 @@ struct ChatResult: Codable {
 	let chat: ChatElements
 }// end struct ChatResult
 
-private enum Premium: Int {
+public enum Premium: Int {
 	case normal = 0
 	case premium = 1
 	case cruise = 2
