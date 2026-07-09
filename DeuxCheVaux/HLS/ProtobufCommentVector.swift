@@ -74,7 +74,7 @@ struct ChatResult: Codable {
 	let chat: ChatElements
 }// end struct ChatResult
 
-private enum Premium: Int {
+public enum Premium: Int {
 	case normal = 0
 	case premium = 1
 	case cruise = 2
@@ -261,7 +261,22 @@ public final class ProtobufCommentVector: NSObject, URLSessionDataDelegate {
 			premium = Premium.owner.rawValue
 		} else if (message.message.simpleNotificationV2.message != Empty) {
 			content = message.message.simpleNotificationV2.message
-			premium = Premium.official.rawValue
+			switch message.message.simpleNotificationV2.type {
+			case Dwango_Nicolive_Chat_Data_Atoms_SimpleNotificationV2.NotificationType.visited:
+				premium = Premium.official.rawValue
+			case Dwango_Nicolive_Chat_Data_Atoms_SimpleNotificationV2.NotificationType.cruise:
+				premium = Premium.cruise.rawValue
+			case Dwango_Nicolive_Chat_Data_Atoms_SimpleNotificationV2.NotificationType.emotion:
+				premium = Premium.normal.rawValue
+			case Dwango_Nicolive_Chat_Data_Atoms_SimpleNotificationV2.NotificationType.ichiba:
+				premium = Premium.normal.rawValue
+			case Dwango_Nicolive_Chat_Data_Atoms_SimpleNotificationV2.NotificationType.programExtended:
+				premium = Premium.owner.rawValue
+			case Dwango_Nicolive_Chat_Data_Atoms_SimpleNotificationV2.NotificationType.rankingIn:
+				premium = Premium.premium.rawValue
+			default:
+				premium = Premium.normal.rawValue
+			}// end switch
 			user_id = informationUserIdentifier
 		} else if (message.message.gift.itemName != Empty) {
 			content = message.message.gift.itemName

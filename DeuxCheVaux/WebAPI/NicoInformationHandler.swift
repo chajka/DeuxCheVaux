@@ -41,7 +41,7 @@ fileprivate enum CurrentLanguage: String {
 	case English = "en-us"
 }// end enum CurrentLanguage
 
-fileprivate let Premium: String = "premium"
+fileprivate let PremiumName: String = "premium"
 
 internal struct data: Codable {
 	let id: String
@@ -160,7 +160,7 @@ public final class NicoInformationHandler: HTTPCommunicatable {
 				if let regex: NSRegularExpression = try? NSRegularExpression(pattern: PremiumFinderRegex, options: NSRegularExpression.Options.caseInsensitive) {
 					if let result: NSTextCheckingResult = regex.firstMatch(in: htmlSource, options: NSRegularExpression.MatchingOptions.withTransparentBounds, range: htmlRange) {
 						let range: NSRange = result.range(at: 1)
-						if Premium == (htmlSource as NSString).substring(with: range) {
+						if PremiumName == (htmlSource as NSString).substring(with: range) {
 							userIsPremium = true
 						}// end if found string is premium
 					}// end optional binding check for founded regex
@@ -348,7 +348,7 @@ public final class NicoInformationHandler: HTTPCommunicatable {
 				if let regex: NSRegularExpression = try? NSRegularExpression(pattern: PremiumFinderRegex, options: NSRegularExpression.Options.caseInsensitive) {
 					if let result: NSTextCheckingResult = regex.firstMatch(in: htmlSource, options: NSRegularExpression.MatchingOptions.withTransparentBounds, range: htmlRange) {
 						let range: NSRange = result.range(at: 1)
-						if Premium == (htmlSource as NSString).substring(with: range) {
+						if PremiumName == (htmlSource as NSString).substring(with: range) {
 							userIsPremium = true
 						}// end if found string is premium
 					}// end optional binding check for founded regex
