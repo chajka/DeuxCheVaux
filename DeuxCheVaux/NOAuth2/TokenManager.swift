@@ -81,10 +81,10 @@ fileprivate struct PremiumData: Codable {
 	let expireTime: String?
 }// end struct PremiumData
 
-fileprivate struct Premium: Codable {
+fileprivate struct PremiumInfo: Codable {
 	let meta: MetaInformation
 	let data: PremiumData
-}// end struct Premium
+}// end struct PremiumInfo
 
 fileprivate struct URLData: Codable {
 	let url: String
@@ -407,7 +407,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 			let request: URLRequest = try await makeRequestWithAccessToken(url: PremiumInfoURL, for: identifier)
 			let result: (data: Data, resp: URLResponse) = try await session.data(for: request)
 				do {
-					let premiumInfo: Premium = try JSONDecoder().decode(Premium.self, from: result.data)
+					let premiumInfo: PremiumInfo = try JSONDecoder().decode(PremiumInfo.self, from: result.data)
 					premium = premiumInfo.data.type == .premium
 				} catch let error {
 					print("GET Premium decode error: \(error.localizedDescription)")
@@ -473,7 +473,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 		request.url = PremiumInfoURL
 		result = try await session.data(for: request)
 		do {
-			let premium: Premium = try decoder.decode(Premium.self, from: result.data)
+			let premium: PremiumInfo = try decoder.decode(PremiumInfo.self, from: result.data)
 			userTokens.premium = premium.data.type == .premium
 		} catch let error {
 			print("premium data decode error \(error.localizedDescription)")
@@ -512,7 +512,7 @@ public final class TokenManager: NSWindowController, WKNavigationDelegate {
 						return
 					}// end guard optional binding check for data
 					do {
-						let premium: Premium = try decoder.decode(Premium.self, from: data)
+						let premium: PremiumInfo = try decoder.decode(PremiumInfo.self, from: data)
 						handler(information.sub, information.nickname, premium.data.type == .premium)
 					} catch let error {
 						print("Get user premium data decde error: \(error.localizedDescription)")
